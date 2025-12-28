@@ -37,8 +37,8 @@ Supports **dual capacities** (confirmed + reserved lists). Built with **Chakra U
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/sergeyt/yabudu.git
-cd yabudu
+git clone https://github.com/sergeyt/budu.git
+cd budu
 pnpm install
 ````
 
