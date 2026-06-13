@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import { BadRequestError, errorMiddleware } from "@/lib/error";
+import { fetchParticipants } from "@/lib/participants";
 
 type Params = { id?: string };
 
@@ -8,10 +8,5 @@ export const GET = errorMiddleware<Params>(async (_req, ctx) => {
   if (!eventId) {
     throw new BadRequestError("eventId is required");
   }
-  const regs = await prisma.registration.findMany({
-    where: { eventId },
-    include: { user: true },
-    orderBy: [{ status: "asc" }, { createdAt: "asc" }],
-  });
-  return regs;
+  return fetchParticipants(eventId);
 });

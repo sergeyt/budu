@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Box, HStack } from "@chakra-ui/react";
 import { api } from "@/lib/api";
@@ -27,8 +27,21 @@ function within24h(startAt: DateLike) {
   return now >= openAt && now < start;
 }
 
+/**
+ * Picks a stable label on the server (always index 0) so SSR and the
+ * initial client render match, then re-rolls to a random label after
+ * mount. Prevents React hydration warnings while keeping the playful
+ * variation on the client.
+ */
 function useRandomLabel(labels: string[]) {
-  return useState(() => labels[Math.floor(Math.random() * labels.length)])[0];
+  const [label, setLabel] = useState(labels[0] ?? "");
+  useEffect(() => {
+    if (labels.length === 0) {
+      return;
+    }
+    setLabel(labels[Math.floor(Math.random() * labels.length)]);
+  }, [labels]);
+  return label;
 }
 
 export default function RegisterPanel({
@@ -145,22 +158,24 @@ export default function RegisterPanel({
   const register = () =>
     startTransition(async () => {
       try {
-        await api.events.register(event.id);
-        const regs = await api.events.participants(event.id);
-        setRegs(regs as any);
-      } catch (e: any) {
-        toast.error({ title: e?.message || "Could not register" });
+        const { regs } = await api.events.register(event.id);
+        setRegs(regs);
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Could not register",
+        });
       }
     });
 
   const unregister = () =>
     startTransition(async () => {
       try {
-        await api.events.unregister(event.id);
-        const regs = await api.events.participants(event.id);
-        setRegs(regs as any);
-      } catch (e: any) {
-        toast.error({ title: e?.message || "Could not unregister" });
+        const { regs } = await api.events.unregister(event.id);
+        setRegs(regs);
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Could not unregister",
+        });
       }
     });
 

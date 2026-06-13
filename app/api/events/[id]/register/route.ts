@@ -15,6 +15,7 @@ import {
   decideRegistrationStatus,
   shouldPromoteFromWaitlist,
 } from "@/lib/registration";
+import { fetchParticipants } from "@/lib/participants";
 
 type Params = { id?: string };
 
@@ -93,7 +94,11 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
     log.error("notifyEventChange failed", err, { eventId, type: "register" });
   });
 
-  return NextResponse.json({ ok: true, status: outcome }, { status: 201 });
+  const regs = await fetchParticipants(eventId);
+  return NextResponse.json(
+    { ok: true, status: outcome, regs },
+    { status: 201 },
+  );
 });
 
 export const DELETE = errorMiddleware<Params>(async (req, ctx) => {
@@ -187,5 +192,11 @@ export const DELETE = errorMiddleware<Params>(async (req, ctx) => {
     })();
   }
 
-  return { ok: true, unregistered: didUnregister, promoted: wasPromoted };
+  const regs = await fetchParticipants(eventId);
+  return {
+    ok: true,
+    unregistered: didUnregister,
+    promoted: wasPromoted,
+    regs,
+  };
 });
