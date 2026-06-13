@@ -11,10 +11,12 @@ import {
   errorMiddleware,
 } from "@/lib/error";
 import { log } from "@/lib/log";
+import {
+  decideRegistrationStatus,
+  shouldPromoteFromWaitlist,
+} from "@/lib/registration";
 
 type Params = { id?: string };
-
-type RegisterStatus = "CONFIRMED" | "RESERVED";
 
 // Acquire a transaction-scoped advisory lock keyed by event id so that
 // concurrent register/unregister calls for the same event are serialized.
@@ -30,7 +32,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
   }
   const { userId } = await requireUser();
 
-  let outcome: RegisterStatus | null = null;
+  let outcome: "CONFIRMED" | "RESERVED" | null = null;
   let actor: string | null = null;
 
   try {
@@ -54,19 +56,21 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
         tx.registration.count({ where: { eventId, status: "CONFIRMED" } }),
         tx.registration.count({ where: { eventId, status: "RESERVED" } }),
       ]);
-      const confirmedCap = event.capacity ?? Number.POSITIVE_INFINITY;
-      const reserveCap = event.reserveCapacity ?? Number.POSITIVE_INFINITY;
 
-      let status: RegisterStatus = "CONFIRMED";
-      if (confirmedCount >= confirmedCap) {
-        if (reserveCount >= reserveCap) {
-          throw new ConflictError("Event and reserve list are full");
-        }
-        status = "RESERVED";
+      const decision = decideRegistrationStatus({
+        confirmedCount,
+        reserveCount,
+        confirmedCap: event.capacity,
+        reserveCap: event.reserveCapacity,
+      });
+      if (decision === "FULL") {
+        throw new ConflictError("Event and reserve list are full");
       }
-      outcome = status;
+      outcome = decision;
 
-      await tx.registration.create({ data: { userId, eventId, status } });
+      await tx.registration.create({
+        data: { userId, eventId, status: decision },
+      });
     });
   } catch (err) {
     if (
@@ -128,11 +132,15 @@ export const DELETE = errorMiddleware<Params>(async (req, ctx) => {
       return;
     }
 
-    const confirmedCap = event.capacity ?? Number.POSITIVE_INFINITY;
     const confirmedCount = await tx.registration.count({
       where: { eventId, status: "CONFIRMED" },
     });
-    if (confirmedCount >= confirmedCap) {
+    if (
+      !shouldPromoteFromWaitlist({
+        confirmedCount,
+        confirmedCap: event.capacity,
+      })
+    ) {
       return;
     }
     const nextWait = await tx.registration.findFirst({

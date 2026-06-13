@@ -46,7 +46,7 @@ export function canRegisterNow(start: DateLike) {
   return now >= openAt && now < start;
 }
 
-export function countBy<T>(data: T[], key: keyof T, init = {}) {
+export function countBy<T>(data: readonly T[], key: keyof T, init = {}) {
   return data.reduce((acc, it) => {
     const k = it[key];
     acc[k] = (acc[k] || 0) + 1;
