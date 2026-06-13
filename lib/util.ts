@@ -46,10 +46,19 @@ export function canRegisterNow(start: DateLike) {
   return now >= openAt && now < start;
 }
 
-export function countBy<T>(data: readonly T[], key: keyof T, init = {}) {
-  return data.reduce((acc, it) => {
-    const k = it[key];
-    acc[k] = (acc[k] || 0) + 1;
-    return acc;
-  }, init as any);
+/**
+ * Count occurrences of `data[i][key]` and return a map of value → count.
+ * Pass `init` to seed counts for keys that may not appear in `data`.
+ */
+export function countBy<T, K extends keyof T>(
+  data: readonly T[],
+  key: K,
+  init: Record<string, number> = {},
+): Record<string, number> {
+  const acc: Record<string, number> = { ...init };
+  for (const item of data) {
+    const k = String(item[key]);
+    acc[k] = (acc[k] ?? 0) + 1;
+  }
+  return acc;
 }

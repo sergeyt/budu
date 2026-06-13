@@ -11,8 +11,8 @@ enum ActionType {
   TELEGRAM_LINK = "telegram_link",
 }
 
-const isEmptyResponse = (obj: any) => {
-  if (typeof obj !== "object") {
+const isEmptyResponse = (obj: unknown) => {
+  if (typeof obj !== "object" || obj === null) {
     return false;
   }
   const keys = Object.keys(obj);

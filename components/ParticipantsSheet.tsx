@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { type ReactElement, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -25,7 +25,7 @@ export default function ParticipantsSheet({
   trigger,
 }: {
   event: WorldEvent;
-  trigger: any;
+  trigger: ReactElement<{ onClick?: (e: unknown) => void }>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [regs, setRegs] = useState(event.regs || []);

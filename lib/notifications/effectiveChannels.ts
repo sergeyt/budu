@@ -1,14 +1,18 @@
-import _ from "lodash";
 import { prisma } from "@/lib/prisma";
 import type { ChannelType } from "@/types/model";
 
 export type Channel = {
   type: ChannelType;
   target: string;
-  meta?: Record<string, any> | null;
+  meta?: Record<string, unknown> | null;
   label?: string | null;
 };
 
+/**
+ * Resolve the notification channels that apply to an event:
+ * - event-level channels override place-level channels of the same type
+ * - place-level channels of types not configured at the event level apply unchanged
+ */
 export async function getEffectiveChannelsForEvent(
   eventId: string,
 ): Promise<Channel[]> {
@@ -38,11 +42,12 @@ export async function getEffectiveChannelsForEvent(
     return [];
   }
 
-  const placeChannels = event.place.channels;
-  const eventChannels = event.channels;
-  const eventTypes = _.groupBy(eventChannels, (c: any) => c.type);
+  const eventChannels = event.channels as Channel[];
+  const placeChannels = event.place.channels as Channel[];
+  const eventTypes = new Set(eventChannels.map((c) => c.type));
 
-  return eventChannels.concat(
-    placeChannels.filter((c: any) => !eventTypes[c.type]?.length),
-  ) as Channel[];
+  return [
+    ...eventChannels,
+    ...placeChannels.filter((c) => !eventTypes.has(c.type)),
+  ];
 }

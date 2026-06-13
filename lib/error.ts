@@ -1,86 +1,101 @@
 import { NextResponse } from "next/server";
 import { log } from "./log";
 
-type ErrorOptions = { code?: string; details?: unknown; cause?: unknown };
+type HttpErrorOptions = {
+  code?: string;
+  details?: unknown;
+  cause?: unknown;
+};
 
 export class HttpError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly details?: unknown;
 
-  constructor(status: number, message: string, opts?: ErrorOptions) {
-    super(message);
+  constructor(status: number, message: string, opts?: HttpErrorOptions) {
+    super(message, opts?.cause ? { cause: opts.cause } : undefined);
     this.name = this.constructor.name;
     this.status = status;
     this.code = opts?.code;
     this.details = opts?.details;
-    if (opts?.cause) {
-      (this as any).cause = opts.cause;
-    }
   }
 }
 
 export class NotFoundError extends HttpError {
-  constructor(message = "Not found", opts?: ErrorOptions) {
+  constructor(message = "Not found", opts?: HttpErrorOptions) {
     super(404, message, opts);
   }
 }
 
 export class BadRequestError extends HttpError {
-  constructor(message = "Bad request", opts?: ErrorOptions) {
+  constructor(message = "Bad request", opts?: HttpErrorOptions) {
     super(400, message, opts);
   }
 }
 
 export class ForbiddenError extends HttpError {
-  constructor(message = "Forbidden", opts?: ErrorOptions) {
+  constructor(message = "Forbidden", opts?: HttpErrorOptions) {
     super(403, message, opts);
   }
 }
 
 export class UnauthorizedError extends HttpError {
-  constructor(message = "Unauthorized", opts?: ErrorOptions) {
+  constructor(message = "Unauthorized", opts?: HttpErrorOptions) {
     super(401, message, opts);
   }
 }
 
 export class ConflictError extends HttpError {
-  constructor(message = "Conflict", opts?: ErrorOptions) {
+  constructor(message = "Conflict", opts?: HttpErrorOptions) {
     super(409, message, opts);
   }
 }
 
-type ParamBase = Record<string, any>;
+type ParamBase = Record<string, unknown>;
 
-export type RouteContext<TParams extends ParamBase = any> = {
+export type RouteContext<TParams extends ParamBase = ParamBase> = {
   params: TParams | Promise<TParams>;
 };
-type Route<TParams extends ParamBase = any> = (
+
+type Route<TParams extends ParamBase = ParamBase> = (
   req: Request,
   ctx: RouteContext<TParams>,
-) => Promise<any>;
+) => Promise<unknown>;
 
-export function errorMiddleware<TParams extends ParamBase = any>(
+type WrappedRoute<TParams extends ParamBase = ParamBase> = (
+  req: Request,
+  ctx?: RouteContext<TParams>,
+) => Promise<NextResponse>;
+
+function statusFromError(err: unknown): number | undefined {
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "status" in err &&
+    typeof (err as { status?: unknown }).status === "number"
+  ) {
+    return (err as { status: number }).status;
+  }
+  return undefined;
+}
+
+function messageFromError(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  if (typeof err === "string") {
+    return err;
+  }
+  return "Internal Server Error";
+}
+
+export function errorMiddleware<TParams extends ParamBase = ParamBase>(
   fn: Route<TParams>,
-): Route<TParams> {
-  return async (req, ctxFromNext?: RouteContext<TParams>) => {
+): WrappedRoute<TParams> {
+  return async (req, ctxFromNext) => {
     try {
-      let ctx = ctxFromNext;
-      if (!ctxFromNext?.params) {
-        const url = new URL(req.url);
-
-        const queryParams = Object.fromEntries(
-          url.searchParams.entries(),
-        ) as Partial<TParams>;
-
-        const mergedParams: TParams = {
-          ...(ctxFromNext?.params ?? {}),
-          ...queryParams,
-        } as TParams;
-        ctx = { params: mergedParams };
-      } else if (!ctx) {
-        ctx = { params: {} as any };
-      }
+      const ctx: RouteContext<TParams> =
+        ctxFromNext ?? ({ params: {} as TParams } as RouteContext<TParams>);
 
       const resp = await fn(req, ctx);
       if (resp === undefined) {
@@ -90,7 +105,7 @@ export function errorMiddleware<TParams extends ParamBase = any>(
         return resp;
       }
       return NextResponse.json(resp, { status: 200 });
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof HttpError) {
         return NextResponse.json(
           {
@@ -108,8 +123,8 @@ export function errorMiddleware<TParams extends ParamBase = any>(
       });
 
       return NextResponse.json(
-        { error: err?.message || "Internal Server Error" },
-        { status: err?.status || 500 },
+        { error: messageFromError(err) },
+        { status: statusFromError(err) ?? 500 },
       );
     }
   };
