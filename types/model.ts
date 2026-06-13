@@ -43,7 +43,7 @@ export type WorldEvent = {
   title: string;
   description: Opt<string>;
   startAt: DateLike;
-  duration: Opt<string>;
+  durationMinutes: Opt<number>;
   capacity: Opt<number>;
   reserveCapacity: Opt<number>;
   regs?: Registration[];

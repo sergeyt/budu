@@ -25,7 +25,7 @@ model User {
   rttfProfileUrl String?
   role           UserRole       @default(USER)
   createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
   accounts       Account[]
   sessions       Session[]
   registrations  Registration[]
@@ -67,7 +67,7 @@ model Place {
   description String?
   infoUrl     String?
   createdAt   DateTime                   @default(now())
-  updatedAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @default(now()) @updatedAt
   events      Event[]
   admins      PlaceAdmin[]
   // default channels under for all events for this place
@@ -93,11 +93,12 @@ model Event {
   // it could be also used for RTTF tournaments
   infoUrl         String?
   startAt         DateTime
-  duration        String?                    @default("1h")
+  // event length in minutes; nullable so callers can opt out
+  durationMinutes Int?                       @default(60)
   placeId         String
   place           Place                      @relation(fields: [placeId], references: [id], onDelete: Cascade)
   createdAt       DateTime                   @default(now())
-  updatedAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @default(now()) @updatedAt
   capacity        Int?
   reserveCapacity Int?
   regs            Registration[]
@@ -141,7 +142,7 @@ model PlaceNotificationChannel {
   label   String?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([placeId, type, target]) // prevents duplicates in same scope
 }
@@ -156,7 +157,7 @@ model EventNotificationChannel {
   label   String?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([eventId, type, target])
 }
