@@ -1,8 +1,6 @@
 # EXECUTION PLAN
-- [x] Дагомыс Арена - failed :)
-  - [x] still not enough motivation between people :)
-- [ ] Ping-pong-house
-- [ ] ЦРНТ
+- [ ] Batumi Podvalchik :)
+  - [ ] need telegram bot
 
 # DOCS
 - [ ] improve readme:
