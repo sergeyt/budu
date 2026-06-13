@@ -11,30 +11,39 @@ on:
 jobs:
   ci_check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: checkout code
-        uses: actions/checkout@master
-
-      - name: setup nodejs
-        uses: actions/setup-node@master
-        with:
-          node-version: 22
+        uses: actions/checkout@v4
 
       - name: setup pnpm
-        uses: pnpm/action-setup@master
+        uses: pnpm/action-setup@v4
         with:
           version: 10
           run_install: false
+
+      - name: setup nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
 
       - name: install deps
         run: pnpm install --frozen-lockfile
         env:
           DATABASE_URL: test
 
+      - name: prisma validate
+        run: pnpm exec prisma validate
+
+      - name: typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: lint
+        run: pnpm lint
+
       - name: build
         run: pnpm build
         env:
           DATABASE_URL: test
-          TELEGRAM_BOT_TOKEN: test

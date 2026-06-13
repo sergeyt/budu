@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { log } from "./log";
 
 type ErrorOptions = { code?: string; details?: unknown; cause?: unknown };
 
@@ -40,6 +41,12 @@ export class ForbiddenError extends HttpError {
 export class UnauthorizedError extends HttpError {
   constructor(message = "Unauthorized", opts?: ErrorOptions) {
     super(401, message, opts);
+  }
+}
+
+export class ConflictError extends HttpError {
+  constructor(message = "Conflict", opts?: ErrorOptions) {
+    super(409, message, opts);
   }
 }
 
@@ -95,9 +102,10 @@ export function errorMiddleware<TParams extends ParamBase = any>(
         );
       }
 
-      // TODO log to Sentry
-      // Unknown error fallback
-      console.error(err);
+      log.error("Unhandled API route error", err, {
+        url: req.url,
+        method: req.method,
+      });
 
       return NextResponse.json(
         { error: err?.message || "Internal Server Error" },

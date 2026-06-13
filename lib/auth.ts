@@ -1,9 +1,22 @@
 import NextAuth, { type NextAuthConfig } from "next-auth";
+import type { OIDCConfig } from "next-auth/providers";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import VkProvider from "next-auth/providers/vk";
 import YandexProvider from "next-auth/providers/yandex";
 import { isDefined } from "./util";
+import { UserRole } from "@/types/model";
+
+type OIDCProfile = {
+  sub?: string;
+  id?: string;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  preferred_username?: string;
+  email?: string;
+  picture?: string;
+};
 
 // Generic OIDC provider factory (Sber ID, TBank/Tinkoff ID)
 function OIDCProvider(
@@ -12,11 +25,11 @@ function OIDCProvider(
   clientId: string,
   clientSecret: string,
   scopes = ["openid", "profile", "email"],
-): any {
+): OIDCConfig<OIDCProfile> {
   return {
     id: name,
     name,
-    type: "oidc" as any,
+    type: "oidc",
     style: {
       logo: "",
       brandColor: "#000000",
@@ -29,13 +42,14 @@ function OIDCProvider(
     wellKnown: `${issuer.replace(/\/$/, "")}/.well-known/openid-configuration`,
     authorization: { params: { scope: scopes.join(" ") } },
     checks: ["pkce", "state"],
-    profile(profile: any) {
+    profile(profile) {
       return {
-        id: profile.sub ?? profile.id,
+        id: profile.sub ?? profile.id ?? "",
         name:
           (profile.name ??
             `${profile.given_name ?? ""} ${profile.family_name ?? ""}`.trim()) ||
-          profile.preferred_username,
+          profile.preferred_username ||
+          null,
         email: profile.email ?? null,
         image: profile.picture ?? null,
       };
@@ -78,9 +92,10 @@ export const authConfig: NextAuthConfig = {
   ].filter(isDefined),
   pages: { signIn: "/" },
   callbacks: {
-    async session({ session, user }: any) {
-      if (session.user) {
+    async session({ session, user }) {
+      if (session.user && user) {
         session.user.id = user.id;
+        session.user.role = user.role ?? UserRole.USER;
       }
       return session;
     },

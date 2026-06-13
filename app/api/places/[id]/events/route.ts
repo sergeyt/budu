@@ -1,16 +1,18 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/api-auth";
+import { BadRequestError, errorMiddleware } from "@/lib/error";
 
-export async function GET(
-  _: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const user = await requireUser();
-  const { id: placeId } = await params;
+type Params = { id?: string };
+
+export const GET = errorMiddleware<Params>(async (_req, ctx) => {
+  await requireUser();
+  const { id: placeId } = await ctx.params;
+  if (!placeId) {
+    throw new BadRequestError("placeId is required");
+  }
   const events = await prisma.event.findMany({
     where: { placeId },
     orderBy: { startAt: "asc" },
   });
-  return NextResponse.json(events);
-}
+  return events;
+});

@@ -2,31 +2,38 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUser, isSuperAdmin, isPlaceAdmin } from "@/lib/api-auth";
 import { AddPlaceAdmin } from "@/lib/validation";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+  errorMiddleware,
+} from "@/lib/error";
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+type Params = { id?: string };
+
+export const POST = errorMiddleware<Params>(async (req, ctx) => {
   const { userId } = await requireUser();
-  const { id: placeId } = await params;
-  const requesterIsAllowed =
+  const { id: placeId } = await ctx.params;
+  if (!placeId) {
+    throw new BadRequestError("placeId is required");
+  }
+  const allowed =
     (await isSuperAdmin(userId)) || (await isPlaceAdmin(userId, placeId));
-  if (!requesterIsAllowed) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!allowed) {
+    throw new ForbiddenError();
   }
   const body = await req.json();
   const parsed = AddPlaceAdmin.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.flatten() },
-      { status: 400 },
-    );
+    throw new BadRequestError("Invalid admin payload", {
+      details: parsed.error.flatten(),
+    });
   }
   const user = await prisma.user.findUnique({
     where: { email: parsed.data.userEmail },
   });
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    throw new NotFoundError("User not found");
   }
   const admin = await prisma.placeAdmin.upsert({
     where: { userId_placeId: { userId: user.id, placeId } },
@@ -34,4 +41,4 @@ export async function POST(
     update: {},
   });
   return NextResponse.json(admin, { status: 201 });
-}
+});

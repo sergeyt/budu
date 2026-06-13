@@ -5,6 +5,7 @@ import { getEffectiveChannelsForEvent } from "./effectiveChannels";
 import { sendMessage as sendMaxMessage } from "./transports/max";
 import { sendTelegramMessage } from "./transports/telegram";
 import { getTranslations } from "@/lib/locale";
+import { log } from "@/lib/log";
 
 type ChangeType = "REGISTERED" | "WAITLISTED" | "UNREGISTERED" | "PROMOTED";
 
@@ -26,15 +27,15 @@ export async function notifyEventChange(opts: {
     include: { place: true },
   });
   if (!event) {
-    // TODO log with winston
-    console.log("Event not found");
+    log.warn("notifyEventChange: event not found", { eventId: opts.eventId });
     return;
   }
 
-  const channels = await getEffectiveChannelsForEvent(event?.id);
+  const channels = await getEffectiveChannelsForEvent(event.id);
   if (!channels.length) {
-    // TODO log with winston
-    console.log("No connected channels");
+    log.info("notifyEventChange: no connected channels", {
+      eventId: event.id,
+    });
     return;
   }
 

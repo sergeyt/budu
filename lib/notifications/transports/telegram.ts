@@ -13,29 +13,31 @@ type SendMessageOptions = {
   >;
 };
 
-function assertEnv(name: string) {
-  const v = process.env[name];
-  if (!v) {
-    throw new Error(`Missing env: ${name}`);
+function getBotToken() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    throw new Error(
+      "TELEGRAM_BOT_TOKEN is not set; configure it to enable Telegram notifications.",
+    );
   }
-  return v;
+  return token;
 }
 
-const BOT_TOKEN = assertEnv("TELEGRAM_BOT_TOKEN");
+export function isTelegramConfigured() {
+  return !!process.env.TELEGRAM_BOT_TOKEN;
+}
 
-async function request<T>(method: string, body: any): Promise<T> {
-  const res = await fetch(`${API_BASE}/bot${BOT_TOKEN}/${method}`, {
+async function request<T>(method: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}/bot${getBotToken()}/${method}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const json = await res.json();
+  const json = (await res.json()) as { ok: boolean; result: T };
   if (!json.ok) {
-    const err = `Telegram API error on ${method}: ${JSON.stringify(json)}`;
-    console.log(err);
-    throw new Error(err);
+    throw new Error(`Telegram API error on ${method}: ${JSON.stringify(json)}`);
   }
-  return json.result as T;
+  return json.result;
 }
 
 function escapeText(text: string, parseMode: ParseMode) {

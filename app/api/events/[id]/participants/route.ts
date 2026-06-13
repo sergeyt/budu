@@ -1,15 +1,17 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { BadRequestError, errorMiddleware } from "@/lib/error";
 
-export async function GET(
-  _: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id: eventId } = await params;
+type Params = { id?: string };
+
+export const GET = errorMiddleware<Params>(async (_req, ctx) => {
+  const { id: eventId } = await ctx.params;
+  if (!eventId) {
+    throw new BadRequestError("eventId is required");
+  }
   const regs = await prisma.registration.findMany({
     where: { eventId },
     include: { user: true },
     orderBy: [{ status: "asc" }, { createdAt: "asc" }],
   });
-  return NextResponse.json(regs);
-}
+  return regs;
+});
