@@ -17,20 +17,17 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
-    exclude: ["test/integration/**", "**/node_modules/**"],
+    include: ["test/integration/**/*.test.ts"],
+    globalSetup: ["test/integration/global-setup.ts"],
+    setupFiles: ["test/integration/setup.ts"],
     globals: false,
-    coverage: {
-      provider: "v8",
-      include: ["lib/**"],
-      exclude: [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/node_modules/**",
-        "lib/prisma.ts",
-        "lib/notifications/transports/**",
-      ],
-      reporter: ["text", "html"],
-    },
+    // Integration tests share one Postgres database and rely on per-test
+    // truncation for isolation. Running files in parallel would cause
+    // cross-test interference, so we serialize file execution.
+    pool: "forks",
+    fileParallelism: false,
+    maxWorkers: 1,
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
   },
 });

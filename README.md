@@ -37,8 +37,9 @@ environment variable the app reads.
 | --- | --- |
 | `pnpm dev` | Next dev server |
 | `pnpm build` / `pnpm start` | Production build / serve |
-| `pnpm test` / `pnpm test:watch` | Vitest unit tests |
+| `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
 | `pnpm test:coverage` | Vitest with v8 coverage |
+| `pnpm test:integration` | Vitest integration tests (needs Postgres 17, see Testing) |
 | `pnpm lint` / `pnpm fmt` | Biome check / format |
 | `pnpm db:migrate` | Run migrations in development |
 | `pnpm db:deploy` | Apply migrations in production |
@@ -63,6 +64,39 @@ and (recommended) `TELEGRAM_WEBHOOK_SECRET`.
 
 Notifications are fire-and-forget after each registration: a slow or
 failing channel never blocks or fails the user-visible request.
+
+## Testing
+
+Two layers, run independently:
+
+**Unit tests** (`pnpm test`) — no database, no network, fast feedback. Cover
+pure logic in `lib/` (registration FSM, error middleware, util, telegram
+link codes).
+
+**Integration tests** (`pnpm test:integration`) — exercise route handlers
+against a real Postgres 17 (matching Neon prod major version). They cover
+the registration flow end-to-end, including the advisory-lock invariant
+under concurrent `POST /api/events/:id/register` calls.
+
+Run them locally:
+
+```bash
+docker run -d --name budu-pg-test \
+  -e POSTGRES_USER=budu -e POSTGRES_PASSWORD=budu -e POSTGRES_DB=budu_test \
+  -p 54329:5432 postgres:17
+
+DATABASE_URL='postgresql://budu:budu@localhost:54329/budu_test?schema=public' \
+  pnpm test:integration
+
+docker rm -f budu-pg-test    # when done
+```
+
+The suite applies all Prisma migrations on startup and truncates every
+table between tests, so the same container can be reused across runs.
+A safety check refuses to run against a `DATABASE_URL` that doesn't look
+disposable; set `ALLOW_NON_TEST_DB=1` to override.
+
+In CI both layers run as separate jobs in `.github/workflows/ci.yml`.
 
 ## Schema
 
