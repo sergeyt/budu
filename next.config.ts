@@ -2,7 +2,47 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-const nextConfig: NextConfig = {};
+// Defensive HTTP response headers applied to every route. Tightening notes:
+//   - HSTS: 1 year, applies-to-self only. Add `includeSubDomains; preload`
+//     once you've verified every subdomain serves HTTPS and you're ready to
+//     submit to https://hstspreload.org/.
+//   - Content-Security-Policy: NOT set here. Adding a strict CSP needs a
+//     report-only deployment first because Chakra/Emotion inject inline
+//     styles, OAuth flows redirect to provider domains, and Sentry tunnels
+//     through `/monitoring`. Layer it on after a measurement window.
+//   - X-Frame-Options keeps us from being framed (clickjacking). Equivalent
+//     `frame-ancestors 'none'` will move into CSP if/when we add one.
+const securityHeaders: { key: string; value: string }[] = [
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: [
+      "accelerometer=()",
+      "camera=()",
+      "geolocation=()",
+      "gyroscope=()",
+      "magnetometer=()",
+      "microphone=()",
+      "payment=()",
+      "usb=()",
+    ].join(", "),
+  },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+];
+
+const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
+};
 
 const withNextIntl = createNextIntlPlugin();
 

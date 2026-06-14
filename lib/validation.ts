@@ -27,11 +27,6 @@ export const CreateEvent = z.object({
   chatId: z.string().min(1).optional().nullable(),
 });
 
-enum ActionType {
-  REUSE_EVENT = "reuse_event",
-  TELEGRAM_LINK = "telegram_link",
-}
-
 export const SuperAdminAction = z.object({
-  type: z.enum(ActionType),
+  type: z.enum(["reuse_event", "telegram_link"]),
 });
