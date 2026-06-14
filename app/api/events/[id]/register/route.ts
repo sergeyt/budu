@@ -11,6 +11,7 @@ import {
   errorMiddleware,
 } from "@/lib/error";
 import { log } from "@/lib/log";
+import { lockEventForRegistration } from "@/lib/locks";
 import {
   decideRegistrationStatus,
   shouldPromoteFromWaitlist,
@@ -18,13 +19,6 @@ import {
 import { fetchParticipants } from "@/lib/participants";
 
 type Params = { id?: string };
-
-// Acquire a transaction-scoped advisory lock keyed by event id so that
-// concurrent register/unregister calls for the same event are serialized.
-// The lock is released automatically when the transaction commits or aborts.
-async function lockEvent(tx: Prisma.TransactionClient, eventId: string) {
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${eventId}, 0))`;
-}
 
 export const POST = errorMiddleware<Params>(async (req, ctx) => {
   const { id: eventId } = await ctx.params;
@@ -38,7 +32,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
 
   try {
     await prisma.$transaction(async (tx) => {
-      await lockEvent(tx, eventId);
+      await lockEventForRegistration(tx, eventId);
 
       const event = await tx.event.findUnique({ where: { id: eventId } });
       if (!event) {
@@ -114,7 +108,7 @@ export const DELETE = errorMiddleware<Params>(async (req, ctx) => {
   let didUnregister = false;
 
   await prisma.$transaction(async (tx) => {
-    await lockEvent(tx, eventId);
+    await lockEventForRegistration(tx, eventId);
 
     const me = await tx.user.findUnique({ where: { id: userId } });
     actor = me?.name ?? me?.email ?? null;
