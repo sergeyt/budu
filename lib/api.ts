@@ -1,52 +1,106 @@
+import type { z } from "zod";
+import type {
+  AddPlaceAdmin,
+  CreateEvent,
+  CreatePlace,
+  UpdatePlace,
+} from "@/lib/validation";
+import type {
+  Place,
+  Registration,
+  RegistrationStatus,
+  WorldEvent,
+} from "@/types/model";
 import { isDefined } from "@/lib/util";
 
-async function http(
+export type CreateEventBody = z.infer<typeof CreateEvent>;
+export type CreatePlaceBody = z.infer<typeof CreatePlace>;
+export type UpdatePlaceBody = z.infer<typeof UpdatePlace>;
+export type AddPlaceAdminBody = z.infer<typeof AddPlaceAdmin>;
+
+export type RegisterResponse = {
+  ok: true;
+  status: RegistrationStatus;
+  regs: Registration[];
+};
+
+export type UnregisterResponse = {
+  ok: true;
+  unregistered: boolean;
+  promoted: boolean;
+  regs: Registration[];
+};
+
+export type SuperAdminAction =
+  | { type: "reuse_event" }
+  | { type: "telegram_link" };
+
+export type TelegramLinkResponse = {
+  code: string;
+  instructions: string;
+};
+
+type HttpInit = Omit<RequestInit, "body"> & { body?: unknown };
+
+async function http<T = unknown>(
   input: RequestInfo,
-  init?: Omit<RequestInit, "body"> & { body?: any },
-) {
-  const { body, ...initExtra } = init || {};
+  init?: HttpInit,
+): Promise<T> {
+  const { body, headers, ...rest } = init ?? {};
   const res = await fetch(input, {
-    ...initExtra,
-    headers: { "content-type": "application/json", ...(init?.headers || {}) },
+    ...rest,
+    headers: { "content-type": "application/json", ...(headers ?? {}) },
     ...(isDefined(body) && { body: JSON.stringify(body) }),
   });
   if (!res.ok) {
-    throw new Error(
-      (await res.json().catch(() => ({})))?.error || res.statusText,
-    );
+    let message = res.statusText;
+    try {
+      const errBody = (await res.json()) as { error?: string };
+      if (errBody?.error) {
+        message = errBody.error;
+      }
+    } catch {
+      // response was not JSON; fall back to statusText
+    }
+    throw new Error(message);
   }
-  return res.json();
+  return (await res.json()) as T;
 }
 
 export const api = {
   places: {
-    list: () => http("/api/places"),
-    get: (id: string) => http(`/api/places/${id}`),
-    create: (body: any) => http("/api/places", { method: "POST", body }),
-    update: (id: string, body: any) =>
-      http(`/api/places/${id}`, {
-        method: "PATCH",
-        body,
-      }),
+    list: () => http<Place[]>("/api/places"),
+    get: (id: string) => http<Place>(`/api/places/${id}`),
+    create: (body: CreatePlaceBody) =>
+      http<Place>("/api/places", { method: "POST", body }),
+    update: (id: string, body: UpdatePlaceBody) =>
+      http<Place>(`/api/places/${id}`, { method: "PATCH", body }),
     addAdmin: (placeId: string, userEmail: string) =>
-      http(`/api/places/${placeId}/admins`, {
-        method: "POST",
-        body: { userEmail },
-      }),
-    events: (placeId: string) => http(`/api/places/${placeId}/events`),
-    action: (placeId: string, body: any) =>
-      http(`/api/places/${placeId}/action`, {
+      http<{ id: string; userId: string; placeId: string }>(
+        `/api/places/${placeId}/admins`,
+        {
+          method: "POST",
+          body: { userEmail } satisfies AddPlaceAdminBody,
+        },
+      ),
+    events: (placeId: string) =>
+      http<WorldEvent[]>(`/api/places/${placeId}/events`),
+    action: <T = unknown>(placeId: string, body: SuperAdminAction) =>
+      http<T>(`/api/places/${placeId}/action`, {
         method: "POST",
         body,
       }),
   },
   events: {
-    create: (body: any) =>
-      http("/api/events", { method: "POST", body: JSON.stringify(body) }),
-    participants: (id: string) => http(`/api/events/${id}/participants`),
+    create: (body: CreateEventBody) =>
+      http<WorldEvent>("/api/events", { method: "POST", body }),
+    participants: (id: string) =>
+      http<Registration[]>(`/api/events/${id}/participants`),
     register: (id: string) =>
-      http(`/api/events/${id}/register`, { method: "POST" }),
+      http<RegisterResponse>(`/api/events/${id}/register`, { method: "POST" }),
     unregister: (id: string) =>
-      http(`/api/events/${id}/register`, { method: "DELETE" }),
+      http<UnregisterResponse>(`/api/events/${id}/register`, {
+        method: "DELETE",
+      }),
   },
 };

@@ -1,8 +1,6 @@
 # EXECUTION PLAN
-- [x] Дагомыс Арена - failed :)
-  - [x] still not enough motivation between people :)
-- [ ] Ping-pong-house
-- [ ] ЦРНТ
+- [ ] Batumi Podvalchik :)
+  - [ ] need telegram bot
 
 # DOCS
 - [ ] improve readme:
@@ -24,7 +22,10 @@
   - [x] seed script
   - [ ] delete events, better event names?
   - [ ] script to generate fake users
-  - [ ] script to add registrations to event for fake users 
+  - [ ] script to add registrations to event for fake users
+- [ ] database / postgres
+  - [ ] CI integration tests on `postgres:17` (match Neon prod major)
+  - [ ] plan PG 17 → 18 migration on Neon (new project + pg_dump/restore; Neon does not do in-place major upgrades)
 - [x] hide sign-in providers if env variables are empty
 - [ ] better design & theme
   - [x] theme switch

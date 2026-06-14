@@ -9,9 +9,10 @@ export enum UserRole {
 
 export type User = {
   id: string;
-  email: string;
+  email?: string | null;
+  name?: string | null;
+  image?: string | null;
   role: UserRole;
-  name: string;
 };
 
 export type Place = {
@@ -42,7 +43,7 @@ export type WorldEvent = {
   title: string;
   description: Opt<string>;
   startAt: DateLike;
-  duration: Opt<string>;
+  durationMinutes: Opt<number>;
   capacity: Opt<number>;
   reserveCapacity: Opt<number>;
   regs?: Registration[];

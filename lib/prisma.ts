@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { log } from "./log";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -35,9 +36,13 @@ const retryExtension = Prisma.defineExtension((client) =>
               }
 
               const delay = 200 * attempt;
-              console.warn(
-                `[Prisma Retry] ${model}.${operation} retry ${attempt}/${retryCount} after ${delay}ms`,
-              );
+              log.breadcrumb("Prisma transient error, retrying", {
+                model,
+                operation,
+                attempt,
+                retryCount,
+                delayMs: delay,
+              });
               await new Promise((r) => setTimeout(r, delay));
             }
           }

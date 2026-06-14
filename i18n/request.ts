@@ -4,11 +4,15 @@ import { locales, defaultLocale } from "./routing";
 
 export default getRequestConfig(async ({ locale: locale0 }) => {
   const session = await auth();
-  const user = session?.user;
+  // TODO: add preferredLanguage prop to the user model + session and read it here
+  const preferred = (
+    session?.user as { preferredLanguage?: string } | undefined
+  )?.preferredLanguage;
 
-  // TODO add preferredLanguage prop to user
-  const locale1 = locale0 || (user as any)?.preferredLanguage || defaultLocale;
-  const locale = locales.includes(locale1) ? locale1 : defaultLocale;
+  const locale1 = locale0 || preferred || defaultLocale;
+  const locale = (locales as readonly string[]).includes(locale1)
+    ? (locale1 as (typeof locales)[number])
+    : defaultLocale;
 
   return {
     locale,

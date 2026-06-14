@@ -1,5 +1,5 @@
 import { sendTelegramMessage } from "@/lib/notifications/transports/telegram";
-import { ForbiddenError, errorMiddleware } from "@/lib/error";
+import { errorMiddleware, errors } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { verifyLinkCode } from "@/lib/telegramLinkCode";
 
@@ -12,7 +12,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
   const { params } = ctx;
   const { secret } = await params;
   if (SECRET && secret !== SECRET) {
-    throw new ForbiddenError(`Bad secret provided`);
+    throw errors.badWebhookSecret();
   }
 
   const update = await req.json();
@@ -68,7 +68,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
     await prisma.placeNotificationChannel.upsert({
       where: {
         placeId_type_target: { placeId, type: "TELEGRAM", target },
-      } as any,
+      },
       update: {},
       create: { placeId, type: "TELEGRAM", target, label: "Owner" },
     });

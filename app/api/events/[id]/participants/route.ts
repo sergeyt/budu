@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { errorMiddleware, errors } from "@/lib/error";
+import { fetchParticipants } from "@/lib/participants";
 
-export async function GET(
-  _: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id: eventId } = await params;
-  const regs = await prisma.registration.findMany({
-    where: { eventId },
-    include: { user: true },
-    orderBy: [{ status: "asc" }, { createdAt: "asc" }],
-  });
-  return NextResponse.json(regs);
-}
+type Params = { id?: string };
+
+export const GET = errorMiddleware<Params>(async (_req, ctx) => {
+  const { id: eventId } = await ctx.params;
+  if (!eventId) {
+    throw errors.missingParam("eventId");
+  }
+  return fetchParticipants(eventId);
+});

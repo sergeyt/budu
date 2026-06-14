@@ -6,7 +6,7 @@ import PlacePicker from "@/components/PlacePicker";
 import RegisterPanel from "@/components/RegisterPanel";
 import SignIn from "@/components/SignIn";
 import HomePromo from "@/components/HomePromo";
-import type { WorldEvent } from "@/types/model";
+import type { User, WorldEvent } from "@/types/model";
 
 type SearchParams = {
   place?: string;
@@ -48,7 +48,7 @@ export default async function Home({
       <Box p={3}>
         <RegisterPanel
           event={upcomingEvent as WorldEvent}
-          user={user as any}
+          user={user as User}
           place={place}
         />
       </Box>

@@ -1,186 +1,127 @@
-# Event Registration App
+# Budu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Next.js](https://img.shields.io/badge/Built%20with-Next.js-000000?logo=next.js)](https://nextjs.org/)
+[![CI](https://github.com/sergeyt/budu/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeyt/budu/actions/workflows/ci.yml)
 
-**Event Registration App** — A modern **Next.js + Prisma + NextAuth** application for managing event participation.  
-Users can register via **Yandex ID, VK ID, Sber ID, or TBank ID**, select event places, and join or leave events with automatic waitlist handling.  
-Supports **dual capacities** (confirmed + reserved lists). Built with **Chakra UI**, fully deployable on **Vercel**.
+Event registration app for table-tennis clubs. Users sign in with a Russian
+OAuth provider, pick a place, and register for the next event. Each event
+has a confirmed list and a reserved (waitlist) list with auto-promotion
+when a confirmed registrant unregisters.
 
----
+## Stack
 
-## 🧭 Features
+- Next.js 16 (App Router) + React 19
+- Prisma 7 + Postgres (`@prisma/adapter-pg`)
+- NextAuth v5, database sessions
+- Chakra UI v3, next-intl, Sentry
+- Biome (lint + format), Vitest
 
-- **OAuth login:** Yandex ID, VK ID, Sber ID, TBank ID (Tinkoff ID)
-- **Event registration rules:** only within 24h before event start
-- **Dual capacities:** confirmed + reserved waitlist
-- **Prisma ORM** with SQLite/Postgres support
-- **NextAuth v5** with Prisma adapter
-- **Chakra UI** mobile-first responsive design
-- **Deploy-ready** on Vercel or any Node server
-
----
-
-## 🧩 Tech Stack
-
-- **Next.js (App Router)** — modern routing, server actions, and auth
-- **NextAuth.js** — OAuth via Russian identity providers
-- **Prisma ORM** — schema-driven database access
-- **SQLite (local)** or **PostgreSQL (production)**
-- **Chakra UI** — clean, accessible component library
-- **TypeScript** — full typing and developer safety
-
----
-
-## ⚙️ Setup
-
-### 1. Clone and install
+## Quick start
 
 ```bash
-git clone https://github.com/sergeyt/budu.git
-cd budu
+cp .env.example .env.local
+# fill in DATABASE_URL, AUTH_SECRET, and at least one OAuth provider
+
 pnpm install
-````
-
-### 2. Environment variables
-
-Create `.env.local`:
-
-```bash
-# Database
-DATABASE_URL="file:./dev.db"
-# provider must be a literal string for IntelliJ
-# provider = "sqlite" or "postgresql"
-
-# NextAuth
-AUTH_URL=http://localhost:3000
-AUTH_SECRET=your_random_long_secret
-AUTH_TRUST_HOST=true
-
-# OAuth credentials
-YANDEX_CLIENT_ID=...
-YANDEX_CLIENT_SECRET=...
-VK_CLIENT_ID=...
-VK_CLIENT_SECRET=...
-SBER_ISSUER=https://login.sber.ru/oidc/
-SBER_CLIENT_ID=...
-SBER_CLIENT_SECRET=...
-TBANK_ISSUER=https://id.tinkoff.ru/oidc/
-TBANK_CLIENT_ID=...
-TBANK_CLIENT_SECRET=...
-```
-
-### 3. Prisma
-
-```bash
-pnpm install
-pnpm db:migrate
-pnpm db:seed
-```
-
----
-
-## 🗄️ Schema Overview
-
-```prisma
-model User {
-  id             String       @id @default(cuid())
-  name           String?
-  email          String?      @unique
-  image          String?
-  rttfProfileUrl String?
-  role           UserRole     @default(USER)
-  createdAt      DateTime     @default(now())
-  accounts       Account[]
-  sessions       Session[]
-  registrations  Registration[]
-  adminPlaces    PlaceAdmin[]
-}
-
-model Place {
-  id          String       @id @default(cuid())
-  name        String       @unique
-  location    String?
-  description String?
-  infoUrl     String?
-  createdAt   DateTime     @default(now())
-  events      Event[]
-  admins      PlaceAdmin[]
-}
-
-model PlaceAdmin {
-  id        String   @id @default(cuid())
-  userId    String
-  placeId   String
-  createdAt DateTime @default(now())
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  @@unique([userId, placeId])
-}
-
-model Event {
-  id              String   @id @default(cuid())
-  title           String
-  startAt         DateTime
-  placeId         String
-  place           Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  capacity        Int?
-  reserveCapacity Int?
-  createdAt       DateTime @default(now())
-  regs            Registration[]
-}
-
-enum RegistrationStatus {
-  CONFIRMED
-  RESERVED
-}
-
-model Registration {
-  id        String              @id @default(cuid())
-  userId    String
-  eventId   String
-  status    RegistrationStatus  @default(CONFIRMED)
-  createdAt DateTime            @default(now())
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  @@unique([userId, eventId])
-}
-
-enum UserRole {
-  USER
-  SUPERADMIN
-}
-```
-
-## 🧪 Development
-
-```bash
+pnpm db:migrate     # apply pending Prisma migrations
+pnpm db:seed        # optional: seed places and a sample event
 pnpm dev
 ```
 
-App runs at [http://localhost:3000](http://localhost:3000)
+App runs at <http://localhost:3000>. See `.env.example` for every
+environment variable the app reads.
 
----
+## Scripts
 
-## 🚀 Deploy to Vercel
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Next dev server |
+| `pnpm build` / `pnpm start` | Production build / serve |
+| `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
+| `pnpm test:coverage` | Vitest with v8 coverage |
+| `pnpm test:integration` | Vitest integration tests (needs Postgres 17, see Testing) |
+| `pnpm test:integration:local` | Spin up Postgres 17 in Docker, run integration tests, tear down |
+| `pnpm lint` / `pnpm fmt` | Biome check / format |
+| `pnpm db:migrate` | Run migrations in development |
+| `pnpm db:deploy` | Apply migrations in production |
+| `pnpm db:seed` | Seed fixtures from `prisma/seed.ts` |
 
-* Add all environment variables in Vercel Dashboard → *Settings → Environment Variables*
-* Use **PostgreSQL** (e.g., Neon, Supabase) in production
-* Provider must be a literal (`"postgresql"`) in `schema.prisma`
-* NextAuth works natively with Edge functions on Vercel
+## Authentication
 
----
+OAuth providers are loaded conditionally — a provider only appears on the
+sign-in screen if both its `<NAME>_CLIENT_ID` and `<NAME>_CLIENT_SECRET`
+are set. Supported: Yandex ID, VK ID, Sber ID (OIDC), TBank/Tinkoff ID
+(OIDC). Sessions are stored in Postgres via the Prisma adapter (not JWT),
+which lets `lib/auth.ts` augment sessions with the user's `role`.
 
-## 🛡️ Security Notes
+## Notifications
 
-* All registration actions are protected by **NextAuth sessions**
-* Server actions only execute with authenticated users
-* No client-side access to Prisma or secrets
-* Use HTTPS + strong `AUTH_SECRET` in production
+Per-place and per-event notification channels (Telegram, MAX Messenger)
+are configured in the database — see `PlaceNotificationChannel` and
+`EventNotificationChannel` in `prisma/schema.prisma`. Telegram chats are
+linked through a one-time `/link <code>` flow handled by
+`/api/webhook/telegram`. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LINK_SECRET`,
+and (recommended) `TELEGRAM_WEBHOOK_SECRET`.
 
----
+Notifications are fire-and-forget after each registration: a slow or
+failing channel never blocks or fails the user-visible request.
 
-## 📜 License
+## Testing
 
-**MIT License**
-© 2025 Sergey Todyshev
+Two layers, run independently:
+
+**Unit tests** (`pnpm test`) — no database, no network, fast feedback. Cover
+pure logic in `lib/` (registration FSM, error middleware, util, telegram
+link codes).
+
+**Integration tests** (`pnpm test:integration`) — exercise route handlers
+against a real Postgres 17 (matching Neon prod major version). They cover
+the registration flow end-to-end, including the advisory-lock invariant
+under concurrent `POST /api/events/:id/register` calls.
+
+Run them locally — one-shot, requires Docker:
+
+```bash
+pnpm test:integration:local           # spin up PG 17, run tests, tear down
+pnpm test:integration:local -t lock   # forward args to vitest
+KEEP=1 pnpm test:integration:local    # keep the container around for iteration
+```
+
+If you already have a Postgres instance you want to use, skip the wrapper
+and point `DATABASE_URL` directly at it:
+
+```bash
+DATABASE_URL='postgresql://user:pass@host:5432/db?schema=public' \
+  pnpm test:integration
+```
+
+The suite applies all Prisma migrations on startup and truncates every
+table between tests, so the same container can be reused across runs.
+A safety check refuses to run against a `DATABASE_URL` that doesn't look
+disposable; set `ALLOW_NON_TEST_DB=1` to override.
+
+In CI both layers run as separate jobs in `.github/workflows/ci.yml`.
+
+## Schema
+
+Source of truth: [`prisma/schema.prisma`](./prisma/schema.prisma).
+Postgres only.
+
+Notable invariants enforced today:
+
+- `@@unique([userId, eventId])` on `Registration` prevents double registrations.
+- A Postgres advisory lock per event (see `lib/locks.ts`) serializes
+  concurrent `POST/DELETE /api/events/:id/register` calls so confirmed/reserved
+  capacity decisions stay consistent. Postgres-only — `lib/locks.ts` is the
+  single point of change if you ever migrate engines.
+
+## Deploy
+
+Any Node host works; Vercel is the easiest. Set every variable from
+`.env.example`, plus `SENTRY_DSN` if you want error reports. Use managed
+Postgres (Neon, Supabase, RDS, …). Run `pnpm db:deploy` on every deploy
+(e.g. as part of the build command: `pnpm db:deploy && pnpm build`).
+
+## License
+
+MIT © Sergey Todyshev

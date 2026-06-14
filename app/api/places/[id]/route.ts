@@ -1,44 +1,40 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireUser, isSuperAdmin } from "@/lib/api-auth";
+import { requireUser } from "@/lib/api-auth";
 import { UpdatePlace } from "@/lib/validation";
+import { errorMiddleware, errors } from "@/lib/error";
 
-export async function GET(
-  _: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const user = await requireUser();
-  const { id: placeId } = await params;
+type Params = { id?: string };
+
+export const GET = errorMiddleware<Params>(async (_req, ctx) => {
+  await requireUser();
+  const { id: placeId } = await ctx.params;
+  if (!placeId) {
+    throw errors.missingParam("placeId");
+  }
   const place = await prisma.place.findUnique({
     where: { id: placeId },
     include: { admins: { include: { user: true } }, events: true },
   });
   if (!place) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    throw errors.placeNotFound();
   }
-  return NextResponse.json(place);
-}
+  return place;
+});
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id: placeId } = await params;
-  const { userId } = await requireUser();
-  if (!(await isSuperAdmin(userId))) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+export const PATCH = errorMiddleware<Params>(async (req, ctx) => {
+  const { id: placeId } = await ctx.params;
+  if (!placeId) {
+    throw errors.missingParam("placeId");
   }
+  await requireUser({ isSuperAdmin: true });
   const body = await req.json();
   const parsed = UpdatePlace.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.flatten() },
-      { status: 400 },
-    );
+    throw errors.invalidPayload("place", parsed.error.flatten());
   }
   const place = await prisma.place.update({
     where: { id: placeId },
     data: parsed.data,
   });
-  return NextResponse.json(place);
-}
+  return place;
+});
