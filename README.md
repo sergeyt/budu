@@ -110,9 +110,10 @@ Postgres only.
 Notable invariants enforced today:
 
 - `@@unique([userId, eventId])` on `Registration` prevents double registrations.
-- A Postgres advisory lock per event (`pg_advisory_xact_lock`) serializes
+- A Postgres advisory lock per event (see `lib/locks.ts`) serializes
   concurrent `POST/DELETE /api/events/:id/register` calls so confirmed/reserved
-  capacity decisions stay consistent.
+  capacity decisions stay consistent. Postgres-only — `lib/locks.ts` is the
+  single point of change if you ever migrate engines.
 
 ## Deploy
 

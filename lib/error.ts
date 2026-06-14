@@ -89,6 +89,74 @@ function messageFromError(err: unknown): string {
   return "Internal Server Error";
 }
 
+/**
+ * Error catalog. Throw `errors.foo(...)` instead of constructing HttpError
+ * subclasses inline so that:
+ *   - All user-facing messages live in one place (easier to audit, translate,
+ *     or reword without spelunking through route handlers).
+ *   - Every error has a stable machine-readable `code` for clients/logs.
+ *   - Parameterized errors get type-checked params at the call site.
+ *
+ * Add new entries here rather than constructing HttpError subclasses inline.
+ */
+export const errors = {
+  // ===== Auth =====
+  unauthorized: () =>
+    new UnauthorizedError("Unauthorized", { code: "UNAUTHORIZED" }),
+  superAdminRequired: () =>
+    new UnauthorizedError("Super admin role required", {
+      code: "SUPER_ADMIN_REQUIRED",
+    }),
+  forbidden: () => new ForbiddenError("Forbidden", { code: "FORBIDDEN" }),
+  badWebhookSecret: () =>
+    new ForbiddenError("Bad secret provided", { code: "BAD_WEBHOOK_SECRET" }),
+
+  // ===== Validation =====
+  missingParam: (name: string) =>
+    new BadRequestError(`${name} is required`, {
+      code: "MISSING_PARAM",
+      details: { param: name },
+    }),
+  invalidPayload: (resource: string, details?: unknown) =>
+    new BadRequestError(`Invalid ${resource} payload`, {
+      code: "INVALID_PAYLOAD",
+      details,
+    }),
+  invalidStartAt: () =>
+    new BadRequestError("Invalid startAt date", { code: "INVALID_START_AT" }),
+
+  // ===== Events =====
+  eventNotFound: () =>
+    new NotFoundError("Event not found", { code: "EVENT_NOT_FOUND" }),
+  registrationWindowClosed: () =>
+    new BadRequestError(
+      "Registration opens 24h before start and closes at start.",
+      { code: "REGISTRATION_WINDOW_CLOSED" },
+    ),
+  eventAndReserveFull: () =>
+    new ConflictError("Event and reserve list are full", {
+      code: "EVENT_AND_RESERVE_FULL",
+    }),
+  alreadyRegistered: () =>
+    new ConflictError("Already registered for this event", {
+      code: "ALREADY_REGISTERED",
+    }),
+
+  // ===== Places =====
+  placeNotFound: () =>
+    new NotFoundError("Place not found", { code: "PLACE_NOT_FOUND" }),
+  noEventInPlace: () =>
+    new NotFoundError("No event in the given place", {
+      code: "NO_EVENT_IN_PLACE",
+    }),
+
+  // ===== Users =====
+  userNotFound: () =>
+    new NotFoundError("User not found", { code: "USER_NOT_FOUND" }),
+} as const;
+
+export type ErrorKey = keyof typeof errors;
+
 export function errorMiddleware<TParams extends ParamBase = ParamBase>(
   fn: Route<TParams>,
 ): WrappedRoute<TParams> {
