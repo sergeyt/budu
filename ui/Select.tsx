@@ -52,7 +52,10 @@ type SelectItemIndicatorProps = React.ComponentPropsWithoutRef<
 >;
 
 // ---------- ROOT ----------
-const Root = React.forwardRef<any, SelectRootProps>(function SelectRoot(
+const Root = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Root>,
+  SelectRootProps
+>(function SelectRoot(
   {
     size = "md",
     variant = "outline",
@@ -75,14 +78,18 @@ const Root = React.forwardRef<any, SelectRootProps>(function SelectRoot(
 });
 
 // ---------- HIDDEN SELECT ----------
-const HiddenSelect = React.forwardRef<any, SelectHiddenSelectProps>(
-  function SelectHiddenSelect(props, ref) {
-    return <ChakraSelect.HiddenSelect ref={ref} {...props} />;
-  },
-);
+const HiddenSelect = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.HiddenSelect>,
+  SelectHiddenSelectProps
+>(function SelectHiddenSelect(props, ref) {
+  return <ChakraSelect.HiddenSelect ref={ref} {...props} />;
+});
 
 // ---------- LABEL ----------
-const Label = React.forwardRef<any, SelectLabelProps>(function SelectLabel(
+const Label = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Label>,
+  SelectLabelProps
+>(function SelectLabel(
   { color = "text.muted", fontSize = "sm", mb = 1, ...rest },
   ref,
 ) {
@@ -98,105 +105,116 @@ const Label = React.forwardRef<any, SelectLabelProps>(function SelectLabel(
 });
 
 // ---------- CONTROL ----------
-const Control = React.forwardRef<any, SelectControlProps>(
-  function SelectControl({ borderRadius = "lg", ...rest }, ref) {
-    return (
-      <ChakraSelect.Control ref={ref} borderRadius={borderRadius} {...rest} />
-    );
-  },
-);
+const Control = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Control>,
+  SelectControlProps
+>(function SelectControl({ borderRadius = "lg", ...rest }, ref) {
+  return (
+    <ChakraSelect.Control ref={ref} borderRadius={borderRadius} {...rest} />
+  );
+});
 
 // ---------- TRIGGER ----------
-const Trigger = React.forwardRef<any, SelectTriggerProps>(
-  function SelectTrigger(
-    {
-      borderRadius = "lg",
-      fontSize = "sm",
-      _focusVisible = { boxShadow: "shadow.focus" },
-      ...rest
-    },
-    ref,
-  ) {
-    return (
-      <ChakraSelect.Trigger
-        ref={ref}
-        borderRadius={borderRadius}
-        fontSize={fontSize}
-        _focusVisible={_focusVisible}
-        {...rest}
-      />
-    );
+const Trigger = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Trigger>,
+  SelectTriggerProps
+>(function SelectTrigger(
+  {
+    borderRadius = "lg",
+    fontSize = "sm",
+    _focusVisible = { boxShadow: "shadow.focus" },
+    ...rest
   },
-);
+  ref,
+) {
+  return (
+    <ChakraSelect.Trigger
+      ref={ref}
+      borderRadius={borderRadius}
+      fontSize={fontSize}
+      _focusVisible={_focusVisible}
+      {...rest}
+    />
+  );
+});
 
 // ---------- VALUE TEXT ----------
-const ValueText = React.forwardRef<any, SelectValueTextProps>(
-  function SelectValueText({ color = "text.body", ...rest }, ref) {
-    return <ChakraSelect.ValueText ref={ref} color={color} {...rest} />;
-  },
-);
+const ValueText = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.ValueText>,
+  SelectValueTextProps
+>(function SelectValueText({ color = "text.body", ...rest }, ref) {
+  return <ChakraSelect.ValueText ref={ref} color={color} {...rest} />;
+});
 
 // ---------- INDICATOR GROUP ----------
-const IndicatorGroup = React.forwardRef<any, SelectIndicatorGroupProps>(
-  function SelectIndicatorGroup(props, ref) {
-    return <ChakraSelect.IndicatorGroup ref={ref} {...props} />;
-  },
-);
+const IndicatorGroup = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.IndicatorGroup>,
+  SelectIndicatorGroupProps
+>(function SelectIndicatorGroup(props, ref) {
+  return <ChakraSelect.IndicatorGroup ref={ref} {...props} />;
+});
 
 // ---------- INDICATOR ----------
-const Indicator = React.forwardRef<any, SelectIndicatorProps>(
-  function SelectIndicator(props, ref) {
-    return <ChakraSelect.Indicator ref={ref} {...props} />;
-  },
-);
+const Indicator = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Indicator>,
+  SelectIndicatorProps
+>(function SelectIndicator(props, ref) {
+  return <ChakraSelect.Indicator ref={ref} {...props} />;
+});
 
 // ---------- CLEAR TRIGGER ----------
-const ClearTrigger = React.forwardRef<any, SelectClearTriggerProps>(
-  function SelectClearTrigger(props, ref) {
-    return <ChakraSelect.ClearTrigger ref={ref} {...props} />;
-  },
-);
+const ClearTrigger = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.ClearTrigger>,
+  SelectClearTriggerProps
+>(function SelectClearTrigger(props, ref) {
+  return <ChakraSelect.ClearTrigger ref={ref} {...props} />;
+});
 
 // ---------- POSITIONER ----------
-const Positioner = React.forwardRef<any, SelectPositionerProps>(
-  function SelectPositioner(props, ref) {
-    return <ChakraSelect.Positioner ref={ref} {...props} />;
-  },
-);
+const Positioner = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Positioner>,
+  SelectPositionerProps
+>(function SelectPositioner(props, ref) {
+  return <ChakraSelect.Positioner ref={ref} {...props} />;
+});
 
 // ---------- CONTENT (dropdown panel) ----------
-const Content = React.forwardRef<any, SelectContentProps>(
-  function SelectContent(
-    {
-      bg = "bg.surface",
-      borderRadius = "lg",
-      borderWidth = "1px",
-      borderColor = "border.subtle",
-      boxShadow = "shadow.popover",
-      py = 1,
-      zIndex = "dropdown",
-      ...rest
-    },
-    ref,
-  ) {
-    return (
-      <ChakraSelect.Content
-        ref={ref}
-        bg={bg}
-        borderRadius={borderRadius}
-        borderWidth={borderWidth}
-        borderColor={borderColor}
-        boxShadow={boxShadow}
-        py={py}
-        zIndex={zIndex}
-        {...rest}
-      />
-    );
+const Content = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Content>,
+  SelectContentProps
+>(function SelectContent(
+  {
+    bg = "bg.surface",
+    borderRadius = "lg",
+    borderWidth = "1px",
+    borderColor = "border.subtle",
+    boxShadow = "shadow.popover",
+    py = 1,
+    zIndex = "dropdown",
+    ...rest
   },
-);
+  ref,
+) {
+  return (
+    <ChakraSelect.Content
+      ref={ref}
+      bg={bg}
+      borderRadius={borderRadius}
+      borderWidth={borderWidth}
+      borderColor={borderColor}
+      boxShadow={boxShadow}
+      py={py}
+      zIndex={zIndex}
+      {...rest}
+    />
+  );
+});
 
 // ---------- ITEM ----------
-const Item = React.forwardRef<any, SelectItemProps>(function SelectItem(
+const Item = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.Item>,
+  SelectItemProps
+>(function SelectItem(
   {
     fontSize = "sm",
     px = 3,
@@ -231,45 +249,48 @@ const Item = React.forwardRef<any, SelectItemProps>(function SelectItem(
 });
 
 // ---------- ITEM INDICATOR ----------
-const ItemIndicator = React.forwardRef<any, SelectItemIndicatorProps>(
-  function SelectItemIndicator(props, ref) {
-    return <ChakraSelect.ItemIndicator ref={ref} {...props} />;
-  },
-);
+const ItemIndicator = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.ItemIndicator>,
+  SelectItemIndicatorProps
+>(function SelectItemIndicator(props, ref) {
+  return <ChakraSelect.ItemIndicator ref={ref} {...props} />;
+});
 
 // ---------- ITEM GROUP ----------
-const ItemGroup = React.forwardRef<any, SelectItemGroupProps>(
-  function SelectItemGroup({ mt = 1, mb = 1, ...rest }, ref) {
-    return <ChakraSelect.ItemGroup ref={ref} mt={mt} mb={mb} {...rest} />;
-  },
-);
+const ItemGroup = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.ItemGroup>,
+  SelectItemGroupProps
+>(function SelectItemGroup({ mt = 1, mb = 1, ...rest }, ref) {
+  return <ChakraSelect.ItemGroup ref={ref} mt={mt} mb={mb} {...rest} />;
+});
 
 // ---------- ITEM GROUP LABEL ----------
-const ItemGroupLabel = React.forwardRef<any, SelectItemGroupLabelProps>(
-  function SelectItemGroupLabel(
-    {
-      fontSize = "xs",
-      textTransform = "uppercase",
-      color = "text.muted",
-      px = 3,
-      py = 1,
-      ...rest
-    },
-    ref,
-  ) {
-    return (
-      <ChakraSelect.ItemGroupLabel
-        ref={ref}
-        fontSize={fontSize}
-        textTransform={textTransform}
-        color={color}
-        px={px}
-        py={py}
-        {...rest}
-      />
-    );
+const ItemGroupLabel = React.forwardRef<
+  React.ComponentRef<typeof ChakraSelect.ItemGroupLabel>,
+  SelectItemGroupLabelProps
+>(function SelectItemGroupLabel(
+  {
+    fontSize = "xs",
+    textTransform = "uppercase",
+    color = "text.muted",
+    px = 3,
+    py = 1,
+    ...rest
   },
-);
+  ref,
+) {
+  return (
+    <ChakraSelect.ItemGroupLabel
+      ref={ref}
+      fontSize={fontSize}
+      textTransform={textTransform}
+      color={color}
+      px={px}
+      py={py}
+      {...rest}
+    />
+  );
+});
 
 // ---------- EXPORT NAMESPACE ----------
 export const Select = {
