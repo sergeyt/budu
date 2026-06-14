@@ -18,6 +18,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   errorMiddleware,
+  errors,
 } from "@/lib/error";
 
 function makeRequest(url = "https://example.com/api/test", init?: RequestInit) {
@@ -99,5 +100,51 @@ describe("errorMiddleware", () => {
     const res = await handler(makeRequest(), { params: {} });
     expect(res.status).toBe(201);
     expect(await res.json()).toEqual({ created: true });
+  });
+});
+
+describe("errors catalog", () => {
+  it("every entry produces an HttpError with status, message, and code", () => {
+    const factories = Object.values(errors);
+    expect(factories.length).toBeGreaterThan(0);
+    for (const factory of factories) {
+      // Call with up to two placeholder args so parameterized factories
+      // (`missingParam`, `invalidPayload`) construct successfully.
+      const err = (factory as (...a: unknown[]) => HttpError)("x", {});
+      expect(err).toBeInstanceOf(HttpError);
+      expect(err.status).toBeGreaterThanOrEqual(400);
+      expect(err.status).toBeLessThan(600);
+      expect(err.message).toBeTruthy();
+      expect(err.code).toMatch(/^[A-Z][A-Z0-9_]+$/);
+    }
+  });
+
+  it("has a unique code for every entry", () => {
+    const codes = Object.values(errors).map(
+      (f) => (f as (...a: unknown[]) => HttpError)("x", {}).code,
+    );
+    expect(new Set(codes).size).toBe(codes.length);
+  });
+
+  it("missingParam produces a 400 with the param name interpolated", () => {
+    const err = errors.missingParam("eventId");
+    expect(err.status).toBe(400);
+    expect(err.message).toBe("eventId is required");
+    expect(err.code).toBe("MISSING_PARAM");
+    expect(err.details).toEqual({ param: "eventId" });
+  });
+
+  it("invalidPayload preserves Zod-style details and interpolates resource", () => {
+    const err = errors.invalidPayload("place", {
+      formErrors: [],
+      fieldErrors: { name: ["required"] },
+    });
+    expect(err.status).toBe(400);
+    expect(err.message).toBe("Invalid place payload");
+    expect(err.code).toBe("INVALID_PAYLOAD");
+    expect(err.details).toEqual({
+      formErrors: [],
+      fieldErrors: { name: ["required"] },
+    });
   });
 });

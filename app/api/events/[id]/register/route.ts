@@ -4,12 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/api-auth";
 import { canRegisterNow } from "@/lib/util";
 import { notifyEventChange } from "@/lib/notifications/notify";
-import {
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-  errorMiddleware,
-} from "@/lib/error";
+import { errorMiddleware, errors } from "@/lib/error";
 import { log } from "@/lib/log";
 import { lockEventForRegistration } from "@/lib/locks";
 import {
@@ -23,7 +18,7 @@ type Params = { id?: string };
 export const POST = errorMiddleware<Params>(async (req, ctx) => {
   const { id: eventId } = await ctx.params;
   if (!eventId) {
-    throw new BadRequestError("eventId is required");
+    throw errors.missingParam("eventId");
   }
   const { userId } = await requireUser();
 
@@ -36,12 +31,10 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
 
       const event = await tx.event.findUnique({ where: { id: eventId } });
       if (!event) {
-        throw new NotFoundError("Event not found");
+        throw errors.eventNotFound();
       }
       if (!canRegisterNow(event.startAt)) {
-        throw new BadRequestError(
-          "Registration opens 24h before start and closes at start.",
-        );
+        throw errors.registrationWindowClosed();
       }
 
       const sessionUser = await tx.user.findUnique({ where: { id: userId } });
@@ -59,7 +52,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
         reserveCap: event.reserveCapacity,
       });
       if (decision === "FULL") {
-        throw new ConflictError("Event and reserve list are full");
+        throw errors.eventAndReserveFull();
       }
       outcome = decision;
 
@@ -72,7 +65,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      throw new ConflictError("Already registered for this event");
+      throw errors.alreadyRegistered();
     }
     throw err;
   }
@@ -98,7 +91,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
 export const DELETE = errorMiddleware<Params>(async (req, ctx) => {
   const { id: eventId } = await ctx.params;
   if (!eventId) {
-    throw new BadRequestError("eventId is required");
+    throw errors.missingParam("eventId");
   }
   const { userId } = await requireUser();
 

@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { requireUser } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
-import { NotFoundError, errorMiddleware, BadRequestError } from "@/lib/error";
+import { errorMiddleware, errors } from "@/lib/error";
 import { createLinkCode } from "@/lib/telegramLinkCode";
 
 enum ActionType {
@@ -15,7 +15,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
   const { params } = ctx;
   const { id: placeId } = await params;
   if (!placeId) {
-    throw new BadRequestError("placeId is required");
+    throw errors.missingParam("placeId");
   }
   await requireUser({ isSuperAdmin: true });
   const body = await req.json();
@@ -29,7 +29,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
   await prisma.$transaction(async (tx) => {
     const place = await tx.place.findUnique({ where: { id: placeId } });
     if (!place) {
-      throw new NotFoundError("Place not found");
+      throw errors.placeNotFound();
     }
 
     switch (body.type) {
@@ -39,7 +39,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
           orderBy: { startAt: "desc" },
         });
         if (!event) {
-          throw new NotFoundError("No event in the given place");
+          throw errors.noEventInPlace();
         }
 
         const pivot = DateTime.now();

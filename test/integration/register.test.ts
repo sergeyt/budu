@@ -6,12 +6,12 @@ import { describe, expect, it, vi } from "vitest";
 // shared between the mock and the test code.
 vi.mock("@/lib/api-auth", async () => {
   const { userALS } = await import("./helpers/auth");
-  const { UnauthorizedError } = await import("@/lib/error");
+  const { errors } = await import("@/lib/error");
   return {
     requireUser: async () => {
       const store = userALS.getStore();
       if (!store) {
-        throw new UnauthorizedError();
+        throw errors.unauthorized();
       }
       return { session: null, userId: store.userId };
     },
