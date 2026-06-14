@@ -40,6 +40,7 @@ environment variable the app reads.
 | `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
 | `pnpm test:coverage` | Vitest with v8 coverage |
 | `pnpm test:integration` | Vitest integration tests (needs Postgres 17, see Testing) |
+| `pnpm test:integration:local` | Spin up Postgres 17 in Docker, run integration tests, tear down |
 | `pnpm lint` / `pnpm fmt` | Biome check / format |
 | `pnpm db:migrate` | Run migrations in development |
 | `pnpm db:deploy` | Apply migrations in production |
@@ -78,17 +79,20 @@ against a real Postgres 17 (matching Neon prod major version). They cover
 the registration flow end-to-end, including the advisory-lock invariant
 under concurrent `POST /api/events/:id/register` calls.
 
-Run them locally:
+Run them locally — one-shot, requires Docker:
 
 ```bash
-docker run -d --name budu-pg-test \
-  -e POSTGRES_USER=budu -e POSTGRES_PASSWORD=budu -e POSTGRES_DB=budu_test \
-  -p 54329:5432 postgres:17
+pnpm test:integration:local           # spin up PG 17, run tests, tear down
+pnpm test:integration:local -t lock   # forward args to vitest
+KEEP=1 pnpm test:integration:local    # keep the container around for iteration
+```
 
-DATABASE_URL='postgresql://budu:budu@localhost:54329/budu_test?schema=public' \
+If you already have a Postgres instance you want to use, skip the wrapper
+and point `DATABASE_URL` directly at it:
+
+```bash
+DATABASE_URL='postgresql://user:pass@host:5432/db?schema=public' \
   pnpm test:integration
-
-docker rm -f budu-pg-test    # when done
 ```
 
 The suite applies all Prisma migrations on startup and truncates every
