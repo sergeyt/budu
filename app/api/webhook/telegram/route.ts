@@ -68,7 +68,7 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
     await prisma.placeNotificationChannel.upsert({
       where: {
         placeId_type_target: { placeId, type: "TELEGRAM", target },
-      } as any,
+      },
       update: {},
       create: { placeId, type: "TELEGRAM", target, label: "Owner" },
     });

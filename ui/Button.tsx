@@ -35,7 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => (
     <ChakraButton
       ref={ref}
-      variant={variant as any}
+      variant={variant as ChakraButtonProps["variant"]}
       colorPalette={colorPalette}
       size={size}
       borderRadius={borderRadius}
