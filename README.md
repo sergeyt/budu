@@ -37,8 +37,10 @@ environment variable the app reads.
 | --- | --- |
 | `pnpm dev` | Next dev server |
 | `pnpm build` / `pnpm start` | Production build / serve |
-| `pnpm test` / `pnpm test:watch` | Vitest unit tests |
+| `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
 | `pnpm test:coverage` | Vitest with v8 coverage |
+| `pnpm test:integration` | Vitest integration tests (needs Postgres 17, see Testing) |
+| `pnpm test:integration:local` | Spin up Postgres 17 in Docker, run integration tests, tear down |
 | `pnpm lint` / `pnpm fmt` | Biome check / format |
 | `pnpm db:migrate` | Run migrations in development |
 | `pnpm db:deploy` | Apply migrations in production |
@@ -63,6 +65,42 @@ and (recommended) `TELEGRAM_WEBHOOK_SECRET`.
 
 Notifications are fire-and-forget after each registration: a slow or
 failing channel never blocks or fails the user-visible request.
+
+## Testing
+
+Two layers, run independently:
+
+**Unit tests** (`pnpm test`) — no database, no network, fast feedback. Cover
+pure logic in `lib/` (registration FSM, error middleware, util, telegram
+link codes).
+
+**Integration tests** (`pnpm test:integration`) — exercise route handlers
+against a real Postgres 17 (matching Neon prod major version). They cover
+the registration flow end-to-end, including the advisory-lock invariant
+under concurrent `POST /api/events/:id/register` calls.
+
+Run them locally — one-shot, requires Docker:
+
+```bash
+pnpm test:integration:local           # spin up PG 17, run tests, tear down
+pnpm test:integration:local -t lock   # forward args to vitest
+KEEP=1 pnpm test:integration:local    # keep the container around for iteration
+```
+
+If you already have a Postgres instance you want to use, skip the wrapper
+and point `DATABASE_URL` directly at it:
+
+```bash
+DATABASE_URL='postgresql://user:pass@host:5432/db?schema=public' \
+  pnpm test:integration
+```
+
+The suite applies all Prisma migrations on startup and truncates every
+table between tests, so the same container can be reused across runs.
+A safety check refuses to run against a `DATABASE_URL` that doesn't look
+disposable; set `ALLOW_NON_TEST_DB=1` to override.
+
+In CI both layers run as separate jobs in `.github/workflows/ci.yml`.
 
 ## Schema
 
