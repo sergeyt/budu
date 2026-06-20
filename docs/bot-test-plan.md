@@ -8,6 +8,206 @@ Manual E2E testing requires **both apps running** with matching secrets.
 
 ---
 
+## Local testing guide
+
+Three common setups. Pick based on what you need to verify.
+
+| Setup | Tunnel? | Good for |
+|-------|---------|----------|
+| **A — localhost** | No | Commands, link/unlink, inline registration, cron, `/new_template` |
+| **B — ngrok (Mini App)** | Yes → Next `:3000` | **📋 List** Mini App on a real phone |
+| **C — ngrok (webhook bot)** | Yes → bot `:8080` | Webhook mode locally (optional; polling is default) |
+
+### What talks to what
+
+```
+Your laptop
+├── Next.js          http://localhost:3000
+│   ├── /api/internal/bot/*   ← bot (Bearer token)
+│   ├── /tg/events/[id]       ← Telegram Mini App (browser inside TG)
+│   └── /api/tg/events/[id]   ← Mini App fetch (initData header)
+└── Deno bot         long-polling → Telegram API
+```
+
+- **Bot → Next:** `API_BASE_URL=http://localhost:3000` is fine when both run on
+  the same machine. The bot never needs a public URL in polling mode.
+- **Telegram → Mini App:** Telegram on your phone must load
+  `WEB_APP_BASE_URL/tg/events/…` over **HTTPS**. `localhost` does not work
+  from a phone; use a tunnel (or deploy).
+
+### Mode A — localhost only (fastest)
+
+No ngrok. Covers most bot flows except the Mini App in Telegram mobile.
+
+**Root `.env.local`:**
+
+```bash
+BOT_INTERNAL_TOKEN=dev-only-internal-token-change-me
+TELEGRAM_BOT_TOKEN=...          # from @BotFather
+TELEGRAM_LINK_SECRET=dev-only-secret
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
+# DATABASE_URL, AUTH_SECRET, OAuth provider(s), …
+```
+
+**`bot/.env`:**
+
+```bash
+TELEGRAM_BOT_TOKEN=...          # same as above
+API_BASE_URL=http://localhost:3000
+BOT_INTERNAL_TOKEN=dev-only-internal-token-change-me   # must match root
+TELEGRAM_LINK_SECRET=dev-only-secret                   # must match root
+TELEGRAM_CALLBACK_SECRET=dev-only-callback-secret
+BOT_MODE=polling
+# WEB_APP_BASE_URL unset — defaults to API_BASE_URL (localhost)
+```
+
+**Start:**
+
+```bash
+pnpm dev                        # terminal 1
+cd bot && deno task dev         # terminal 2
+```
+
+**Mini App workaround without tunnel:** use the inline **List** callback (sends
+full participant list as a DM) instead of the **📋 List** Web App button — or
+open `http://localhost:3000/tg/events/<id>` in a desktop browser (initData
+auth will fail outside Telegram; useful only for layout smoke).
+
+---
+
+### Mode B — ngrok for Mini App (recommended full E2E)
+
+Telegram mobile requires HTTPS for Web App buttons. Tunnel the **Next app**
+(port 3000), not the bot.
+
+#### 1. Install ngrok
+
+```bash
+# macOS
+brew install ngrok
+
+# or https://ngrok.com/download — then authenticate once:
+ngrok config add-authtoken <your-token>
+```
+
+Alternatives: [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/),
+[localtunnel](https://localtunnel.github.io/www/) (`npx localtunnel --port 3000`).
+Steps below use ngrok; substitute your tool’s HTTPS URL.
+
+#### 2. Start the stack
+
+```bash
+pnpm dev                        # terminal 1 — keep running
+```
+
+#### 3. Open the tunnel
+
+```bash
+ngrok http 3000                 # terminal 2
+```
+
+Copy the **HTTPS** forwarding URL, e.g. `https://abc123.ngrok-free.app`.
+
+> **ngrok free tier:** browsers may show an interstitial on first visit. Telegram
+> usually loads the Mini App fine; if the page is blank, open the URL once in
+> Safari/Chrome and tap through, then retry in Telegram.
+
+#### 4. Point the bot at the public URL
+
+Edit `bot/.env`:
+
+```bash
+API_BASE_URL=http://localhost:3000              # bot → Next stays local
+WEB_APP_BASE_URL=https://abc123.ngrok-free.app  # Telegram → Mini App pages
+```
+
+Restart the bot after changing env (config is cached at startup):
+
+```bash
+cd bot && deno task dev         # terminal 3
+```
+
+#### 5. (Optional) Web UI through the same tunnel
+
+Only needed if you want to sign in via OAuth on a phone or share the admin UI
+externally. Update root `.env.local`:
+
+```bash
+AUTH_URL=https://abc123.ngrok-free.app
+AUTH_TRUST_HOST=true
+```
+
+Restart `pnpm dev`. Add the tunnel URL to each OAuth provider’s allowed
+redirect URIs (Yandex/VK/etc. — exact path depends on provider, typically
+`https://<host>/api/auth/callback/<provider>`).
+
+#### 6. Verify Mini App
+
+1. Link a chat, post an announcement (`/announce_next` or wait for cron).
+2. On your phone, tap **📋 List** under the announcement.
+3. **Expect:** Mini App opens, event title and participant lists load.
+
+**Sanity URLs** (replace host and event id):
+
+```text
+https://abc123.ngrok-free.app/tg/events/<eventId>     # page (needs Telegram)
+https://abc123.ngrok-free.app/api/tg/events/<eventId> # API (401 without initData)
+```
+
+#### 7. When the tunnel URL changes
+
+ngrok assigns a new subdomain each run (unless you use a reserved domain).
+After restarting ngrok:
+
+1. Update `WEB_APP_BASE_URL` (and `AUTH_URL` if used).
+2. Restart the bot (and Next if `AUTH_URL` changed).
+3. Post a **new** announcement — old messages still embed the previous
+   `WEB_APP_BASE_URL` in their keyboard.
+
+---
+
+### Mode C — webhook bot locally (optional)
+
+Default dev uses **polling** (`BOT_MODE=polling`); no tunnel required for the
+bot. To exercise webhook mode locally:
+
+```bash
+ngrok http 8080                 # tunnel to bot PORT
+```
+
+**`bot/.env`:**
+
+```bash
+BOT_MODE=webhook
+WEBHOOK_URL=https://xyz789.ngrok-free.app
+WEBHOOK_SECRET=long-random-string
+PORT=8080
+API_BASE_URL=http://localhost:3000
+# … other secrets unchanged
+```
+
+```bash
+cd bot && deno task start
+```
+
+**Expect:** log line `webhook registered at …/webhook/<secret>`. Send a command
+in Telegram; `GET https://…/health` returns `ok`.
+
+Use **either** polling **or** webhook — not both against the same bot token.
+
+---
+
+### Local testing checklist
+
+- [ ] Root and `bot/.env` secrets match (`BOT_INTERNAL_TOKEN`, `TELEGRAM_LINK_SECRET`, `TELEGRAM_BOT_TOKEN`)
+- [ ] `pnpm dev` up; bot logs `polling as @…` (or webhook registered)
+- [ ] For Mini App: `WEB_APP_BASE_URL` is current ngrok HTTPS URL; bot restarted
+- [ ] Fresh announcement posted after tunnel URL change
+- [ ] Phone on cellular or Wi‑Fi (not required to be same LAN as laptop)
+
+---
+
 ## Prerequisites
 
 ### Environment
@@ -18,10 +218,12 @@ Manual E2E testing requires **both apps running** with matching secrets.
 | `TELEGRAM_LINK_SECRET` | root `.env` + `bot/.env` | ✓ each other |
 | `TELEGRAM_BOT_TOKEN` | root `.env` + `bot/.env` | ✓ each other |
 | `TELEGRAM_CALLBACK_SECRET` | `bot/.env` only | — |
-| `API_BASE_URL` | `bot/.env` | Next app URL |
-| `WEB_APP_BASE_URL` | `bot/.env` (optional) | Public URL for Mini App |
+| `API_BASE_URL` | `bot/.env` | Next app URL (localhost OK for bot) |
+| `WEB_APP_BASE_URL` | `bot/.env` (optional) | Public **HTTPS** URL for Mini App — see [Local testing guide](#local-testing-guide) |
 
 ### Start stack
+
+See [Mode A](#mode-a--localhost-only-fastest) or [Mode B](#mode-b--ngrok-for-mini-app-recommended-full-e2e) above. Minimal:
 
 ```bash
 # Terminal 1 — Next app + DB
@@ -221,8 +423,10 @@ Copy old announcement or edit `callback_data` manually (if possible).
 
 ## Layer 6 — Mini App (📋 List)
 
-1. Tap **📋 List** on an announcement (requires `WEB_APP_BASE_URL` reachable
-   from phone).
+Requires [Mode B (ngrok)](#mode-b--ngrok-for-mini-app-recommended-full-e2e) for
+testing on a real phone.
+
+1. Tap **📋 List** on an announcement.
 2. **Expect:** opens `/tg/events/[id]` inside Telegram; full participant list
    loads.
 
@@ -230,10 +434,10 @@ Copy old announcement or edit `callback_data` manually (if possible).
 |------|--------|
 | Open outside Telegram | initData missing → auth error |
 | Wrong/old initData | 401 |
-| Local dev on phone | use tunnel (ngrok etc.) or same-network URL for `WEB_APP_BASE_URL` |
+| Stale announcement | keyboard still has old tunnel URL → fix env, restart bot, post again |
 
-Fallback: **List** callback (non–Web App path) sends full list as DM — test if
-Web App unavailable.
+Fallback: **List** callback (non–Web App path) sends full list as DM — works
+without ngrok; see [Mode A](#mode-a--localhost-only-fastest).
 
 ---
 
@@ -284,7 +488,7 @@ Use before a release:
 - [ ] `/announce_next` posts with keyboard
 - [ ] Register + cancel via inline button; message edits
 - [ ] Deep link `?start=ev_<id>` works in DM
-- [ ] **📋 List** Mini App opens and shows participants
+- [ ] **📋 List** Mini App on phone (ngrok Mode B)
 - [ ] `/new_template` in DM (place admin) creates template
 - [ ] Cron materialize + announce (or smoke script)
 - [ ] Web registration syncs to bot message
@@ -297,4 +501,5 @@ Use before a release:
 - `/templates` is read-only; CRUD is web-only (`/admin/...`).
 - Announcement participant names in message body are Russian-formatted
   regardless of user locale (buttons/toasts are localized).
-- Local Mini App needs a URL Telegram can reach (tunnel or deploy).
+- Mini App on a phone needs a public HTTPS tunnel — see
+  [Local testing guide](#local-testing-guide).
