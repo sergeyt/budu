@@ -9,7 +9,6 @@
     "jsr:@std/path@1.1.2": "1.1.2",
     "jsr:@std/testing@1": "1.0.19",
     "npm:luxon@^3.7.2": "3.7.2",
-    "npm:postgres@^3.4.5": "3.4.9",
     "npm:zod@^4.2.1": "4.4.3"
   },
   "jsr": {
@@ -45,9 +44,6 @@
   "npm": {
     "luxon@3.7.2": {
       "integrity": "sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew=="
-    },
-    "postgres@3.4.9": {
-      "integrity": "sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw=="
     },
     "zod@4.4.3": {
       "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="
@@ -96,7 +92,6 @@
     "dependencies": [
       "npm:@types/luxon@^3.7.1",
       "npm:luxon@^3.7.2",
-      "npm:postgres@^3.4.5",
       "npm:zod@^4.2.1"
     ]
   }

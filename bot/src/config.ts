@@ -4,16 +4,16 @@ const Mode = z.enum(["polling", "webhook"]);
 
 const Schema = z.object({
   TELEGRAM_BOT_TOKEN: z.string().min(10),
-  DATABASE_URL: z.string().url(),
+  /** Next.js app base URL for the internal bot API. */
+  API_BASE_URL: z.string().url().default("http://localhost:3000"),
+  /** Shared secret — must match BOT_INTERNAL_TOKEN in the Next app. */
+  BOT_INTERNAL_TOKEN: z.string().min(16),
   TELEGRAM_LINK_SECRET: z.string().min(8),
   TELEGRAM_CALLBACK_SECRET: z.string().min(8),
   BOT_MODE: Mode.default("polling"),
   WEBHOOK_URL: z.string().url().optional(),
   WEBHOOK_SECRET: z.string().optional(),
   PORT: z.coerce.number().int().min(1).max(65535).default(8080),
-  // How often the materializer tick fires in **non**-Deno-Deploy runs
-  // (local dev, plain `deno run`, etc.). In Deno Deploy we let `Deno.cron`
-  // schedule it at every minute. Useful to bump while smoke-testing.
   MATERIALIZE_INTERVAL_SEC: z.coerce.number().int().min(5).max(3600).default(
     60,
   ),

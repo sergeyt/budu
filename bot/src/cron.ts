@@ -1,5 +1,5 @@
 import type { Bot } from "grammy";
-import { materializeUpcoming } from "@/services/materialize.ts";
+import { materializeUpcoming } from "@/api/materialize.ts";
 import { postDueAnnouncements } from "@/services/announceScheduler.ts";
 import { loadConfig } from "@/config.ts";
 

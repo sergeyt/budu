@@ -4,7 +4,7 @@ import {
   findPlaceById,
   linkTelegramChatToPlace,
   unlinkTelegramChatFromPlace,
-} from "@/db/places.ts";
+} from "@/api/places.ts";
 
 function extractCode(text: string | undefined): string | null {
   if (!text) return null;

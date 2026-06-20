@@ -1,10 +1,10 @@
 import type { Bot, Context } from "grammy";
 import { type Action, decodeCallbackData } from "@/services/callbackData.ts";
-import { findOrCreateTelegramUser } from "@/db/users.ts";
+import { findOrCreateTelegramUser } from "@/api/users.ts";
 import {
   cancelRegistration,
   registerUserForEvent,
-} from "@/db/registrations.ts";
+} from "@/api/announcements.ts";
 import {
   buildFullListMessage,
   scheduleAnnouncementRefresh,

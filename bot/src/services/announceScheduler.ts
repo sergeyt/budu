@@ -1,9 +1,9 @@
 import type { Bot } from "grammy";
-import { listTelegramChannelsForEvent } from "@/db/channels.ts";
+import { listTelegramChannelsForEvent } from "@/api/channels.ts";
 import {
   type AnnounceableEvent,
   listEventsDueForAnnouncement,
-} from "@/db/events.ts";
+} from "@/api/events.ts";
 import { postAnnouncement } from "@/services/announce.ts";
 
 export type AnnounceSchedulerResult = {

@@ -1,6 +1,6 @@
 import type { Bot, Context } from "grammy";
-import { findEventById } from "@/db/events.ts";
-import { findOrCreateTelegramUser } from "@/db/users.ts";
+import { findEventById } from "@/api/events.ts";
+import { findOrCreateTelegramUser } from "@/api/users.ts";
 import { buildAnnouncement } from "@/services/announce.ts";
 import { canRegisterNow } from "@/services/registrationWindow.ts";
 

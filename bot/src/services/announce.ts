@@ -6,12 +6,12 @@ import {
   findEventById,
   listParticipants,
   type ParticipantRow,
-} from "@/db/events.ts";
+} from "@/api/events.ts";
 import {
   type AnnouncementRef,
   getAnnouncements,
   upsertAnnouncement,
-} from "@/db/announcements.ts";
+} from "@/api/announcements.ts";
 
 const PARTICIPANT_LIST_LIMIT = 12;
 

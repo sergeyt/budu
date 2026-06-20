@@ -1,5 +1,5 @@
 import type { Context } from "grammy";
-import { listTemplatesForChat } from "@/db/templates.ts";
+import { listTemplatesForChat } from "@/api/templates.ts";
 import {
   localTimeToDate,
   nextOccurrencesUtc,

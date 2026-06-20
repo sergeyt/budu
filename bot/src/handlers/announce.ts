@@ -1,6 +1,6 @@
 import type { Bot, Context } from "grammy";
-import { findNextEventForPlace } from "@/db/events.ts";
-import { placesLinkedToChat } from "@/db/places.ts";
+import { findNextEventForPlace } from "@/api/events.ts";
+import { placesLinkedToChat } from "@/api/places.ts";
 import { postAnnouncement } from "@/services/announce.ts";
 
 /**

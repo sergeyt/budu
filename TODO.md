@@ -4,9 +4,10 @@
 
 ## Telegram bot — milestones
 
-Stack: Deno 2.x + grammY, same Postgres as the Next app (direct via `postgresjs`),
-Deno Deploy (`Deno.cron` + webhook). Supports both Telegram channels and
-groups via a per-binding flag. Mini App deferred to M4.
+Stack: Deno 2.x + grammY, Next.js internal REST API (`/api/internal/bot/*`
+with `BOT_INTERNAL_TOKEN`), Deno Deploy (`Deno.cron` + webhook). Supports
+both Telegram channels and groups via a per-binding flag. Mini App deferred
+to M4.
 
 ### M0 — Prisma migrations (no behavior change) ✅
 - [x] `EventTemplate`: weekly recurrence (`dayOfWeek`, `localTime`),

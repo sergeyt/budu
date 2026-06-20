@@ -1,62 +1,75 @@
 # budu bot
 
 Telegram bot for [`budu`](../README.md) built on [grammY](https://grammy.dev) +
-Deno. Shares the Postgres database with the Next.js app; the schema is owned by
-[`prisma/schema.prisma`](../prisma/schema.prisma).
+Deno. **Does not connect to Postgres directly** — all data access goes through
+the Next.js app's internal REST API (`/api/internal/bot/*`), authenticated
+with a shared `BOT_INTERNAL_TOKEN`.
 
 ## What works today (through M3)
 
-- `/start`, `/help` — onboarding + chat id discovery
-- `/start ev_<eventId>` — deep link: creates a bot user if needed, shows the
-  event with inline registration buttons
-- `/link <code>` / `/unlink <code>` — bind a Telegram chat to a Place via a
-  one-time signed code (`TELEGRAM_LINK_SECRET` must match the Next app)
-- `/templates` — read-only listing of templates for linked places
-- `/announce_next` — manual nudge: posts the next upcoming event for every
-  linked place
-- **Scheduled cron** (every minute): materializes template events 8 days ahead,
-  then posts announcements when `startAt - announceOffsetMinutes` arrives
-- Announcements go to effective TELEGRAM channels (event-level overrides place)
-- Inline keyboard: **✅ Я иду** / **⏳ Резерв** / **❌ Отмена** / **📋 Список**
-  (HMAC-signed `callback_data`, ≤64 bytes)
-- Tapping register/cancel runs the capacity FSM under `pg_advisory_xact_lock`
-  (same invariant as the Next app), then edits the live announcement after a
-  ≥5s debounce
-- **📋 Список** DMs the tapper the full participant list (Mini App deferred to M4)
-- Registration window: opens 24h before start, closes at start (mirrors web app)
+- `/start`, `/help`, `/start ev_<eventId>` deep links
+- `/link` / `/unlink`, `/templates`, `/announce_next`
+- Scheduled cron: materialize templates + post due announcements
+- Inline registration keyboard with HMAC-signed `callback_data`
+- Live announcement edits (debounced ≥5s)
 
-Not yet wired: Mini App (M4), bot-side template wizard (M4), per-template channel
-overrides at announce time (M4). Bot-only users get a `User` row keyed by
-`telegramUserId`; they can link to OAuth web accounts later.
+## Quick start (local)
 
-## Quick start (local, long-polling — no ngrok needed)
+**1. Next app** — add to the root `.env`:
+
+```bash
+BOT_INTERNAL_TOKEN=dev-only-internal-token-change-me   # ≥16 chars
+```
+
+Then start it: `pnpm dev`
+
+**2. Bot** — configure `bot/.env`:
 
 ```bash
 cd bot
 cp .env.example .env
-# fill TELEGRAM_BOT_TOKEN, TELEGRAM_LINK_SECRET, TELEGRAM_CALLBACK_SECRET,
-# DATABASE_URL (same as the Next app)
+# TELEGRAM_BOT_TOKEN from @BotFather
+# API_BASE_URL=http://localhost:3000
+# BOT_INTERNAL_TOKEN must match the Next app
+# TELEGRAM_LINK_SECRET must match the Next app
 deno task dev
 ```
 
-The dev task auto-deletes any active webhook before starting `getUpdates`.
+The dev task auto-deletes any active webhook before starting long-polling.
 
 ### Wire it end-to-end
 
-1. Start the Next app (`pnpm dev`) and ensure places/events/templates exist.
-2. Mint a link code from the super-admin console (or any flow calling
-   `createLinkCode(placeId)`).
-3. DM the bot `/link <code>`.
-4. Create a template in `/admin/places/<id>/templates` or wait for the cron to
-   materialize seeded templates.
-5. Either wait until `startAt - announceOffsetMinutes`, or use `/announce_next`
-   to post immediately.
-6. Tap the inline buttons — watch the announcement edit after ~5s.
+1. Link a chat: `/link <code>` (code from super-admin console).
+2. Create templates in `/admin/places/<id>/templates`.
+3. Wait for cron or use `/announce_next`.
+4. Deep link: `https://t.me/<bot>?start=ev_<eventId>`
 
-**Deep link test:** `https://t.me/<bot>?start=ev_<eventId>`
+## Internal API
 
-For channels: add the bot as admin with **Post Messages** + **Edit Messages**,
-then `/link <code>` in the channel.
+All routes live under `/api/internal/bot/` and require:
+
+```
+Authorization: Bearer <BOT_INTERNAL_TOKEN>
+```
+
+| Route | Purpose |
+|-------|---------|
+| `POST /users/telegram` | find-or-create bot user |
+| `GET /places/:id` | place lookup |
+| `POST/DELETE /places/:id/telegram` | link/unlink chat |
+| `GET /places/by-chat/:chatId` | places for a chat |
+| `GET /events/:id` | event details |
+| `GET /events/next?placeId=` | next upcoming event |
+| `GET /events/due-for-announcement` | scheduler query |
+| `GET /events/:id/participants` | participant list |
+| `GET/PUT /events/:id/announcements` | live message refs |
+| `GET /events/:id/telegram-channels` | announce targets |
+| `POST/DELETE /events/:id/register` | register / cancel |
+| `GET /templates/active` | enabled templates |
+| `GET /templates/by-chat/:chatId` | templates for linked chat |
+| `POST /cron/materialize` | materialize upcoming events |
+
+Business logic lives in `lib/bot/*` on the Next side (Prisma + advisory locks).
 
 ## Webhook mode (prod / Deno Deploy)
 
@@ -64,12 +77,10 @@ then `/link <code>` in the channel.
 BOT_MODE=webhook
 WEBHOOK_URL=https://your-host.example
 WEBHOOK_SECRET=long-random-string
-PORT=8080
+API_BASE_URL=https://your-next-app.example
+BOT_INTERNAL_TOKEN=...
 deno task start
 ```
-
-On Deno Deploy, `Deno.cron` runs the combined materialize + announce tick every
-minute.
 
 ## Tests
 
@@ -77,33 +88,24 @@ minute.
 deno task test
 ```
 
-Covers capacity FSM, link codes, callback_data signing, Luxon time helpers,
-registration window, and more.
+Pure unit tests (capacity, link codes, callback_data, time helpers) run
+without the Next app. Integration smoke:
+
+```bash
+deno run --allow-env --allow-net --allow-read --allow-import \
+  --env-file=.env --env-file=../.env scripts/smoke_materialize.ts
+```
+
+(requires Next app running with matching `BOT_INTERNAL_TOKEN`)
 
 ## Layout
 
 ```
 src/
-  main.ts              # entry: polling or webhook server
-  bot.ts               # grammY Bot factory
-  cron.ts              # materialize + announce scheduler tick
-  config.ts            # zod-validated env
-  db/
-    client.ts          # postgresjs (+ TIMESTAMP UTC codec)
-    channels.ts        # effective TELEGRAM channels per event
-    events.ts          # lookup + due-for-announce query
-    templates.ts       # template listing
-    registrations.ts   # FSM under pg_advisory_xact_lock
-    announcements.ts   # Event.announcements JSONB
-  services/
-    materialize.ts     # template → Event rows
-    announceScheduler.ts # post due announcements
-    announce.ts        # render, post, debounced edit
-    registrationWindow.ts
-    callbackData.ts    # signed inline payloads
-  handlers/
-    start.ts           # /start + ev_ deep links
-    registration.ts    # callback_query taps
-scripts/
-  smoke_materialize.ts # one-shot DB smoke test
+  main.ts              # polling or webhook server
+  cron.ts              # materialize + announce tick (via API)
+  config.ts            # API_BASE_URL, BOT_INTERNAL_TOKEN, …
+  api/                 # HTTP client for /api/internal/bot/*
+  services/            # Telegram-facing logic (announce, callbacks, time)
+  handlers/            # grammY command + callback handlers
 ```
