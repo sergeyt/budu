@@ -1,8 +1,13 @@
 import { webhookCallback } from "grammy";
 import * as Sentry from "@sentry/deno";
-import { loadConfig } from "@/config.ts";
+import {
+  loadConfig,
+  useWebhook,
+  webhookEndpointUrl,
+} from "@/config.ts";
 import { createBot, publishCommands } from "@/bot.ts";
 import { attachBotToCron, startCron } from "@/cron.ts";
+import { deriveWebhookSecretToken } from "@/webhookSecret.ts";
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
@@ -19,7 +24,7 @@ async function main(): Promise<void> {
   startCron();
   console.log(`[bot] @${bot.botInfo.username} initialized`);
 
-  if (cfg.BOT_MODE === "polling") {
+  if (!useWebhook()) {
     // Long-polling can't coexist with an active webhook. Drop any leftover
     // one (e.g. set by the Next app) so getUpdates doesn't 409.
     await bot.api.deleteWebhook({ drop_pending_updates: false });
@@ -31,20 +36,22 @@ async function main(): Promise<void> {
     return;
   }
 
-  // webhook mode
-  const url = `${cfg.WEBHOOK_URL}/webhook/${cfg.WEBHOOK_SECRET}`;
-  await bot.api.setWebhook(url, { drop_pending_updates: false });
-  console.log(`[bot] webhook registered at ${url}`);
+  const webhookUrl = webhookEndpointUrl();
+  const secretToken = await deriveWebhookSecretToken(cfg.BOT_INTERNAL_TOKEN);
+  await bot.api.setWebhook(webhookUrl, {
+    drop_pending_updates: false,
+    secret_token: secretToken,
+  });
+  console.log(`[bot] webhook registered at ${webhookUrl}`);
 
-  const handle = webhookCallback(bot, "std/http");
-  const path = `/webhook/${cfg.WEBHOOK_SECRET}`;
+  const handle = webhookCallback(bot, "std/http", { secretToken });
 
   Deno.serve({ port: cfg.PORT }, async (req) => {
     const u = new URL(req.url);
     if (req.method === "GET" && u.pathname === "/health") {
       return new Response("ok", { status: 200 });
     }
-    if (u.pathname !== path) {
+    if (u.pathname !== "/webhook") {
       return new Response("not found", { status: 404 });
     }
     return await handle(req);

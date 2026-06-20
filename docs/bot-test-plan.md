@@ -57,8 +57,7 @@ TELEGRAM_BOT_TOKEN=...          # same as above
 API_BASE_URL=http://localhost:3000
 BOT_INTERNAL_TOKEN=dev-only-internal-token-change-me   # must match root
 TELEGRAM_LINK_SECRET=dev-only-secret                   # must match root
-TELEGRAM_CALLBACK_SECRET=dev-only-callback-secret
-BOT_MODE=polling
+# BOT_PUBLIC_URL unset — long-polling (default)
 # WEB_APP_BASE_URL unset — defaults to API_BASE_URL (localhost)
 ```
 
@@ -169,8 +168,8 @@ After restarting ngrok:
 
 ### Mode C — webhook bot locally (optional)
 
-Default dev uses **polling** (`BOT_MODE=polling`); no tunnel required for the
-bot. To exercise webhook mode locally:
+Default dev uses **long-polling** (`BOT_PUBLIC_URL` unset); no tunnel required
+for the bot. To exercise webhook mode locally:
 
 ```bash
 ngrok http 8080                 # tunnel to bot PORT
@@ -179,9 +178,7 @@ ngrok http 8080                 # tunnel to bot PORT
 **`bot/.env`:**
 
 ```bash
-BOT_MODE=webhook
-WEBHOOK_URL=https://xyz789.ngrok-free.app
-WEBHOOK_SECRET=long-random-string
+BOT_PUBLIC_URL=https://xyz789.ngrok-free.app
 PORT=8080
 API_BASE_URL=http://localhost:3000
 # … other secrets unchanged
@@ -191,10 +188,11 @@ API_BASE_URL=http://localhost:3000
 cd bot && deno task start
 ```
 
-**Expect:** log line `webhook registered at …/webhook/<secret>`. Send a command
-in Telegram; `GET https://…/health` returns `ok`.
+**Expect:** log line `webhook registered at https://…/webhook`. Send a command
+in Telegram; `GET https://…/health` returns `ok`. Webhook `secret_token` is
+derived from `BOT_INTERNAL_TOKEN` — no extra env var.
 
-Use **either** polling **or** webhook — not both against the same bot token.
+Do not run polling and webhook against the same bot token at once.
 
 ---
 
@@ -215,9 +213,8 @@ Use **either** polling **or** webhook — not both against the same bot token.
 | Variable | Where | Must match |
 |----------|-------|------------|
 | `BOT_INTERNAL_TOKEN` | root `.env` + `bot/.env` | ✓ each other |
-| `TELEGRAM_LINK_SECRET` | root `.env` + `bot/.env` | ✓ each other |
+| `TELEGRAM_LINK_SECRET` | root `.env` + `bot/.env` | ✓ each other (link codes + callback buttons) |
 | `TELEGRAM_BOT_TOKEN` | root `.env` + `bot/.env` | ✓ each other |
-| `TELEGRAM_CALLBACK_SECRET` | `bot/.env` only | — |
 | `API_BASE_URL` | `bot/.env` | Next app URL (localhost OK for bot) |
 | `WEB_APP_BASE_URL` | `bot/.env` (optional) | Public **HTTPS** URL for Mini App — see [Local testing guide](#local-testing-guide) |
 
@@ -460,7 +457,7 @@ Commands to spot-check: `start`, `help`, `link`, `unlink`, `announce_next`,
 |-------|-----|--------|
 | Next app down | stop `pnpm dev`, send `/templates` | Bot logs API error; no crash |
 | Bad `BOT_INTERNAL_TOKEN` | wrong token in bot | 401 on internal API; commands fail gracefully |
-| Webhook vs polling | local uses polling | no 409 on `getUpdates` |
+| Webhook vs polling | `BOT_PUBLIC_URL` unset locally | no 409 on `getUpdates` |
 | Sentry (optional) | set `SENTRY_DSN`, trigger handler error | event in Sentry dashboard |
 | Health (webhook mode) | `GET /health` on bot server | `200 ok` |
 
@@ -470,8 +467,8 @@ Commands to spot-check: `start`, `help`, `link`, `unlink`, `announce_next`,
 
 Before deploy:
 
-1. `BOT_MODE=webhook`, `WEBHOOK_URL`, `WEBHOOK_SECRET` set.
-2. `deno task start` — webhook registered log line.
+1. `BOT_PUBLIC_URL` set to the bot’s public HTTPS origin.
+2. `deno task start` — log line `webhook registered at …/webhook`.
 3. Send command in Telegram → update received.
 4. Cron runs on host (Deno Deploy cron or interval fallback).
 5. Secrets match between Next and bot on staging.

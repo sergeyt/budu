@@ -29,7 +29,7 @@ function getKey(): Promise<CryptoKey> {
   if (!keyPromise) {
     keyPromise = crypto.subtle.importKey(
       "raw",
-      encoder.encode(loadConfig().TELEGRAM_CALLBACK_SECRET),
+      encoder.encode(loadConfig().TELEGRAM_LINK_SECRET),
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign", "verify"],
