@@ -1,4 +1,4 @@
-import type { ApiClient } from "../client.ts";
+import type { ApiClient } from "../client";
 import type {
   AddPlaceAdminBody,
   CreateEventBody,
@@ -15,7 +15,7 @@ import type {
   WebEventTemplate,
   WebPlace,
   WebRegistration,
-} from "../types/web.ts";
+} from "../types/web";
 
 export function createWebPlacesApi(client: ApiClient) {
   return {
@@ -123,4 +123,4 @@ export type {
   WebEventTemplate,
   WebPlace,
   WebRegistration,
-} from "../types/web.ts";
+} from "../types/web";

@@ -1,5 +1,5 @@
-import { ApiError, type ApiClient } from "../client.ts";
-import type { BotPlace } from "../types/bot.ts";
+import { ApiError, type ApiClient } from "../client";
+import type { BotPlace } from "../types/bot";
 
 const PREFIX = "/api/internal/bot";
 

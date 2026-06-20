@@ -20,7 +20,22 @@ import type {
 /** Browser client — session cookies, no Bearer token. */
 const client = new ApiClient({ credentials: "same-origin" });
 
-export const api = createWebApi(client);
+const webApi = createWebApi(client);
+
+/** Wire JSON matches app model shapes; assert at the boundary. */
+export const api = {
+  places: webApi.places,
+  templates: webApi.templates,
+  events: {
+    create: webApi.events.create,
+    participants: (id: string): Promise<Registration[]> =>
+      webApi.events.participants(id) as Promise<Registration[]>,
+    register: (id: string): Promise<RegisterResponse> =>
+      webApi.events.register(id) as Promise<RegisterResponse>,
+    unregister: (id: string): Promise<UnregisterResponse> =>
+      webApi.events.unregister(id) as Promise<UnregisterResponse>,
+  },
+};
 
 export type CreateEventBody = z.infer<typeof CreateEvent>;
 export type CreatePlaceBody = z.infer<typeof CreatePlace>;

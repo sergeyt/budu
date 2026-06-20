@@ -4,7 +4,7 @@ export {
   type ApiClientAuth,
   type ApiClientOptions,
   type HttpInit,
-} from "./client.ts";
+} from "./client";
 
-export { createWebApi, type WebApi } from "./web/index.ts";
-export { createBotApi, type BotApi } from "./bot/index.ts";
+export { createWebApi, type WebApi } from "./web/index";
+export { createBotApi, type BotApi } from "./bot/index";

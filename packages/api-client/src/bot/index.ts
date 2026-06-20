@@ -1,6 +1,6 @@
-import type { ApiClient } from "../client.ts";
-import { createBotEventsApi } from "./events.ts";
-import { createBotPlacesApi } from "./places.ts";
+import type { ApiClient } from "../client";
+import { createBotEventsApi } from "./events";
+import { createBotPlacesApi } from "./places";
 import {
   createBotAdminApi,
   createBotAnnouncementsApi,
@@ -8,7 +8,7 @@ import {
   createBotMaterializeApi,
   createBotTemplatesApi,
   createBotUsersApi,
-} from "./rest.ts";
+} from "./rest";
 
 /** Typed client for `/api/internal/bot/*` (Telegram bot service). */
 export function createBotApi(client: ApiClient) {
@@ -26,8 +26,8 @@ export function createBotApi(client: ApiClient) {
 
 export type BotApi = ReturnType<typeof createBotApi>;
 
-export { createBotPlacesApi } from "./places.ts";
-export { createBotEventsApi } from "./events.ts";
+export { createBotPlacesApi } from "./places";
+export { createBotEventsApi } from "./events";
 export {
   createBotAdminApi,
   createBotAnnouncementsApi,
@@ -35,7 +35,7 @@ export {
   createBotMaterializeApi,
   createBotTemplatesApi,
   createBotUsersApi,
-} from "./rest.ts";
+} from "./rest";
 
 export type {
   AnnounceableEvent,
@@ -50,10 +50,10 @@ export type {
   RegisterOutcome,
   TelegramChannel,
   TemplateRow,
-} from "../types/bot.ts";
+} from "../types/bot";
 
 export {
   parseAnnounceable,
   parseEvent,
   parseParticipant,
-} from "../types/bot.ts";
+} from "../types/bot";

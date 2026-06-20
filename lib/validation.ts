@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ChannelType } from "@/types/model";
 
 export const CreatePlace = z.object({
   name: z.string().min(1),
@@ -67,7 +68,7 @@ export const CreateEventTemplate = EventTemplateBase;
 export const UpdateEventTemplate = EventTemplateBase.partial();
 
 export const UpsertTemplateChannel = z.object({
-  type: z.enum(["TELEGRAM", "WHATSAPP", "SLACK", "MAX"]),
+  type: z.nativeEnum(ChannelType),
   target: z.string().min(1),
   label: z.string().nullish(),
 });

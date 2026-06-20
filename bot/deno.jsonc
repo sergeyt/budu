@@ -6,10 +6,10 @@
     "dev": "deno run --watch --allow-env --allow-net --allow-read --allow-import --env-file=.env --env-file=../.env src/main.ts",
     // Webhook server for production / Deno Deploy.
     "start": "deno run --allow-env --allow-net --allow-read --allow-import --env-file=.env src/main.ts",
-    "test": "deno test --allow-env --allow-net --allow-read --allow-import",
+    "test": "deno test --allow-env --allow-net --allow-read --allow-import --unstable-sloppy-imports",
     "fmt": "deno fmt",
     "lint": "deno lint",
-    "check": "deno check --allow-import src/main.ts"
+    "check": "deno check --allow-import --unstable-sloppy-imports src/main.ts"
   },
   "imports": {
     "grammy": "https://deno.land/x/grammy@v1.44.0/mod.ts",
@@ -38,5 +38,6 @@
   "compilerOptions": {
     "strict": true,
     "lib": ["deno.window"]
-  }
+  },
+  "unstable": ["sloppy-imports"]
 }

@@ -1,4 +1,4 @@
-import { ApiError, type ApiClient } from "../client.ts";
+import { ApiError, type ApiClient } from "../client";
 import {
   type AnnounceableEvent,
   type EventRow,
@@ -6,7 +6,7 @@ import {
   parseAnnounceable,
   parseEvent,
   parseParticipant,
-} from "../types/bot.ts";
+} from "../types/bot";
 
 const PREFIX = "/api/internal/bot";
 

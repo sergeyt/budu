@@ -1,4 +1,4 @@
-import type { ApiClient } from "../client.ts";
+import type { ApiClient } from "../client";
 import type {
   AnnouncementRef,
   BotPlace,
@@ -9,7 +9,7 @@ import type {
   RegisterOutcome,
   TelegramChannel,
   TemplateRow,
-} from "../types/bot.ts";
+} from "../types/bot";
 
 const PREFIX = "/api/internal/bot";
 
