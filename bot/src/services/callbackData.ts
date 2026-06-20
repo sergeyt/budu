@@ -6,8 +6,8 @@ import { loadConfig } from "@/config.ts";
  * channel message can't be forged to target arbitrary events.
  *
  * Wire format: `v1|<action>|<eventId>|<sig>` where:
- *   - action ∈ {reg, can, wai}  (3 chars; "reg"=register, "can"=cancel,
- *                                "wai"=join-waitlist explicitly)
+ *   - action ∈ {reg, can, wai, list}  (reg=register, can=cancel,
+ *                                wai=join-waitlist, list=full list DM)
  *   - eventId is a cuid (25 chars)
  *   - sig is the first 10 base64url chars of HMAC-SHA256("<action>|<eventId>")
  *
@@ -18,7 +18,7 @@ import { loadConfig } from "@/config.ts";
  * skip unknown versions cleanly.
  */
 
-export type Action = "reg" | "can" | "wai";
+export type Action = "reg" | "can" | "wai" | "list";
 
 const VERSION = "v1";
 const SIG_CHARS = 10;
@@ -89,7 +89,10 @@ export async function decodeCallbackData(
   if (parts.length !== 4) return { ok: false, error: "malformed" };
   const [version, action, eventId, sig] = parts;
   if (version !== VERSION) return { ok: false, error: "unsupported version" };
-  if (action !== "reg" && action !== "can" && action !== "wai") {
+  if (
+    action !== "reg" && action !== "can" && action !== "wai" &&
+    action !== "list"
+  ) {
     return { ok: false, error: "unknown action" };
   }
   if (!eventId) return { ok: false, error: "missing eventId" };

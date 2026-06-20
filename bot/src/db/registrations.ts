@@ -4,11 +4,15 @@ import {
   decideRegistrationStatus,
   shouldPromoteFromWaitlist,
 } from "@/services/capacity.ts";
+import { canRegisterNow } from "@/services/registrationWindow.ts";
 
 export type RegisterOutcome =
   | { ok: true; status: "CONFIRMED" | "RESERVED"; alreadyRegistered: false }
   | { ok: true; status: "CONFIRMED" | "RESERVED"; alreadyRegistered: true }
-  | { ok: false; reason: "FULL" | "EVENT_NOT_FOUND" };
+  | {
+    ok: false;
+    reason: "FULL" | "EVENT_NOT_FOUND" | "WINDOW_CLOSED";
+  };
 
 /**
  * Register `userId` for `eventId` under a Postgres advisory transaction lock
@@ -44,9 +48,13 @@ export async function registerUserForEvent(
     }
 
     const evRows = await tx<
-      { capacity: number | null; reserveCapacity: number | null }[]
+      {
+        capacity: number | null;
+        reserveCapacity: number | null;
+        startAt: Date;
+      }[]
     >`
-      SELECT capacity, "reserveCapacity"
+      SELECT capacity, "reserveCapacity", "startAt"
       FROM "Event"
       WHERE id = ${eventId}
       LIMIT 1
@@ -55,6 +63,9 @@ export async function registerUserForEvent(
       return { ok: false, reason: "EVENT_NOT_FOUND" } as const;
     }
     const ev = evRows[0];
+    if (!canRegisterNow(ev.startAt)) {
+      return { ok: false, reason: "WINDOW_CLOSED" } as const;
+    }
 
     const [{ count: confirmedCount }] = await tx<{ count: number }[]>`
       SELECT COUNT(*)::int AS count FROM "Registration"

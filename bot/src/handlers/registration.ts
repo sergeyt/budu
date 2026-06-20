@@ -5,23 +5,41 @@ import {
   cancelRegistration,
   registerUserForEvent,
 } from "@/db/registrations.ts";
-import { refreshAnnouncements } from "@/services/announce.ts";
+import {
+  buildFullListMessage,
+  scheduleAnnouncementRefresh,
+} from "@/services/announce.ts";
 
-/**
- * Tap on a Register / Cancel / Waitlist button under a live announcement
- * message. Inline-keyboard callbacks come from `callback_query.data` —
- * we decode + verify HMAC, run the FSM, edit the message in place.
- */
 export function handleCallbackQuery(bot: Bot) {
   return async (ctx: Context): Promise<void> => {
     const cb = ctx.callbackQuery;
-    if (!cb?.data) return;
+    if (!cb?.data) {
+      return;
+    }
     const decoded = await decodeCallbackData(cb.data);
     if (!decoded.ok) {
       await ctx.answerCallbackQuery({
         text: `Кнопка устарела (${decoded.error})`,
         show_alert: false,
       });
+      return;
+    }
+
+    if (decoded.action === "list") {
+      const text = await buildFullListMessage(decoded.eventId);
+      try {
+        await bot.api.sendMessage(cb.from.id, text, {
+          parse_mode: "HTML",
+          link_preview_options: { is_disabled: true },
+        });
+        await ctx.answerCallbackQuery();
+      } catch (err) {
+        console.error("[registration] full list DM failed", err);
+        await ctx.answerCallbackQuery({
+          text: "Не удалось отправить список в личку. Напишите боту /start.",
+          show_alert: true,
+        });
+      }
       return;
     }
 
@@ -33,15 +51,12 @@ export function handleCallbackQuery(bot: Bot) {
 
     const reply = await runAction(decoded.action, decoded.eventId, user.id);
     await ctx.answerCallbackQuery({ text: reply.toast });
-    // Fire-and-forget; we already answered the user.
-    void refreshAnnouncements(bot, decoded.eventId).catch((err) => {
-      console.error("[announce] refresh failed", err);
-    });
+    scheduleAnnouncementRefresh(bot, decoded.eventId);
   };
 }
 
 async function runAction(
-  action: Action,
+  action: Exclude<Action, "list">,
   eventId: string,
   userId: string,
 ): Promise<{ toast: string }> {
@@ -50,6 +65,11 @@ async function runAction(
     case "wai": {
       const out = await registerUserForEvent(eventId, userId);
       if (!out.ok) {
+        if (out.reason === "WINDOW_CLOSED") {
+          return {
+            toast: "Запись открывается за 24ч до начала и закрывается в старт",
+          };
+        }
         return {
           toast: out.reason === "FULL"
             ? "Все места и резерв заняты"

@@ -15,18 +15,11 @@ import {
 
 const PARTICIPANT_LIST_LIMIT = 12;
 
-/**
- * Re-renders are gated to once per this many ms per (event, chat) to stay
- * well under Telegram's per-chat edit rate limit (~1/s). A trailing edit is
- * always coalesced via lastSignature comparison so we don't drop updates.
- */
+/** Stay under Telegram's ~1 edit/sec per chat flood limit. */
 const EDIT_DEBOUNCE_MS = 5_000;
 
-/**
- * Stable signature of the rendered announcement state. If this matches
- * what's already on Telegram we skip the editMessageText call entirely
- * (Telegram would 400 with "message is not modified" anyway).
- */
+const pendingRefreshes = new Map<string, ReturnType<typeof setTimeout>>();
+
 function signature(
   event: EventRow,
   participants: ParticipantRow[],
@@ -56,27 +49,61 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function renderText(event: EventRow, participants: ParticipantRow[]): string {
-  const confirmed = participants.filter((p) => p.status === "CONFIRMED");
-  const reserved = participants.filter((p) => p.status === "RESERVED");
-
-  // Format: 🏓 <title> — <place> — <when>
-  // Then confirmed list (up to LIMIT), then waitlist (up to LIMIT), then
-  // a "+N more" tail per list.
-  const when = event.startAt.toLocaleString("ru-RU", {
+function formatWhen(event: EventRow): string {
+  return event.startAt.toLocaleString("ru-RU", {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "Europe/Moscow",
+    timeZone: event.placeTimezone,
   });
+}
+
+export function renderParticipantList(
+  participants: ParticipantRow[],
+  opts: { limit?: number } = {},
+): string {
+  const limit = opts.limit ?? PARTICIPANT_LIST_LIMIT;
+  const confirmed = participants.filter((p) => p.status === "CONFIRMED");
+  const reserved = participants.filter((p) => p.status === "RESERVED");
+
+  const lines: string[] = [];
+  lines.push(`✅ <b>Идут (${confirmed.length})</b>`);
+  if (confirmed.length === 0) {
+    lines.push("  <i>пока никого</i>");
+  } else {
+    for (const p of confirmed.slice(0, limit)) {
+      lines.push(`  • ${escapeHtml(p.displayName)}`);
+    }
+    if (confirmed.length > limit) {
+      lines.push(`  … и ещё ${confirmed.length - limit}`);
+    }
+  }
+
+  if (reserved.length > 0) {
+    lines.push("");
+    lines.push(`⏳ <b>Резерв (${reserved.length})</b>`);
+    for (const p of reserved.slice(0, limit)) {
+      lines.push(`  • ${escapeHtml(p.displayName)}`);
+    }
+    if (reserved.length > limit) {
+      lines.push(`  … и ещё ${reserved.length - limit}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function renderText(event: EventRow, participants: ParticipantRow[]): string {
+  const confirmed = participants.filter((p) => p.status === "CONFIRMED");
+  const reserved = participants.filter((p) => p.status === "RESERVED");
 
   const lines: string[] = [];
   lines.push(
     `🏓 <b>${escapeHtml(event.title)}</b> — ${escapeHtml(event.placeName)}`,
   );
-  lines.push(`🗓 ${when}`);
+  lines.push(`🗓 ${formatWhen(event)}`);
   if (event.capacity != null) {
     lines.push(
       `👥 Мест: ${confirmed.length}/${event.capacity}` +
@@ -87,40 +114,28 @@ function renderText(event: EventRow, participants: ParticipantRow[]): string {
   }
 
   lines.push("");
-  lines.push(`✅ <b>Идут (${confirmed.length})</b>`);
-  if (confirmed.length === 0) {
-    lines.push("  <i>пока никого</i>");
-  } else {
-    const head = confirmed.slice(0, PARTICIPANT_LIST_LIMIT);
-    for (const p of head) lines.push(`  • ${escapeHtml(p.displayName)}`);
-    if (confirmed.length > head.length) {
-      lines.push(`  … и ещё ${confirmed.length - head.length}`);
-    }
-  }
-
-  if (reserved.length > 0) {
-    lines.push("");
-    lines.push(`⏳ <b>Резерв (${reserved.length})</b>`);
-    const head = reserved.slice(0, PARTICIPANT_LIST_LIMIT);
-    for (const p of head) lines.push(`  • ${escapeHtml(p.displayName)}`);
-    if (reserved.length > head.length) {
-      lines.push(`  … и ещё ${reserved.length - head.length}`);
-    }
-  }
-
+  lines.push(renderParticipantList(participants));
   return lines.join("\n");
 }
 
 async function buildKeyboard(eventId: string): Promise<InlineKeyboardMarkup> {
-  const [reg, can] = await Promise.all([
+  const [reg, wai, can, list] = await Promise.all([
     encodeCallbackData("reg", eventId),
+    encodeCallbackData("wai", eventId),
     encodeCallbackData("can", eventId),
+    encodeCallbackData("list", eventId),
   ]);
   return {
-    inline_keyboard: [[
-      { text: "✅ Я иду", callback_data: reg },
-      { text: "❌ Отмена", callback_data: can },
-    ]],
+    inline_keyboard: [
+      [
+        { text: "✅ Я иду", callback_data: reg },
+        { text: "⏳ Резерв", callback_data: wai },
+      ],
+      [
+        { text: "❌ Отмена", callback_data: can },
+        { text: "📋 Список", callback_data: list },
+      ],
+    ],
   };
 }
 
@@ -141,10 +156,6 @@ export async function buildAnnouncement(
   };
 }
 
-/**
- * Post a brand-new announcement to `chatId` and remember the message id
- * on Event.announcements.
- */
 export async function postAnnouncement(
   bot: Bot,
   event: EventRow,
@@ -167,31 +178,49 @@ export async function postAnnouncement(
 }
 
 /**
- * Re-render every live announcement for `eventId`. Debounced per (event,
- * chat) and short-circuits when the signature hasn't changed.
- *
- * Fire-and-forget from callback handlers — a failed edit shouldn't fail
- * the user's tap.
+ * Coalesce rapid registration taps into one trailing edit ≥5s after the
+ * last change. Signature comparison still skips no-op edits.
  */
+export function scheduleAnnouncementRefresh(
+  bot: Bot,
+  eventId: string,
+): void {
+  const existing = pendingRefreshes.get(eventId);
+  if (existing) {
+    clearTimeout(existing);
+  }
+  pendingRefreshes.set(
+    eventId,
+    setTimeout(() => {
+      pendingRefreshes.delete(eventId);
+      void refreshAnnouncements(bot, eventId).catch((err) => {
+        console.error("[announce] scheduled refresh failed", err);
+      });
+    }, EDIT_DEBOUNCE_MS),
+  );
+}
+
 export async function refreshAnnouncements(
   bot: Bot,
   eventId: string,
 ): Promise<void> {
   const event = await findEventById(eventId);
-  if (!event) return;
+  if (!event) {
+    return;
+  }
   const refs = await getAnnouncements(eventId);
-  if (refs.length === 0) return;
+  if (refs.length === 0) {
+    return;
+  }
 
   const payload = await buildAnnouncement(event);
   const now = Date.now();
 
   await Promise.all(refs.map(async (ref) => {
-    if (ref.lastSignature === payload.signature) return;
+    if (ref.lastSignature === payload.signature) {
+      return;
+    }
     if (now - Date.parse(ref.lastRenderedAt) < EDIT_DEBOUNCE_MS) {
-      // Defer: schedule a single late edit if nothing else fires sooner.
-      // Cheap implementation: just no-op; the next user interaction (or
-      // the future cron tick) will catch up. The bound-then-late edit
-      // pattern is not worth a queue here.
       return;
     }
     try {
@@ -214,4 +243,20 @@ export async function refreshAnnouncements(
       });
     }
   }));
+}
+
+/** Full participant list for the "Список" button (no truncation). */
+export async function buildFullListMessage(eventId: string): Promise<string> {
+  const event = await findEventById(eventId);
+  if (!event) {
+    return "Событие не найдено.";
+  }
+  const participants = await listParticipants(eventId);
+  const lines = [
+    `🏓 <b>${escapeHtml(event.title)}</b>`,
+    `🗓 ${formatWhen(event)}`,
+    "",
+    renderParticipantList(participants, { limit: 500 }),
+  ];
+  return lines.join("\n");
 }

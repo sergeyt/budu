@@ -15,7 +15,7 @@ const { encodeCallbackData, decodeCallbackData } = await import(
 const CUID = "ckxx1234567890abcdefghijk"; // 25-char placeholder
 
 Deno.test("callbackData: round-trip for every action", async () => {
-  for (const action of ["reg", "can", "wai"] as const) {
+  for (const action of ["reg", "can", "wai", "list"] as const) {
     const data = await encodeCallbackData(action, CUID);
     const decoded = await decodeCallbackData(data);
     assertEquals(decoded, { ok: true, action, eventId: CUID });

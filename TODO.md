@@ -48,16 +48,18 @@ groups via a per-binding flag. Mini App deferred to M4.
       parse bare TIMESTAMP as UTC so the bot reads what Prisma wrote, and
       vice versa. Verified end-to-end against the dev DB.
 
-### M3 — Announcements + user registration
-- [ ] Cron posts announcement at `startAt - announceOffsetMinutes` and stores
-      `(chatId, messageId)` in `Event.announcements`.
-- [ ] Inline keyboard: Register / Waitlist / Cancel / Full list. Signed
-      `callback_data` (HMAC) so old messages can't forge state.
-- [ ] Capacity FSM under `pg_advisory_xact_lock` per event (mirror
-      `lib/locks.ts`).
-- [ ] Re-render announcement on change, debounced to ≥5s per event (Telegram
-      flood limit ≈1 edit/sec per chat).
-- [ ] First-time-user onboarding via deep link `t.me/<bot>?start=ev_<id>`.
+### M3 — Announcements + user registration ✅
+- [x] Cron posts announcement at `startAt - announceOffsetMinutes` and stores
+      `(chatId, messageId)` in `Event.announcements`. Combined tick also runs
+      the M2 materializer. Idempotent per channel via `announcements` JSON.
+- [x] Inline keyboard: Register / Waitlist / Cancel / Full list. Signed
+      `callback_data` (HMAC) — actions `reg`, `wai`, `can`, `list`.
+- [x] Capacity FSM under `pg_advisory_xact_lock` per event (mirror
+      `lib/locks.ts`). Registration window enforced (24h before → start).
+- [x] Re-render announcement on change, debounced ≥5s per event with trailing
+      coalescing via `scheduleAnnouncementRefresh`.
+- [x] First-time-user onboarding via deep link `t.me/<bot>?start=ev_<id>`.
+      Full list DMs the tapper; Mini App deferred to M4.
 
 ### M4 — Polish
 - [ ] Telegram Mini App for "Full list" (Next.js page, `initData` auth).

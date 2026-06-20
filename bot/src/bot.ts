@@ -16,7 +16,7 @@ export function createBot(): Bot {
     });
   });
 
-  bot.command("start", handleStart);
+  bot.command("start", handleStart(bot));
   bot.command("help", handleHelp);
   bot.command("link", handleLink);
   bot.command("unlink", handleUnlink);

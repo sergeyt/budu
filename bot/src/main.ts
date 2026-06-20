@@ -1,13 +1,14 @@
 import { webhookCallback } from "grammy";
 import { loadConfig } from "@/config.ts";
 import { createBot, publishCommands } from "@/bot.ts";
-import { startCron } from "@/cron.ts";
+import { attachBotToCron, startCron } from "@/cron.ts";
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
   const bot = createBot();
   await bot.init();
   await publishCommands(bot);
+  attachBotToCron(bot);
   startCron();
   console.log(`[bot] @${bot.botInfo.username} initialized`);
 
