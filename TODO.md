@@ -1,6 +1,66 @@
 # EXECUTION PLAN
 - [ ] Batumi Podvalchik :)
-  - [ ] need telegram bot
+  - [ ] Telegram bot (grammY on Deno; see plan below)
+
+## Telegram bot — milestones
+
+Stack: Deno 2.x + grammY, same Postgres as the Next app (direct via `postgresjs`),
+Deno Deploy (`Deno.cron` + webhook). Supports both Telegram channels and
+groups via a per-binding flag. Mini App deferred to M4.
+
+### M0 — Prisma migrations (no behavior change)
+- [ ] `EventTemplate`: weekly recurrence (`dayOfWeek`, `localTime`, `timezone`),
+      `durationMinutes`, `capacity`, `reserveCapacity`,
+      `announceOffsetMinutes`, `enabled`, FK `placeId`.
+- [ ] `EventTemplateNotificationChannel` (mirrors place/event channel tables).
+- [ ] `Event.templateId String?` + `@@unique([templateId, startAt])` for
+      idempotent materialization.
+- [ ] `Event.announcements Json?` — `[{ chatId, messageId, lastRenderedAt,
+      lastSignature }]` so we can edit the live announcement, not repost.
+- [ ] `User.telegramUserId BigInt? @unique` + `telegramUsername String?`.
+- [ ] Update `prisma/seed.ts` + integration tests for the new fields.
+
+### M1 — `bot/` Deno project skeleton
+- [ ] `bot/deno.jsonc`, `bot/src/main.ts` (grammY webhook server + cron stub).
+- [ ] `bot/src/db/client.ts` against the same `DATABASE_URL`.
+- [ ] Port `/start`, `/link`, `/unlink` from
+      `app/api/webhook/telegram/route.ts`. Keep the Next route behind
+      `TELEGRAM_WEBHOOK_OWNER=next|bot` until M1 is stable, then delete.
+- [ ] Duplicate `lib/registration.ts` + tests into
+      `bot/src/db/registrations.ts` (extract to shared package later if it
+      drifts).
+- [ ] `bot/README.md` for local dev (ngrok hint, `deno task dev`).
+
+### M2 — Admin templates
+- [ ] Web admin UI: `app/admin/places/[id]/templates` (CRUD) — Chakra forms.
+- [ ] Bot DM `/templates` — read-only listing of templates the user admins.
+- [ ] Cron: materialize `Event` rows from active templates 8 days ahead
+      (idempotent on `(templateId, startAt)`).
+
+### M3 — Announcements + user registration
+- [ ] Cron posts announcement at `startAt - announceOffsetMinutes` and stores
+      `(chatId, messageId)` in `Event.announcements`.
+- [ ] Inline keyboard: Register / Waitlist / Cancel / Full list. Signed
+      `callback_data` (HMAC) so old messages can't forge state.
+- [ ] Capacity FSM under `pg_advisory_xact_lock` per event (mirror
+      `lib/locks.ts`).
+- [ ] Re-render announcement on change, debounced to ≥5s per event (Telegram
+      flood limit ≈1 edit/sec per chat).
+- [ ] First-time-user onboarding via deep link `t.me/<bot>?start=ev_<id>`.
+
+### M4 — Polish
+- [ ] Telegram Mini App for "Full list" (Next.js page, `initData` auth).
+- [ ] Bot DM template wizard (`grammy-conversations`).
+- [ ] Per-template channel overrides (`EventTemplateNotificationChannel`).
+- [ ] ru/en i18n in bot text (mirror `messages/`).
+- [ ] Sentry-Deno integration.
+
+### Open notes
+- Channel posting requires bot to be added as channel admin with
+  **Post Messages** + **Edit Messages** rights — document in onboarding text.
+- Time zones: templates store IANA `timezone` + `localTime`; materialization
+  converts to UTC `startAt`. Deno side will use `Temporal` (or
+  `date-fns-tz` via `npm:`).
 
 # DOCS
 - [ ] improve readme:

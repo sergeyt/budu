@@ -102,6 +102,51 @@ async function main() {
       update: game,
     });
   }
+
+  // Sample weekly templates so the bot has something to materialize /
+  // announce. Idempotent: looked up by (placeId, title). Timezone is
+  // inherited from `Place.timezone` (defaults to Europe/Moscow).
+  //
+  // `localTime` is a Postgres TIME(0) — Prisma wants a Date whose
+  // *time-of-day* is what matters. We build it as a UTC date so the local
+  // clock of whoever runs the seed doesn't shift the hour.
+  const time = (hhmm: string) => new Date(`1970-01-01T${hhmm}:00.000Z`);
+
+  const templates = [
+    {
+      placeId: crnt.id,
+      title: "Лесенка (еженедельно)",
+      dayOfWeek: 3, // Wednesday
+      localTime: time("19:00"),
+      capacity: 24,
+      reserveCapacity: 6,
+      announceOffsetMinutes: 24 * 60,
+    },
+    {
+      placeId: dagomys.id,
+      title: "Утренняя Заря (еженедельно)",
+      dayOfWeek: 6, // Saturday
+      localTime: time("10:00"),
+      capacity: 4,
+      reserveCapacity: 2,
+      announceOffsetMinutes: 12 * 60,
+    },
+  ];
+
+  for (const tpl of templates) {
+    const existing = await prisma.eventTemplate.findFirst({
+      where: { placeId: tpl.placeId, title: tpl.title },
+      select: { id: true },
+    });
+    if (existing) {
+      await prisma.eventTemplate.update({
+        where: { id: existing.id },
+        data: tpl,
+      });
+    } else {
+      await prisma.eventTemplate.create({ data: tpl });
+    }
+  }
 }
 
 main().then(() => prisma.$disconnect());

@@ -17,19 +17,25 @@ enum UserRole {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  name           String?
-  email          String?        @unique
-  emailVerified  DateTime?
-  image          String?
-  rttfProfileUrl String?
-  role           UserRole       @default(USER)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @default(now()) @updatedAt
-  accounts       Account[]
-  sessions       Session[]
-  registrations  Registration[]
-  adminPlaces    PlaceAdmin[]
+  id                String         @id @default(cuid())
+  name              String?
+  email             String?        @unique
+  emailVerified     DateTime?
+  image             String?
+  rttfProfileUrl    String?
+  role              UserRole       @default(USER)
+  // Populated when the user registers via the Telegram bot (or links their
+  // web account through the bot). Bot-only users have a User row with all
+  // OAuth fields null and telegramUserId set.
+  telegramUserId    BigInt?        @unique
+  telegramUsername  String?
+  telegramFirstName String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now()) @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  registrations     Registration[]
+  adminPlaces       PlaceAdmin[]
 }
 
 model Account {
@@ -66,9 +72,15 @@ model Place {
   location    String?
   description String?
   infoUrl     String?
+  // IANA timezone for the place's physical location (e.g. "Europe/Moscow",
+  // "Asia/Tbilisi"). Event templates inherit this when materializing into
+  // concrete UTC `Event.startAt` instants. Stored on Place (not template)
+  // because a place has one location and thus one canonical zone.
+  timezone    String                     @default("Europe/Moscow")
   createdAt   DateTime                   @default(now())
   updatedAt   DateTime                   @default(now()) @updatedAt
   events      Event[]
+  templates   EventTemplate[]
   admins      PlaceAdmin[]
   // default channels under for all events for this place
   channels    PlaceNotificationChannel[]
@@ -97,6 +109,16 @@ model Event {
   durationMinutes Int?                       @default(60)
   placeId         String
   place           Place                      @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  // Set when an event was materialized from a recurring template.
+  // SetNull (not Cascade) so deleting a template doesn't wipe history.
+  templateId      String?
+  template        EventTemplate?             @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  // Records every live announcement posted for this event so the bot can
+  // edit the same message instead of reposting. Shape:
+  //   [{ chatId: string, messageId: number, lastRenderedAt: string,
+  //      lastSignature: string }]
+  // chatId is stored as string to keep big chat ids out of JSON number land.
+  announcements   Json?
   createdAt       DateTime                   @default(now())
   updatedAt       DateTime                   @default(now()) @updatedAt
   capacity        Int?
@@ -104,7 +126,62 @@ model Event {
   regs            Registration[]
   channels        EventNotificationChannel[] // overrides/additions specific to this event
 
+  @@unique([templateId, startAt])
   @@index([placeId, startAt])
+}
+
+/// Weekly recurring "show" run by a place. A scheduler materializes one
+/// `Event` row per occurrence ahead of time and the bot posts an
+/// announcement to the configured channels at `startAt -
+/// announceOffsetMinutes`.
+///
+/// Time is decomposed into (dayOfWeek, localTime, place.timezone). The
+/// materializer converts that to a UTC `Event.startAt`; the timezone
+/// lives on Place rather than here so all templates at one venue share
+/// it and admins can't typo it per-template.
+model EventTemplate {
+  id                    String                             @id @default(cuid())
+  placeId               String
+  place                 Place                              @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  title                 String
+  description           String?
+  infoUrl               String?
+  // ISO weekday: 1 = Monday … 7 = Sunday (matches Luxon's `weekday`).
+  dayOfWeek             Int
+  // Local time of day in `place.timezone`. Postgres TIME(0) rejects
+  // invalid values at insert; Prisma surfaces it as a Date whose date
+  // portion is the epoch — extract HH:MM:SS at the materializer.
+  localTime             DateTime                           @db.Time(0)
+  durationMinutes       Int?                               @default(60)
+  capacity              Int?
+  reserveCapacity       Int?
+  // How many minutes before startAt to post the announcement.
+  // Default 24h. 0 = post immediately on materialization.
+  announceOffsetMinutes Int                                @default(1440)
+  enabled               Boolean                            @default(true)
+  createdAt             DateTime                           @default(now())
+  updatedAt             DateTime                           @default(now()) @updatedAt
+  events                Event[]
+  // Per-template overrides; otherwise the bot falls back to the place's
+  // channels via the same precedence rule used at event level.
+  channels              EventTemplateNotificationChannel[]
+
+  @@index([placeId, enabled])
+}
+
+model EventTemplateNotificationChannel {
+  id         String                  @id @default(cuid())
+  templateId String
+  template   EventTemplate           @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  type       NotificationChannelType
+  target     String
+  meta       Json?
+  label      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([templateId, type, target])
 }
 
 model Registration {
