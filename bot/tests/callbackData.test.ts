@@ -4,7 +4,6 @@ Deno.env.set("TELEGRAM_LINK_SECRET", "test-link-secret");
 Deno.env.set("TELEGRAM_BOT_TOKEN", "test-token-0000000000");
 Deno.env.set("API_BASE_URL", "http://localhost:3000");
 Deno.env.set("BOT_INTERNAL_TOKEN", "test-internal-token-00000000");
-Deno.env.set("TELEGRAM_CALLBACK_SECRET", "test-callback-secret");
 
 const { encodeCallbackData, decodeCallbackData } = await import(
   "../src/services/callbackData.ts"

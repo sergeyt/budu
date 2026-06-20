@@ -70,7 +70,7 @@ Bot: `cd bot && deno task dev` · `deno task test` · `deno task check`
 | --- | --- |
 | [docs/telegram.md](./docs/telegram.md) | Bot, announcements, Mini App, link flow |
 | [docs/testing.md](./docs/testing.md) | Unit vs integration tests, local Postgres |
-| [bot/README.md](./bot/README.md) | Bot env, internal API routes, webhook mode |
+| [bot/README.md](./bot/README.md) | Bot env, internal API routes, Fly.io deploy |
 | [AGENTS.md](./AGENTS.md) | Conventions for AI agents |
 | [CODEREVIEW.md](./CODEREVIEW.md) | Code review checklist |
 | [TODO.md](./TODO.md) | Milestones and backlog |

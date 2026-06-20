@@ -94,7 +94,9 @@ export async function handleTemplates(ctx: Context): Promise<void> {
     }).slice(0, 3);
     if (occs.length > 0) {
       lines.push(
-        `   ↳ ${occs.map((o) => formatNext(o, t.placeTimezone, fmtLocale)).join(" · ")}`,
+        `   ↳ ${
+          occs.map((o) => formatNext(o, t.placeTimezone, fmtLocale)).join(" · ")
+        }`,
       );
     }
   }

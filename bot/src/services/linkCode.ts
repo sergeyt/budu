@@ -2,7 +2,8 @@ import { loadConfig } from "@/config.ts";
 
 /**
  * Port of lib/telegramLinkCode.ts using Web Crypto. Codes minted by the
- * Next app verify here as long as TELEGRAM_LINK_SECRET matches.
+ * Next app verify here as long as TELEGRAM_LINK_SECRET matches. The same
+ * secret signs inline-keyboard callback_data (see callbackData.ts).
  *
  * Format: `<base64url(payload)>.<base64url(HMAC-SHA256(payload))>` where
  * payload is `{"placeId":"...","exp":<unix-seconds>}`.

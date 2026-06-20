@@ -1,5 +1,5 @@
 import { ApiClient, ApiError } from "@budu/api-client";
-import { createBotApi, type BotApi } from "@budu/api-client/bot";
+import { type BotApi, createBotApi } from "@budu/api-client/bot";
 import { loadConfig } from "@/config.ts";
 
 export { ApiError };

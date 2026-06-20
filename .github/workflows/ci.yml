@@ -54,6 +54,34 @@ jobs:
       - name: build
         run: pnpm build
 
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: bot
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: setup deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: fmt
+        run: deno fmt --check src/ tests/
+
+      - name: lint
+        run: deno lint
+
+      - name: typecheck
+        run: deno check --allow-import --unstable-sloppy-imports src/main.ts
+
+      - name: test
+        run: deno test --allow-env --allow-net --allow-read --allow-import --unstable-sloppy-imports
+
   integration_tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15

@@ -1,6 +1,6 @@
 import type { Bot } from "grammy";
 import type { BotContext } from "@/context.ts";
-import { api, type AnnounceableEvent } from "@/api/client.ts";
+import { type AnnounceableEvent, api } from "@/api/client.ts";
 import { postAnnouncement } from "@/services/announce.ts";
 
 export type AnnounceSchedulerResult = {

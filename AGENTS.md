@@ -146,8 +146,10 @@ See `README.md`, `bot/README.md`, and `TODO.md` for milestones and env vars.
 
 Separate Deno project; excluded from root `tsconfig.json` and Biome.
 
-- Entry: `bot/src/main.ts` — polling locally, webhook in prod.
+- Entry: `bot/src/main.ts` — long-polling when `BOT_PUBLIC_URL` unset; webhook
+  auto-registered on startup when set.
 - Config: `bot/src/config.ts` — reads `bot/.env` (+ parent `.env` in dev).
+- Fly.io: `bot/fly.toml`, `bot/Dockerfile`, [`bot/DEPLOY.md`](bot/DEPLOY.md).
 - HTTP client: `bot/src/api/*` → `/api/internal/bot/*`.
 - Handlers: `bot/src/handlers/*`; Telegram-facing logic in
   `bot/src/services/*`.

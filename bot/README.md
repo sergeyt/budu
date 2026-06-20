@@ -88,17 +88,33 @@ Public Mini App API (Telegram `initData`, not bot token):
 
 Business logic lives in `lib/bot/*` on the Next side (Prisma + advisory locks).
 
-## Webhook mode (prod / Deno Deploy)
+## Production (Fly.io)
+
+Recommended: Docker on [Fly.io](./DEPLOY.md). Polling by default — no public
+URL until you opt into webhooks.
 
 ```bash
-BOT_MODE=webhook
-WEBHOOK_URL=https://your-host.example
-WEBHOOK_SECRET=long-random-string
-API_BASE_URL=https://your-next-app.example
-WEB_APP_BASE_URL=https://your-next-app.example
-BOT_INTERNAL_TOKEN=...
-deno task start
+# once: fly apps create budu-bot && fly secrets set …
+fly deploy --config bot/fly.toml
 ```
+
+Secrets (`TELEGRAM_BOT_TOKEN`, `BOT_INTERNAL_TOKEN`, `TELEGRAM_LINK_SECRET`,
+`API_BASE_URL`, `WEB_APP_BASE_URL`) must match the Next app on Vercel. See
+[`DEPLOY.md`](./DEPLOY.md) for the full checklist and GitHub Actions setup.
+
+### Webhook on Fly (optional)
+
+```bash
+fly secrets set BOT_PUBLIC_URL=https://budu-bot.fly.dev -a budu-bot
+# uncomment [http_service] in fly.toml, redeploy
+```
+
+Telegram receives `POST {BOT_PUBLIC_URL}/webhook` (auto-registered on startup).
+
+### Deno Deploy (alternative)
+
+Same env vars; set `BOT_PUBLIC_URL` to your Deno Deploy URL and use
+`deno task start`.
 
 ## Tests
 
@@ -122,7 +138,7 @@ Manual E2E checklist: [`../docs/bot-test-plan.md`](../docs/bot-test-plan.md).
 
 ```
 src/
-  main.ts              # polling or webhook server (+ optional Sentry)
+  main.ts              # polling (default) or webhook when BOT_PUBLIC_URL is set
   cron.ts              # materialize + announce tick (via API)
   config.ts            # API_BASE_URL, BOT_INTERNAL_TOKEN, WEB_APP_BASE_URL, …
   i18n.ts              # ru/en string lookup

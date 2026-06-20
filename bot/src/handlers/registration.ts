@@ -47,7 +47,12 @@ export function handleCallbackQuery(bot: Bot<BotContext>) {
       firstName: from.first_name,
     });
 
-    const reply = await runAction(ctx, decoded.action, decoded.eventId, user.id);
+    const reply = await runAction(
+      ctx,
+      decoded.action,
+      decoded.eventId,
+      user.id,
+    );
     await ctx.answerCallbackQuery({ text: reply.toast });
     scheduleAnnouncementRefresh(bot, decoded.eventId);
   };

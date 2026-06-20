@@ -3,10 +3,10 @@ import type { BotContext } from "@/context.ts";
 import type { InlineKeyboardMarkup } from "grammy/types";
 import { encodeCallbackData } from "@/services/callbackData.ts";
 import { webAppBaseUrl } from "@/config.ts";
-import { t, type Locale } from "@/i18n.ts";
+import { type Locale, t } from "@/i18n.ts";
 import {
-  api,
   type AnnouncementRef,
+  api,
   type EventRow,
   type ParticipantRow,
 } from "@/api/client.ts";
