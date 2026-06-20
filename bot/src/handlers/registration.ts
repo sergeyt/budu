@@ -1,11 +1,7 @@
 import type { Bot, Context } from "grammy";
 import type { BotContext } from "@/context.ts";
+import { api } from "@/api/client.ts";
 import { type Action, decodeCallbackData } from "@/services/callbackData.ts";
-import { findOrCreateTelegramUser } from "@/api/users.ts";
-import {
-  cancelRegistration,
-  registerUserForEvent,
-} from "@/api/announcements.ts";
 import {
   buildFullListMessage,
   scheduleAnnouncementRefresh,
@@ -46,7 +42,7 @@ export function handleCallbackQuery(bot: Bot<BotContext>) {
     }
 
     const from = cb.from;
-    const user = await findOrCreateTelegramUser(from.id, {
+    const user = await api.users.findOrCreateTelegram(from.id, {
       username: from.username,
       firstName: from.first_name,
     });
@@ -66,7 +62,7 @@ async function runAction(
   switch (action) {
     case "reg":
     case "wai": {
-      const out = await registerUserForEvent(eventId, userId);
+      const out = await api.announcements.register(eventId, userId);
       if (!out.ok) {
         if (out.reason === "WINDOW_CLOSED") {
           return { toast: tr(ctx, "registration.window_closed") };
@@ -91,7 +87,7 @@ async function runAction(
       };
     }
     case "can": {
-      const out = await cancelRegistration(eventId, userId);
+      const out = await api.announcements.cancel(eventId, userId);
       return {
         toast: out.unregistered
           ? out.promotedUserId

@@ -1,5 +1,5 @@
 import type { Context } from "grammy";
-import { listTemplatesForChat } from "@/api/templates.ts";
+import { api } from "@/api/client.ts";
 import {
   localTimeToDate,
   nextOccurrencesUtc,
@@ -47,7 +47,7 @@ export async function handleTemplates(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!chatId) return;
 
-  const rows = await listTemplatesForChat(chatId);
+  const rows = await api.templates.listByChat(chatId);
   if (rows.length === 0) {
     await ctx.reply(tr(ctx, "templates.empty"), { parse_mode: "HTML" });
     return;

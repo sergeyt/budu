@@ -4,9 +4,7 @@ import {
   conversations,
   createConversation,
 } from "@grammyjs/conversations";
-import { createTemplateForAdmin, listAdminPlaces } from "@/api/admin.ts";
-import type { Place } from "@/api/types.ts";
-import { findOrCreateTelegramUser } from "@/api/users.ts";
+import { api, type BotPlace } from "@/api/client.ts";
 import type { BotContext } from "@/context.ts";
 import { tr } from "@/i18n.ts";
 
@@ -35,21 +33,21 @@ async function newTemplateConversation(
   }
 
   await conversation.external(() =>
-    findOrCreateTelegramUser(from.id, {
+    api.users.findOrCreateTelegram(from.id, {
       username: from.username,
       firstName: from.first_name,
     })
   );
 
   const places = await conversation.external(() =>
-    listAdminPlaces(from.id)
+    api.admin.listPlaces(from.id)
   );
   if (places.length === 0) {
     await ctx.reply(tr(ctx, "wizard.no_places"));
     return;
   }
 
-  const lines = places.map((p: Place, i: number) => `${i + 1}. ${p.name}`);
+  const lines = places.map((p: BotPlace, i: number) => `${i + 1}. ${p.name}`);
   await ctx.reply(`${tr(ctx, "wizard.pick_place")}\n\n${lines.join("\n")}`);
 
   const pickRaw = await readText(conversation);
@@ -110,7 +108,7 @@ async function newTemplateConversation(
   }
 
   const created = await conversation.external(() =>
-    createTemplateForAdmin(place.id, from.id, {
+    api.admin.createTemplate(place.id, from.id, {
       title,
       dayOfWeek,
       localTime,

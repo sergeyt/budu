@@ -5,16 +5,11 @@ import { encodeCallbackData } from "@/services/callbackData.ts";
 import { webAppBaseUrl } from "@/config.ts";
 import { t, type Locale } from "@/i18n.ts";
 import {
-  type EventRow,
-  findEventById,
-  listParticipants,
-  type ParticipantRow,
-} from "@/api/events.ts";
-import {
+  api,
   type AnnouncementRef,
-  getAnnouncements,
-  upsertAnnouncement,
-} from "@/api/announcements.ts";
+  type EventRow,
+  type ParticipantRow,
+} from "@/api/client.ts";
 
 const PARTICIPANT_LIST_LIMIT = 12;
 
@@ -154,7 +149,7 @@ export type AnnouncePayload = {
 export async function buildAnnouncement(
   event: EventRow,
 ): Promise<AnnouncePayload> {
-  const participants = await listParticipants(event.id);
+  const participants = await api.events.listParticipants(event.id);
   return {
     text: renderText(event, participants),
     reply_markup: await buildKeyboard(event.id),
@@ -179,7 +174,7 @@ export async function postAnnouncement(
     lastRenderedAt: new Date().toISOString(),
     lastSignature: payload.signature,
   };
-  await upsertAnnouncement(event.id, ref);
+  await api.announcements.upsert(event.id, ref);
   return ref;
 }
 
@@ -210,11 +205,11 @@ export async function refreshAnnouncements(
   bot: Bot<BotContext>,
   eventId: string,
 ): Promise<void> {
-  const event = await findEventById(eventId);
+  const event = await api.events.findById(eventId);
   if (!event) {
     return;
   }
-  const refs = await getAnnouncements(eventId);
+  const refs = await api.announcements.list(eventId);
   if (refs.length === 0) {
     return;
   }
@@ -235,7 +230,7 @@ export async function refreshAnnouncements(
         reply_markup: payload.reply_markup,
         link_preview_options: { is_disabled: true },
       });
-      await upsertAnnouncement(eventId, {
+      await api.announcements.upsert(eventId, {
         ...ref,
         lastRenderedAt: new Date().toISOString(),
         lastSignature: payload.signature,
@@ -253,11 +248,11 @@ export async function refreshAnnouncements(
 
 /** Full participant list for the "Список" button (no truncation). */
 export async function buildFullListMessage(eventId: string): Promise<string> {
-  const event = await findEventById(eventId);
+  const event = await api.events.findById(eventId);
   if (!event) {
     return "Событие не найдено.";
   }
-  const participants = await listParticipants(eventId);
+  const participants = await api.events.listParticipants(eventId);
   const lines = [
     `🏓 <b>${escapeHtml(event.title)}</b>`,
     `🗓 ${formatWhen(event)}`,

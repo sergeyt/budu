@@ -1,10 +1,6 @@
 import type { Bot } from "grammy";
 import type { BotContext } from "@/context.ts";
-import { listTelegramChannelsForEvent } from "@/api/channels.ts";
-import {
-  type AnnounceableEvent,
-  listEventsDueForAnnouncement,
-} from "@/api/events.ts";
+import { api, type AnnounceableEvent } from "@/api/client.ts";
 import { postAnnouncement } from "@/services/announce.ts";
 
 export type AnnounceSchedulerResult = {
@@ -28,7 +24,7 @@ export async function postDueAnnouncements(
   bot: Bot<BotContext>,
   now: Date = new Date(),
 ): Promise<AnnounceSchedulerResult> {
-  const due = await listEventsDueForAnnouncement(now);
+  const due = await api.events.listDueForAnnouncement(now);
   const result: AnnounceSchedulerResult = {
     scanned: due.length,
     posted: 0,
@@ -37,7 +33,7 @@ export async function postDueAnnouncements(
   };
 
   for (const event of due) {
-    const channels = await listTelegramChannelsForEvent(event.id);
+    const channels = await api.channels.listTelegramForEvent(event.id);
     if (channels.length === 0) {
       continue;
     }

@@ -1,10 +1,6 @@
 import type { Context } from "grammy";
 import { verifyLinkCode } from "@/services/linkCode.ts";
-import {
-  findPlaceById,
-  linkTelegramChatToPlace,
-  unlinkTelegramChatFromPlace,
-} from "@/api/places.ts";
+import { api } from "@/api/client.ts";
 import { tr } from "@/i18n.ts";
 
 function extractCode(text: string | undefined): string | null {
@@ -29,7 +25,7 @@ export async function handleLink(ctx: Context): Promise<void> {
     return;
   }
 
-  const place = await findPlaceById(verified.placeId);
+  const place = await api.places.findById(verified.placeId);
   if (!place) {
     await ctx.reply(
       tr(ctx, "link.place_not_found", { placeId: verified.placeId }),
@@ -39,7 +35,7 @@ export async function handleLink(ctx: Context): Promise<void> {
 
   const label = ctx.chat?.type === "private" ? "Owner DM" : ctx.chat?.title ??
     null;
-  await linkTelegramChatToPlace(place.id, chatId, label);
+  await api.places.linkTelegram(place.id, chatId, label);
 
   await ctx.reply(
     tr(ctx, "link.success", { name: place.name, placeId: place.id }),
@@ -62,7 +58,7 @@ export async function handleUnlink(ctx: Context): Promise<void> {
     return;
   }
 
-  const place = await findPlaceById(verified.placeId);
+  const place = await api.places.findById(verified.placeId);
   if (!place) {
     await ctx.reply(
       tr(ctx, "unlink.place_not_found", { placeId: verified.placeId }),
@@ -70,7 +66,7 @@ export async function handleUnlink(ctx: Context): Promise<void> {
     return;
   }
 
-  const removed = await unlinkTelegramChatFromPlace(place.id, chatId);
+  const removed = await api.places.unlinkTelegram(place.id, chatId);
   await ctx.reply(
     removed
       ? tr(ctx, "unlink.success", { name: place.name })

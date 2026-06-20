@@ -1,52 +1,43 @@
+import { ApiClient, ApiError } from "@budu/api-client";
+import { createBotApi, type BotApi } from "@budu/api-client/bot";
 import { loadConfig } from "@/config.ts";
 
-type HttpInit = Omit<RequestInit, "body"> & { body?: unknown };
+export { ApiError };
+export type {
+  AnnounceableEvent,
+  AnnouncementRef,
+  BotPlace,
+  BotUser,
+  CancelOutcome,
+  CreateTemplateBody,
+  EventRow,
+  MaterializeResult,
+  ParticipantRow,
+  RegisterOutcome,
+  TelegramChannel,
+  TemplateRow,
+} from "@budu/api-client/bot";
 
-export class ApiError extends Error {
-  readonly status: number;
-  readonly code?: string;
+let cachedClient: ApiClient | undefined;
+let cachedApi: BotApi | undefined;
 
-  constructor(status: number, message: string, code?: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.code = code;
+export function getApiClient(): ApiClient {
+  if (!cachedClient) {
+    const cfg = loadConfig();
+    cachedClient = new ApiClient({
+      baseUrl: cfg.API_BASE_URL,
+      auth: { kind: "bearer", token: cfg.BOT_INTERNAL_TOKEN },
+    });
   }
+  return cachedClient;
 }
 
-export async function apiFetch<T>(
-  path: string,
-  init: HttpInit = {},
-): Promise<T> {
-  const cfg = loadConfig();
-  const { body, headers, ...rest } = init;
-  const res = await fetch(`${cfg.API_BASE_URL}${path}`, {
-    ...rest,
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${cfg.BOT_INTERNAL_TOKEN}`,
-      ...(headers ?? {}),
-    },
-    ...(body !== undefined && { body: JSON.stringify(body) }),
-  });
-
-  if (!res.ok) {
-    let message = res.statusText;
-    let code: string | undefined;
-    try {
-      const err = (await res.json()) as { error?: string; code?: string };
-      if (err.error) {
-        message = err.error;
-      }
-      code = err.code;
-    } catch {
-      // non-JSON error body
-    }
-    throw new ApiError(res.status, message, code);
+export function getBotApi(): BotApi {
+  if (!cachedApi) {
+    cachedApi = createBotApi(getApiClient());
   }
-
-  if (res.status === 204) {
-    return undefined as T;
-  }
-  return (await res.json()) as T;
+  return cachedApi;
 }
+
+/** Lazy singleton — use `api.places.findById`, `api.events.register`, etc. */
+export const api = getBotApi();

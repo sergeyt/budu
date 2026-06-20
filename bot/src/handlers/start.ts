@@ -1,7 +1,6 @@
 import type { Bot, Context } from "grammy";
 import type { BotContext } from "@/context.ts";
-import { findEventById } from "@/api/events.ts";
-import { findOrCreateTelegramUser } from "@/api/users.ts";
+import { api } from "@/api/client.ts";
 import { buildAnnouncement } from "@/services/announce.ts";
 import { canRegisterNow } from "@/services/registrationWindow.ts";
 import { tr } from "@/i18n.ts";
@@ -38,12 +37,12 @@ async function handleEventDeepLink(
     return false;
   }
 
-  await findOrCreateTelegramUser(from.id, {
+  await api.users.findOrCreateTelegram(from.id, {
     username: from.username,
     firstName: from.first_name,
   });
 
-  const event = await findEventById(eventId);
+  const event = await api.events.findById(eventId);
   if (!event) {
     await ctx.reply(tr(ctx, "start.event_not_found"));
     return true;

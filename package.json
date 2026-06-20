@@ -21,6 +21,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@budu/api-client": "workspace:*",
     "@auth/prisma-adapter": "^2.11.1",
     "@chakra-ui/react": "^3.30.0",
     "@emotion/react": "^11.14.0",

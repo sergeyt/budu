@@ -34,6 +34,7 @@ const securityHeaders: { key: string; value: string }[] = [
 ];
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@budu/api-client"],
   async headers() {
     return [
       {

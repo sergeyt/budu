@@ -1,7 +1,6 @@
 import type { Bot, Context } from "grammy";
 import type { BotContext } from "@/context.ts";
-import { findNextEventForPlace } from "@/api/events.ts";
-import { placesLinkedToChat } from "@/api/places.ts";
+import { api } from "@/api/client.ts";
 import { postAnnouncement } from "@/services/announce.ts";
 import { tr } from "@/i18n.ts";
 
@@ -15,7 +14,7 @@ export function handleAnnounceNext(bot: Bot<BotContext>) {
     const chatId = ctx.chat?.id;
     if (!chatId) return;
 
-    const places = await placesLinkedToChat(chatId);
+    const places = await api.places.listByChat(chatId);
     if (places.length === 0) {
       await ctx.reply(tr(ctx, "announce.not_linked"));
       return;
@@ -23,7 +22,7 @@ export function handleAnnounceNext(bot: Bot<BotContext>) {
 
     let posted = 0;
     for (const place of places) {
-      const event = await findNextEventForPlace(place.id);
+      const event = await api.events.findNext(place.id);
       if (!event) continue;
       await postAnnouncement(bot, event, chatId);
       posted++;

@@ -19,6 +19,9 @@
     "luxon": "npm:luxon@^3.7.2",
     "@types/luxon": "npm:@types/luxon@^3.7.1",
     "zod": "npm:zod@^4.2.1",
+    "@budu/api-client": "../packages/api-client/src/index.ts",
+    "@budu/api-client/web": "../packages/api-client/src/web/index.ts",
+    "@budu/api-client/bot": "../packages/api-client/src/bot/index.ts",
     "@/": "./src/"
   },
   "fmt": {

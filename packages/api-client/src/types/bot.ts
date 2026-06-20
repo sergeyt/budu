@@ -1,4 +1,4 @@
-/** Wire DTOs from the Next internal API (dates as ISO strings). */
+/** Wire DTOs from `/api/internal/bot/*` (dates as ISO strings over HTTP). */
 
 export type BotUser = {
   id: string;
@@ -8,7 +8,7 @@ export type BotUser = {
   telegramFirstName: string | null;
 };
 
-export type Place = {
+export type BotPlace = {
   id: string;
   name: string;
   description: string | null;
@@ -89,24 +89,37 @@ export type MaterializeResult = {
   errors: Array<{ templateId: string; error: string }>;
 };
 
+export type CreateTemplateBody = {
+  title: string;
+  dayOfWeek: number;
+  localTime: string;
+  durationMinutes?: number | null;
+  capacity?: number | null;
+  reserveCapacity?: number | null;
+  announceOffsetMinutes?: number;
+};
+
 type EventDto = Omit<EventRow, "startAt"> & { startAt: string };
 
 export function parseEvent(d: EventDto): EventRow {
   return { ...d, startAt: new Date(d.startAt) };
 }
 
-export function parseAnnounceable(d: EventDto & {
-  announceOffsetMinutes: number;
-  announcements: Array<{ chatId: string }> | null;
-}): AnnounceableEvent {
-  return { ...parseEvent(d), ...{
+export function parseAnnounceable(
+  d: EventDto & {
+    announceOffsetMinutes: number;
+    announcements: Array<{ chatId: string }> | null;
+  },
+): AnnounceableEvent {
+  return {
+    ...parseEvent(d),
     announceOffsetMinutes: d.announceOffsetMinutes,
     announcements: d.announcements,
-  } };
+  };
 }
 
-export function parseParticipant(d: Omit<ParticipantRow, "createdAt"> & {
-  createdAt: string;
-}): ParticipantRow {
+export function parseParticipant(
+  d: Omit<ParticipantRow, "createdAt"> & { createdAt: string },
+): ParticipantRow {
   return { ...d, createdAt: new Date(d.createdAt) };
 }

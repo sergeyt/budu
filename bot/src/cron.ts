@@ -1,6 +1,6 @@
 import type { Bot } from "grammy";
 import type { BotContext } from "@/context.ts";
-import { materializeUpcoming } from "@/api/materialize.ts";
+import { api } from "@/api/client.ts";
 import { postDueAnnouncements } from "@/services/announceScheduler.ts";
 import { loadConfig } from "@/config.ts";
 
@@ -40,7 +40,7 @@ export function startCron(): void {
 async function tick(): Promise<void> {
   const t0 = Date.now();
   try {
-    const materialized = await materializeUpcoming();
+    const materialized = await api.materialize.upcoming();
     if (materialized.inserted > 0 || materialized.errors.length > 0) {
       console.log(
         `[cron] materialized ${materialized.inserted}/${materialized.scanned} ` +
