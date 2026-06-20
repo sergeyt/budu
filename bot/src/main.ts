@@ -1,10 +1,6 @@
 import { webhookCallback } from "grammy";
 import * as Sentry from "@sentry/deno";
-import {
-  loadConfig,
-  useWebhook,
-  webhookEndpointUrl,
-} from "@/config.ts";
+import { loadConfig, useWebhook, webhookEndpointUrl } from "@/config.ts";
 import { createBot, publishCommands } from "@/bot.ts";
 import { attachBotToCron, startCron } from "@/cron.ts";
 import { deriveWebhookSecretToken } from "@/webhookSecret.ts";
