@@ -1,11 +1,10 @@
 # budu Telegram bot on Fly.io
 # Docs: https://fly.io/docs/reference/configuration/
 #
-# Polling by default (no public URL). Scale stays at 1 via deploy workflow.
-# Webhook: fly secrets set BOT_PUBLIC_URL=https://<app>.fly.dev, uncomment
-# [http_service] below, redeploy.
+# Polling for Telegram + HTTP /health for Fly (keeps machine alive).
+# Webhook mode: set BOT_PUBLIC_URL secret — bot switches automatically.
 
-app = "budu-bot"
+app = "budu"
 primary_region = "fra"
 
 [build]
@@ -18,25 +17,25 @@ primary_region = "fra"
 [deploy]
   strategy = "immediate"
 
-# Lightweight Deno process + cron; no Postgres in the bot VM.
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
   memory = "512mb"
 
-# --- Webhook mode (optional) ---
-# fly secrets set BOT_PUBLIC_URL=https://budu-bot.fly.dev -a budu-bot
-#
-# [http_service]
-#   internal_port = 8080
-#   force_https = true
-#   auto_stop_machines = "off"
-#   auto_start_machines = true
-#   min_machines_running = 1
-#
-#   [[http_service.checks]]
-#     grace_period = "30s"
-#     interval = "30s"
-#     method = "GET"
-#     path = "/health"
-#     timeout = "5s"
+# Required on Fly: health check keeps the machine running (polling still uses getUpdates).
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "20s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    timeout = "5s"
+
+# Webhook mode (optional — replaces polling; also needs BOT_PUBLIC_URL secret):
+# fly secrets set BOT_PUBLIC_URL=https://budu.fly.dev -a budu

@@ -92,13 +92,18 @@ fly scale count 1 -a budu-bot --yes   # enforce single machine
 
 ## Polling vs webhook on Fly
 
-| Mode | Config |
-| --- | --- |
-| **Polling** (default) | Leave `BOT_PUBLIC_URL` unset. No `[http_service]` in `fly.toml`. |
-| **Webhook** | `fly secrets set BOT_PUBLIC_URL=https://budu-bot.fly.dev -a budu-bot`, uncomment `[http_service]` in `fly.toml`, redeploy. Webhook registers on startup at `{origin}/webhook`. |
+| Mode | Telegram | Fly `[http_service]` |
+| --- | --- | --- |
+| **Polling** (default) | Bot pulls updates via `getUpdates` | **Yes** — `/health` on `:8080` keeps the machine alive |
+| **Webhook** | Telegram POSTs to `{BOT_PUBLIC_URL}/webhook` | Same port — `/webhook` + `/health` |
 
-Polling is simpler (no TLS setup). Webhook saves a persistent outbound poll
-connection — optional on Fly.
+Leave `BOT_PUBLIC_URL` unset for polling. For webhook:
+
+```bash
+fly secrets set BOT_PUBLIC_URL=https://budu.fly.dev -a budu
+```
+
+`[http_service]` uses `auto_stop_machines = "off"` so the bot stays up 24/7.
 
 ---
 

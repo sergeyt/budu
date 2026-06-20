@@ -4,6 +4,7 @@ import { loadConfig, useWebhook, webhookEndpointUrl } from "@/config.ts";
 import { createBot, publishCommands } from "@/bot.ts";
 import { attachBotToCron, startCron } from "@/cron.ts";
 import { deriveWebhookSecretToken } from "@/webhookSecret.ts";
+import { startHealthServer } from "@/health.ts";
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
@@ -24,6 +25,8 @@ async function main(): Promise<void> {
     // Long-polling can't coexist with an active webhook. Drop any leftover
     // one (e.g. set by the Next app) so getUpdates doesn't 409.
     await bot.api.deleteWebhook({ drop_pending_updates: false });
+    // Fly needs something on internal_port for health checks + always-on.
+    startHealthServer(cfg.PORT);
     console.log("[bot] starting long-polling…");
     await bot.start({
       onStart: (info) =>
@@ -42,7 +45,7 @@ async function main(): Promise<void> {
 
   const handle = webhookCallback(bot, "std/http", { secretToken });
 
-  Deno.serve({ port: cfg.PORT }, async (req) => {
+  Deno.serve({ port: cfg.PORT, hostname: "0.0.0.0" }, async (req) => {
     const u = new URL(req.url);
     if (req.method === "GET" && u.pathname === "/health") {
       return new Response("ok", { status: 200 });

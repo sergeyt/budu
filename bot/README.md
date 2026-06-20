@@ -105,11 +105,11 @@ Secrets (`TELEGRAM_BOT_TOKEN`, `BOT_INTERNAL_TOKEN`, `TELEGRAM_LINK_SECRET`,
 ### Webhook on Fly (optional)
 
 ```bash
-fly secrets set BOT_PUBLIC_URL=https://budu-bot.fly.dev -a budu-bot
-# uncomment [http_service] in fly.toml, redeploy
+fly secrets set BOT_PUBLIC_URL=https://budu.fly.dev -a budu
 ```
 
-Telegram receives `POST {BOT_PUBLIC_URL}/webhook` (auto-registered on startup).
+Same `[http_service]` and `/health` as polling; Telegram POSTs to `/webhook`
+instead of the bot using long-polling.
 
 ### Deno Deploy (alternative)
 
