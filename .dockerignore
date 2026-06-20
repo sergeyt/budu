@@ -1,0 +1,47 @@
+# Docker build context for bot/ (Fly.io). Web app not included yet.
+.git
+.github
+.next
+node_modules
+out
+build
+coverage
+.pnpm-store
+
+# Env & local secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# Next.js app (stays on Vercel for now)
+app
+components
+lib
+prisma
+public
+theme
+ui
+types
+test
+scripts
+messages
+i18n
+*.config.ts
+*.config.js
+*.config.mjs
+tsconfig.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+package.json
+vitest*.ts
+
+# Docs & misc
+docs
+*.md
+!bot/README.md
+!packages/api-client/README.md
+.DS_Store
+.idea
+.vercel
