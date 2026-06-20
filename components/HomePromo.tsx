@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslations } from "next-intl";
 import { Box, HStack } from "@chakra-ui/react";
 import { ColorModeButton, Heading } from "../ui";

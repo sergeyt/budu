@@ -73,18 +73,22 @@ export const authConfig: NextAuthConfig = {
           clientSecret: process.env.VK_CLIENT_SECRET,
         })
       : null,
-    process.env.SBER_CLIENT_ID && process.env.SBER_CLIENT_SECRET
+    process.env.SBER_CLIENT_ID &&
+    process.env.SBER_CLIENT_SECRET &&
+    process.env.SBER_ISSUER
       ? OIDCProvider(
           "sber",
-          process.env.SBER_ISSUER!,
+          process.env.SBER_ISSUER,
           process.env.SBER_CLIENT_ID,
           process.env.SBER_CLIENT_SECRET,
         )
       : null,
-    process.env.TBANK_CLIENT_ID && process.env.TBANK_CLIENT_SECRET
+    process.env.TBANK_CLIENT_ID &&
+    process.env.TBANK_CLIENT_SECRET &&
+    process.env.TBANK_ISSUER
       ? OIDCProvider(
           "tbank",
-          process.env.TBANK_ISSUER!,
+          process.env.TBANK_ISSUER,
           process.env.TBANK_CLIENT_ID,
           process.env.TBANK_CLIENT_SECRET,
         )

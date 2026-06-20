@@ -110,6 +110,14 @@ export const errors = {
   forbidden: () => new ForbiddenError("Forbidden", { code: "FORBIDDEN" }),
   badWebhookSecret: () =>
     new ForbiddenError("Bad secret provided", { code: "BAD_WEBHOOK_SECRET" }),
+  badBotInternalToken: () =>
+    new ForbiddenError("Bad bot internal token", {
+      code: "BAD_BOT_INTERNAL_TOKEN",
+    }),
+  botApiNotConfigured: () =>
+    new ForbiddenError("Bot internal API is not configured", {
+      code: "BOT_API_NOT_CONFIGURED",
+    }),
 
   // ===== Validation =====
   missingParam: (name: string) =>
@@ -148,6 +156,17 @@ export const errors = {
   noEventInPlace: () =>
     new NotFoundError("No event in the given place", {
       code: "NO_EVENT_IN_PLACE",
+    }),
+  invalidTimezone: (zone: string) =>
+    new BadRequestError(`Invalid IANA timezone: ${zone}`, {
+      code: "INVALID_TIMEZONE",
+      details: { zone },
+    }),
+
+  // ===== Templates =====
+  templateNotFound: () =>
+    new NotFoundError("Event template not found", {
+      code: "TEMPLATE_NOT_FOUND",
     }),
 
   // ===== Users =====

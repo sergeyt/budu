@@ -1,5 +1,5 @@
 import "./globals.css";
-import React, { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { Center } from "@chakra-ui/react";
 import { Inter } from "next/font/google";

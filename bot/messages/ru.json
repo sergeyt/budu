@@ -1,0 +1,85 @@
+{
+  "commands": {
+    "start": "Старт",
+    "help": "Помощь",
+    "link": "Привязать чат к месту",
+    "unlink": "Отвязать",
+    "announce_next": "Анонс ближайшего события",
+    "templates": "Шаблоны привязанного места",
+    "new_template": "Создать шаблон (личка)"
+  },
+  "start": {
+    "greeting": "👋 Привет, {name}!",
+    "chat_id": "Это чат: <code>{chatId}</code>",
+    "commands_header": "Команды:",
+    "cmd_link": "• <code>/link &lt;код&gt;</code> — привязать этот чат к месту",
+    "cmd_unlink": "• <code>/unlink &lt;код&gt;</code> — отвязать",
+    "cmd_announce": "• <code>/announce_next</code> — опубликовать анонс ближайшего события",
+    "cmd_templates": "• <code>/templates</code> — шаблоны привязанного места",
+    "cmd_new_template": "• <code>/new_template</code> — создать шаблон (личка, для админов)",
+    "cmd_help": "• <code>/help</code> — помощь",
+    "deep_link_hint": "Ссылка на событие: <code>t.me/{bot}?start=ev_&lt;id&gt;</code>",
+    "event_not_found": "Событие не найдено или уже прошло.",
+    "register_open": "Нажмите кнопку ниже, чтобы записаться.",
+    "register_closed": "Запись открывается за 24 часа до начала."
+  },
+  "help": {
+    "body": "Доступные команды:\n/start — приветствие и id чата\n/start ev_<id> — открыть событие и записаться\n/link <код> — привязать чат к месту\n/unlink <код> — отвязать\n/announce_next — анонс ближайшего события привязанного места\n/templates — шаблоны привязанного места\n/new_template — создать еженедельный шаблон (личка, для админов)"
+  },
+  "link": {
+    "usage": "Использование: <code>/link &lt;код&gt;</code>",
+    "failed": "❌ Не удалось привязать: {error}",
+    "place_not_found": "❌ Место не найдено: {placeId}",
+    "success": "✅ Чат привязан к месту: <b>{name}</b>\n<code>{placeId}</code>"
+  },
+  "unlink": {
+    "usage": "Использование: <code>/unlink &lt;код&gt;</code>",
+    "failed": "❌ Не удалось отвязать: {error}",
+    "place_not_found": "❌ Место не найдено: {placeId}",
+    "success": "🗑 Чат отвязан от места: {name}",
+    "not_linked": "ℹ️ Привязки к месту {name} не было"
+  },
+  "templates": {
+    "empty": "В этом чате нет шаблонов. Свяжите чат командой <code>/link &lt;код&gt;</code> и создайте шаблон в админке.",
+    "caps": "мест {capacity}, резерв {reserve}"
+  },
+  "announce": {
+    "not_linked": "Этот чат не привязан ни к одному месту. Используйте /link.",
+    "no_events": "Не нашёл ближайших событий для привязанных мест. Создайте событие в админке (или дождитесь материализации шаблона)."
+  },
+  "registration": {
+    "stale_button": "Кнопка устарела ({error})",
+    "list_dm_failed": "Не удалось отправить список в личку. Напишите боту /start.",
+    "window_closed": "Запись открывается за 24ч до начала и закрывается в старт",
+    "full": "Все места и резерв заняты",
+    "event_not_found": "Событие не найдено",
+    "already_confirmed": "Вы уже записаны ✅",
+    "already_waitlist": "Вы уже в резерве ⏳",
+    "registered": "Записал ✅",
+    "waitlisted": "Свободных мест нет — добавил в резерв ⏳",
+    "cancelled_promoted": "Снял запись · резерв двинулся",
+    "cancelled": "Снял запись",
+    "not_registered": "Записи не было"
+  },
+  "keyboard": {
+    "register": "✅ Я иду",
+    "waitlist": "⏳ Резерв",
+    "cancel": "❌ Отмена",
+    "list": "📋 Список"
+  },
+  "wizard": {
+    "dm_only": "Команду /new_template нужно вызывать в личке с ботом.",
+    "no_places": "Ваш Telegram не привязан к роли админа места. Сначала войдите в веб-приложении.",
+    "pick_place": "Выберите место (ответьте номером):",
+    "invalid_pick": "Отправьте номер из списка.",
+    "title_prompt": "Название шаблона?",
+    "title_required": "Название не может быть пустым.",
+    "day_prompt": "День недели? 1=Пн … 7=Вс",
+    "day_invalid": "Ожидается число 1–7.",
+    "time_prompt": "Локальное время начала? (ЧЧ:ММ, 24ч)",
+    "time_invalid": "Ожидается ЧЧ:ММ.",
+    "capacity_prompt": "Вместимость? (число или - для безлимита)",
+    "capacity_invalid": "Ожидается неотрицательное число или -.",
+    "created": "✅ Шаблон <b>{title}</b> создан для {place}."
+  }
+}

@@ -3,33 +3,50 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![CI](https://github.com/sergeyt/budu/actions/workflows/ci.yml/badge.svg)](https://github.com/sergeyt/budu/actions/workflows/ci.yml)
 
-Event registration app for table-tennis clubs. Users sign in with a Russian
-OAuth provider, pick a place, and register for the next event. Each event
-has a confirmed list and a reserved (waitlist) list with auto-promotion
-when a confirmed registrant unregisters.
+Event registration for table-tennis clubs. Players sign in with a Russian
+OAuth provider, pick a place, and register for the next event — confirmed
+seats plus a waitlist with auto-promotion when someone cancels.
+
+Place admins manage weekly **event templates** in the web UI. A **Telegram
+bot** materializes events, posts announcements to linked channels, and
+handles inline registration. A **Mini App** shows the full participant list.
 
 ## Stack
 
-- Next.js 16 (App Router) + React 19
-- Prisma 7 + Postgres (`@prisma/adapter-pg`)
-- NextAuth v5, database sessions
-- Chakra UI v3, next-intl, Sentry
-- Biome (lint + format), Vitest
+| Layer | Tools |
+| --- | --- |
+| Web app | [Next.js 16](https://nextjs.org) (App Router), [React 19](https://react.dev) |
+| UI | [Chakra UI v3](https://chakra-ui.com), [next-themes](https://github.com/pacocoursey/next-themes), [react-icons](https://react-icons.github.io/react-icons/) |
+| i18n | [next-intl](https://next-intl.dev) |
+| Auth | [NextAuth v5](https://authjs.dev) (database sessions, Prisma adapter) |
+| Data | [Prisma 7](https://www.prisma.io) + Postgres via [`@prisma/adapter-pg`](https://www.prisma.io/docs/orm/overview/databases/postgresql) and [`pg`](https://node-postgres.com) |
+| Validation | [Zod 4](https://zod.dev) |
+| Time | [Luxon](https://moment.github.io/luxon/) (template scheduling, IANA timezones on `Place`) |
+| Observability | [Sentry](https://sentry.io) — `@sentry/nextjs` on the web app, `@sentry/deno` in the bot (optional `SENTRY_DSN`) |
+| Quality | [Biome](https://biomejs.dev) (lint + format), [Vitest](https://vitest.dev) |
+| Telegram bot | [Deno 2](https://deno.com) + [grammY](https://grammy.dev), [grammy-conversations](https://github.com/grammyjs/conversations) — see [`bot/README.md`](./bot/README.md) |
+
+The bot does **not** connect to Postgres. It calls the Next app at
+`/api/internal/bot/*` (Bearer `BOT_INTERNAL_TOKEN`); business logic lives in
+[`lib/bot/`](./lib/bot/).
 
 ## Quick start
 
 ```bash
 cp .env.example .env.local
-# fill in DATABASE_URL, AUTH_SECRET, and at least one OAuth provider
+# DATABASE_URL, AUTH_SECRET, and at least one OAuth provider
 
 pnpm install
-pnpm db:migrate     # apply pending Prisma migrations
-pnpm db:seed        # optional: seed places and a sample event
-pnpm dev
+pnpm db:migrate
+pnpm db:seed        # optional
+pnpm dev            # http://localhost:3000
 ```
 
-App runs at <http://localhost:3000>. See `.env.example` for every
-environment variable the app reads.
+Environment variables are documented in [`.env.example`](./.env.example).
+
+**Telegram bot (optional):** start the Next app first, then follow
+[`bot/README.md`](./bot/README.md). You need matching `BOT_INTERNAL_TOKEN`,
+`TELEGRAM_BOT_TOKEN`, and `TELEGRAM_LINK_SECRET` in both apps.
 
 ## Scripts
 
@@ -39,88 +56,71 @@ environment variable the app reads.
 | `pnpm build` / `pnpm start` | Production build / serve |
 | `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
 | `pnpm test:coverage` | Vitest with v8 coverage |
-| `pnpm test:integration` | Vitest integration tests (needs Postgres 17, see Testing) |
-| `pnpm test:integration:local` | Spin up Postgres 17 in Docker, run integration tests, tear down |
+| `pnpm test:integration:local` | Postgres 17 in Docker + integration tests |
 | `pnpm lint` / `pnpm fmt` | Biome check / format |
 | `pnpm db:migrate` | Run migrations in development |
 | `pnpm db:deploy` | Apply migrations in production |
 | `pnpm db:seed` | Seed fixtures from `prisma/seed.ts` |
 
+Bot: `cd bot && deno task dev` · `deno task test` · `deno task check`
+
+## Documentation
+
+| Doc | Contents |
+| --- | --- |
+| [docs/telegram.md](./docs/telegram.md) | Bot, announcements, Mini App, link flow |
+| [docs/testing.md](./docs/testing.md) | Unit vs integration tests, local Postgres |
+| [bot/README.md](./bot/README.md) | Bot env, internal API routes, webhook mode |
+| [AGENTS.md](./AGENTS.md) | Conventions for AI agents |
+| [CODEREVIEW.md](./CODEREVIEW.md) | Code review checklist |
+| [TODO.md](./TODO.md) | Milestones and backlog |
+
+## Features (high level)
+
+**Web**
+
+- OAuth sign-in (Yandex, VK, Sber ID, TBank — each optional via env)
+- Place picker, register / unregister for the next event
+- Admin UI at `/admin` — template CRUD, per-template Telegram channel overrides
+- Mini App at `/tg/events/[id]` (Telegram `initData` auth)
+
+**Telegram bot**
+
+- Link a chat to a place (`/link <code>`), weekly template materialization, scheduled announcements
+- Inline keyboard: register, waitlist, cancel; **📋 List** opens the Mini App
+- DM `/new_template` wizard for place admins; ru/en command menus
+
+**Notifications**
+
+- Per-place, per-template, and per-event channel overrides (Telegram, MAX, …)
+- Fire-and-forget after registration — slow channels never block the HTTP response
+
 ## Authentication
 
-OAuth providers are loaded conditionally — a provider only appears on the
-sign-in screen if both its `<NAME>_CLIENT_ID` and `<NAME>_CLIENT_SECRET`
-are set. Supported: Yandex ID, VK ID, Sber ID (OIDC), TBank/Tinkoff ID
-(OIDC). Sessions are stored in Postgres via the Prisma adapter (not JWT),
-which lets `lib/auth.ts` augment sessions with the user's `role`.
+Providers load conditionally: a button appears only when both
+`<NAME>_CLIENT_ID` and `<NAME>_CLIENT_SECRET` are set. Sessions live in
+Postgres (not JWT) so `lib/auth.ts` can attach the user's `role` and
+`PlaceAdmin` membership.
 
-## Notifications
-
-Per-place and per-event notification channels (Telegram, MAX Messenger)
-are configured in the database — see `PlaceNotificationChannel` and
-`EventNotificationChannel` in `prisma/schema.prisma`. Telegram chats are
-linked through a one-time `/link <code>` flow handled by
-`/api/webhook/telegram`. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LINK_SECRET`,
-and (recommended) `TELEGRAM_WEBHOOK_SECRET`.
-
-Notifications are fire-and-forget after each registration: a slow or
-failing channel never blocks or fails the user-visible request.
-
-## Testing
-
-Two layers, run independently:
-
-**Unit tests** (`pnpm test`) — no database, no network, fast feedback. Cover
-pure logic in `lib/` (registration FSM, error middleware, util, telegram
-link codes).
-
-**Integration tests** (`pnpm test:integration`) — exercise route handlers
-against a real Postgres 17 (matching Neon prod major version). They cover
-the registration flow end-to-end, including the advisory-lock invariant
-under concurrent `POST /api/events/:id/register` calls.
-
-Run them locally — one-shot, requires Docker:
-
-```bash
-pnpm test:integration:local           # spin up PG 17, run tests, tear down
-pnpm test:integration:local -t lock   # forward args to vitest
-KEEP=1 pnpm test:integration:local    # keep the container around for iteration
-```
-
-If you already have a Postgres instance you want to use, skip the wrapper
-and point `DATABASE_URL` directly at it:
-
-```bash
-DATABASE_URL='postgresql://user:pass@host:5432/db?schema=public' \
-  pnpm test:integration
-```
-
-The suite applies all Prisma migrations on startup and truncates every
-table between tests, so the same container can be reused across runs.
-A safety check refuses to run against a `DATABASE_URL` that doesn't look
-disposable; set `ALLOW_NON_TEST_DB=1` to override.
-
-In CI both layers run as separate jobs in `.github/workflows/ci.yml`.
-
-## Schema
+## Schema & invariants
 
 Source of truth: [`prisma/schema.prisma`](./prisma/schema.prisma).
-Postgres only.
 
-Notable invariants enforced today:
-
-- `@@unique([userId, eventId])` on `Registration` prevents double registrations.
-- A Postgres advisory lock per event (see `lib/locks.ts`) serializes
-  concurrent `POST/DELETE /api/events/:id/register` calls so confirmed/reserved
-  capacity decisions stay consistent. Postgres-only — `lib/locks.ts` is the
-  single point of change if you ever migrate engines.
+- `@@unique([userId, eventId])` on `Registration` — no double sign-ups
+- Postgres advisory lock per event ([`lib/locks.ts`](./lib/locks.ts)) — concurrent register/unregister stays consistent
+- Registration FSM: [`lib/registration.ts`](./lib/registration.ts)
 
 ## Deploy
 
-Any Node host works; Vercel is the easiest. Set every variable from
-`.env.example`, plus `SENTRY_DSN` if you want error reports. Use managed
-Postgres (Neon, Supabase, RDS, …). Run `pnpm db:deploy` on every deploy
-(e.g. as part of the build command: `pnpm db:deploy && pnpm build`).
+Any Node host works; Vercel is the simplest path. Use managed Postgres
+(Neon, Supabase, RDS, …). On each deploy:
+
+```bash
+pnpm db:deploy && pnpm build
+```
+
+Set variables from `.env.example`. Optional: `SENTRY_DSN` for error reporting.
+Run the bot separately (e.g. Deno Deploy) — see [docs/telegram.md](./docs/telegram.md).
 
 ## License
 

@@ -1,6 +1,6 @@
 import { getTranslations as getTranslationsImpl } from "next-intl/server";
 
-export async function getTranslations(req: Request, namespace: string) {
+export async function getTranslations(_req: Request, namespace: string) {
   // TODO get locale from request (via middleware or cookie)
   const locale = "ru";
 

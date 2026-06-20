@@ -1,49 +1,110 @@
-# EXECUTION PLAN
-- [ ] Batumi Podvalchik :)
-  - [ ] need telegram bot
+# Roadmap
 
-# DOCS
-- [ ] improve readme:
-  - [ ] include all used tools, Sentry is missing
+Event registration for table-tennis clubs — web app + Telegram bot. Stack and
+setup: [`README.md`](./README.md).
 
-# TESTING
-- [x] yandex sign-in
-- [x] register/unregister
-- [ ] waitlist
+## Shipped
 
-# BUGS & IMPROVEMENTS
-- [x] hide Place selector if not logged in
-- [x] use SVG icons for sign-in providers
-- [x] super-admin functions:
-  - [x] reuse event for current date (dagomys case)
-  - [ ] time selector
-  - [ ] select place admins
-- [ ] db scripts
-  - [x] seed script
-  - [ ] delete events, better event names?
-  - [ ] script to generate fake users
-  - [ ] script to add registrations to event for fake users
-- [ ] database / postgres
-  - [ ] CI integration tests on `postgres:17` (match Neon prod major)
-  - [ ] plan PG 17 → 18 migration on Neon (new project + pg_dump/restore; Neon does not do in-place major upgrades)
-- [x] hide sign-in providers if env variables are empty
-- [ ] better design & theme
-  - [x] theme switch
-  - [x] render card
-  - [x] place info drawer (including name, description and location URL)
-  - [x] better place selector preferably with async search
-  - [ ] show capacity info in tooltip since usually people already know it. or as a small badge with 3 numbers. registered/capacity/waitlist
-- [x] refactorings:
-  - [x] extract model types and reuse in code, never ending :)
-  - [ ] use typed errors more
+**Web** — OAuth (Yandex, VK, Sber, TBank), place picker, register/unregister
+with waitlist + auto-promotion, `/admin` template CRUD, next-intl (ru),
+theme switch, place info drawer.
 
-# NEW FEATURES
-- [x] internationalization
-  - [x] basic next-intl integration
-  - [x] ru translations
-  - [ ] switch between lang
-- [ ] notification about event registrations
-  - [ ] send list to MAX chat 
-  - [ ] complete MAX notification on testing chat
-- [ ] sign-up by email & phone number 
-- [ ] sign-in by email or phone number
+**Telegram bot (M0–M4)** — Deno + grammY via `/api/internal/bot/*`; weekly
+template materialization, scheduled announcements, inline registration,
+Mini App participant list, `/new_template` wizard, per-template channels,
+ru/en bot strings, optional Sentry. Details: [`docs/telegram.md`](./docs/telegram.md).
+
+**Quality** — Vitest unit tests, Postgres 17 integration tests in CI,
+Biome, mirrored bot time tests, docs (`docs/`, `AGENTS.md`, `CODEREVIEW.md`).
+
+---
+
+## Next improvements
+
+Prioritized backlog. Pick up in order unless a specific item is more urgent.
+
+### UX & product
+
+- [ ] **Capacity on event card** — badge or tooltip:
+  `registered / capacity / waitlist` (players often already know cap numbers)
+- [ ] **Language switcher** — en/ru toggle (next-intl wired; UI switch missing)
+- [ ] **Waitlist clarity on web** — show RESERVED status after sign-up; confirm
+  full flow in browser (logic + integration tests exist; manual pass still open)
+
+### Admin & super-admin
+
+- [ ] **Event time selector** — easier ad-hoc event editing (super-admin)
+- [ ] **Place admin management** — assign/remove admins in UI (not only DB/seed)
+- [ ] **Delete legacy Next Telegram webhook** — `app/api/webhook/telegram` if
+  fully replaced by Deno bot; drop `TELEGRAM_WEBHOOK_OWNER` split
+
+### Notifications
+
+- [ ] **MAX Messenger** — finish transport + test on a real chat
+  (`lib/notifications/transports/max.ts` is placeholder)
+- [ ] **Registration push to channels** — verify Telegram + MAX list updates
+  after web sign-up match announcement edits
+
+### Dev tooling
+
+- [ ] **DB scripts** — delete old events, generate fake users, bulk-add
+  registrations (for demos and load checks)
+- [ ] **Bot in CI** — `deno task check && deno task test` job alongside Next
+
+### Code quality
+
+- [ ] **Typed errors** — use `HttpError` / `errors.*` consistently; reduce
+  raw `throw new Error` in new code
+
+### Auth (later)
+
+- [ ] Sign-up by email or phone
+- [ ] Sign-in by email or phone
+
+### Infrastructure (later)
+
+- [ ] Plan Neon PG 17 → 18 (new project + pg_dump/restore; no in-place major
+  upgrade on Neon)
+
+---
+
+## Manual QA checklist
+
+Quick passes before a release or after big registration/bot changes:
+
+- [x] Yandex sign-in
+- [x] Register / unregister (confirmed)
+- [ ] Waitlist + promotion (web UI — tap through, not only API tests)
+- [ ] Bot: register, waitlist, cancel from announcement + deep link
+- [ ] Mini App list from **📋 List** button
+
+---
+
+## Telegram bot milestones (archive)
+
+All complete. Kept for reference.
+
+<details>
+<summary>M0–M4 checklist</summary>
+
+**M0 — Schema** — `EventTemplate`, template channels, `Event.templateId`,
+`Event.announcements`, `User.telegramUserId`.
+
+**M1 — Bot skeleton** — `bot/`, `/start` `/link` `/unlink`, internal API
+refactor (bot no longer uses direct Postgres).
+
+**M2 — Templates** — `/admin` CRUD, `/templates`, materializer cron, shared
+time helpers + DST tests.
+
+**M3 — Announcements** — inline keyboard, capacity FSM + advisory lock,
+24h registration window, debounced live edits, deep links.
+
+**M4 — Polish** — Mini App, `/new_template` wizard, template channel
+overrides, bot ru/en i18n, Sentry-Deno.
+
+**Open ops notes**
+
+- Bot needs **Post Messages** + **Edit Messages** in target channels.
+- Times: IANA `Place.timezone` + template `localTime` → UTC `Event.startAt`.
+
+</details>

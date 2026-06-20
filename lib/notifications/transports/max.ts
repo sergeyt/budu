@@ -1,6 +1,6 @@
 export async function sendMessage(chatId: string, text: string) {
-  const base = process.env.MAX_API_URL!;
-  const token = process.env.MAX_BOT_TOKEN!;
+  const base = process.env.MAX_API_URL;
+  const token = process.env.MAX_BOT_TOKEN;
   if (!base || !token) {
     throw new Error("MAX API not configured");
   }

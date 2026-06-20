@@ -1,0 +1,43 @@
+{
+  "tasks": {
+    // Long-polling dev loop. Loads bot/.env then falls back to the parent
+    // app's .env, unsets any active webhook so /getUpdates won't 409,
+    // and watches src/ for changes.
+    "dev": "deno run --watch --allow-env --allow-net --allow-read --allow-import --env-file=.env --env-file=../.env src/main.ts",
+    // Webhook server for production / Deno Deploy.
+    "start": "deno run --allow-env --allow-net --allow-read --allow-import --env-file=.env src/main.ts",
+    "test": "deno test --allow-env --allow-net --allow-read --allow-import --unstable-sloppy-imports",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "check": "deno check --allow-import --unstable-sloppy-imports src/main.ts"
+  },
+  "imports": {
+    "grammy": "https://deno.land/x/grammy@v1.44.0/mod.ts",
+    "grammy/types": "https://deno.land/x/grammy@v1.44.0/types.ts",
+    "@grammyjs/conversations": "https://deno.land/x/grammy_conversations@v1.2.0/mod.ts",
+    "@sentry/deno": "npm:@sentry/deno@10.59.0",
+    "luxon": "npm:luxon@^3.7.2",
+    "@types/luxon": "npm:@types/luxon@^3.7.2",
+    "zod": "npm:zod@^4.4.3",
+    "@budu/api-client": "../packages/api-client/src/index.ts",
+    "@budu/api-client/web": "../packages/api-client/src/web/index.ts",
+    "@budu/api-client/bot": "../packages/api-client/src/bot/index.ts",
+    "@/": "./src/"
+  },
+  "fmt": {
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "singleQuote": false,
+    "semiColons": true
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.window"]
+  },
+  "unstable": ["sloppy-imports"]
+}

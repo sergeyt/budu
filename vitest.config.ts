@@ -17,7 +17,11 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
+    include: [
+      "test/**/*.test.ts",
+      "test/**/*.test.tsx",
+      "packages/**/*.test.ts",
+    ],
     exclude: ["test/integration/**", "**/node_modules/**"],
     globals: false,
     coverage: {

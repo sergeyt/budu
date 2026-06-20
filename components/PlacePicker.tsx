@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -51,7 +51,7 @@ export default function PlacePicker({ places, currentId }: Props) {
         onValueChange={(e) => {
           const p = new URLSearchParams(params);
           p.set("place", e.value[0]);
-          router.push("/?" + p.toString());
+          router.push(`/?${p.toString()}`);
         }}
       >
         <Select.HiddenSelect />

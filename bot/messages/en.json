@@ -1,0 +1,85 @@
+{
+  "commands": {
+    "start": "Start",
+    "help": "Help",
+    "link": "Link chat to a place",
+    "unlink": "Unlink",
+    "announce_next": "Post next event announcement",
+    "templates": "Templates for linked place",
+    "new_template": "Create a weekly template (DM)"
+  },
+  "start": {
+    "greeting": "👋 Hi, {name}!",
+    "chat_id": "This chat: <code>{chatId}</code>",
+    "commands_header": "Commands:",
+    "cmd_link": "• <code>/link &lt;code&gt;</code> — link this chat to a place",
+    "cmd_unlink": "• <code>/unlink &lt;code&gt;</code> — unlink",
+    "cmd_announce": "• <code>/announce_next</code> — post the next event announcement",
+    "cmd_templates": "• <code>/templates</code> — templates for the linked place",
+    "cmd_new_template": "• <code>/new_template</code> — create a template (DM, admins only)",
+    "cmd_help": "• <code>/help</code> — help",
+    "deep_link_hint": "Event link: <code>t.me/{bot}?start=ev_&lt;id&gt;</code>",
+    "event_not_found": "Event not found or already passed.",
+    "register_open": "Tap a button below to register.",
+    "register_closed": "Registration opens 24 hours before start."
+  },
+  "help": {
+    "body": "Available commands:\n/start — greeting and chat id\n/start ev_<id> — open an event and register\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
+  },
+  "link": {
+    "usage": "Usage: <code>/link &lt;code&gt;</code>",
+    "failed": "❌ Link failed: {error}",
+    "place_not_found": "❌ Place not found: {placeId}",
+    "success": "✅ Chat linked to place: <b>{name}</b>\n<code>{placeId}</code>"
+  },
+  "unlink": {
+    "usage": "Usage: <code>/unlink &lt;code&gt;</code>",
+    "failed": "❌ Unlink failed: {error}",
+    "place_not_found": "❌ Place not found: {placeId}",
+    "success": "🗑 Chat unlinked from place: {name}",
+    "not_linked": "ℹ️ This chat was not linked to {name}"
+  },
+  "templates": {
+    "empty": "No templates in this chat. Link the chat with <code>/link &lt;code&gt;</code> and create templates in the admin UI.",
+    "caps": "seats {capacity}, reserve {reserve}"
+  },
+  "announce": {
+    "not_linked": "This chat is not linked to any place. Use /link.",
+    "no_events": "No upcoming events for linked places. Create one in the admin UI or wait for template materialization."
+  },
+  "registration": {
+    "stale_button": "Button expired ({error})",
+    "list_dm_failed": "Could not DM the list. Message the bot with /start first.",
+    "window_closed": "Registration opens 24h before start and closes at kickoff",
+    "full": "All seats and waitlist spots taken",
+    "event_not_found": "Event not found",
+    "already_confirmed": "Already registered ✅",
+    "already_waitlist": "Already on waitlist ⏳",
+    "registered": "Registered ✅",
+    "waitlisted": "No free seats — added to waitlist ⏳",
+    "cancelled_promoted": "Removed · waitlist promoted",
+    "cancelled": "Registration removed",
+    "not_registered": "You were not registered"
+  },
+  "keyboard": {
+    "register": "✅ I'm in",
+    "waitlist": "⏳ Waitlist",
+    "cancel": "❌ Cancel",
+    "list": "📋 List"
+  },
+  "wizard": {
+    "dm_only": "Run /new_template in a private chat with the bot.",
+    "no_places": "Your Telegram account is not linked to any place admin role. Sign in on the web app first, then try again.",
+    "pick_place": "Pick a place (reply with the number):",
+    "invalid_pick": "Send a number from the list.",
+    "title_prompt": "Template title?",
+    "title_required": "Title cannot be empty.",
+    "day_prompt": "Day of week? Reply 1=Mon … 7=Sun",
+    "day_invalid": "Expected a number 1–7.",
+    "time_prompt": "Local start time? (HH:MM, 24h)",
+    "time_invalid": "Expected HH:MM.",
+    "capacity_prompt": "Capacity? (number, or - for unlimited)",
+    "capacity_invalid": "Expected a non-negative integer or -.",
+    "created": "✅ Created template <b>{title}</b> for {place}."
+  }
+}
