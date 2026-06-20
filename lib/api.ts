@@ -9,13 +9,7 @@ import type {
   UpdateEventTemplate,
   UpdatePlace,
 } from "@/lib/validation";
-import type {
-  EventTemplate,
-  Place,
-  Registration,
-  RegistrationStatus,
-  WorldEvent,
-} from "@/types/model";
+import type { Registration, RegistrationStatus } from "@/types/model";
 
 /** Browser client — session cookies, no Bearer token. */
 const client = new ApiClient({ credentials: "same-origin" });

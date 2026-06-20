@@ -81,15 +81,15 @@ export function createWebTemplatesApi(client: ApiClient) {
           `/api/templates/${templateId}/channels`,
         ),
       upsert: (templateId: string, body: UpsertTemplateChannelBody) =>
-        client.fetch<TemplateChannel>(
-          `/api/templates/${templateId}/channels`,
-          { method: "POST", body },
-        ),
+        client.fetch<TemplateChannel>(`/api/templates/${templateId}/channels`, {
+          method: "POST",
+          body,
+        }),
       remove: (templateId: string, channelId: string) =>
         client.fetch<{ ok: true; deleted: string }>(
-          `/api/templates/${templateId}/channels?channelId=${
-            encodeURIComponent(channelId)
-          }`,
+          `/api/templates/${templateId}/channels?channelId=${encodeURIComponent(
+            channelId,
+          )}`,
           { method: "DELETE" },
         ),
     },

@@ -74,9 +74,9 @@ export type RegisterOutcome =
   | { ok: true; status: "CONFIRMED" | "RESERVED"; alreadyRegistered: false }
   | { ok: true; status: "CONFIRMED" | "RESERVED"; alreadyRegistered: true }
   | {
-    ok: false;
-    reason: "FULL" | "EVENT_NOT_FOUND" | "WINDOW_CLOSED";
-  };
+      ok: false;
+      reason: "FULL" | "EVENT_NOT_FOUND" | "WINDOW_CLOSED";
+    };
 
 export type CancelOutcome = {
   unregistered: boolean;

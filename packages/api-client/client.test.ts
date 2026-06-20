@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ApiClient, ApiError } from "./src/client";
+import { ApiClient, type ApiError } from "./src/client";
 
 describe("ApiClient", () => {
   it("sends Bearer auth when configured", async () => {
@@ -33,9 +33,12 @@ describe("ApiClient", () => {
   it("throws ApiError with server message and code", async () => {
     const client = new ApiClient({
       fetch: async () =>
-        new Response(JSON.stringify({ error: "Forbidden", code: "FORBIDDEN" }), {
-          status: 403,
-        }),
+        new Response(
+          JSON.stringify({ error: "Forbidden", code: "FORBIDDEN" }),
+          {
+            status: 403,
+          },
+        ),
     });
 
     await expect(client.fetch("/x")).rejects.toMatchObject({

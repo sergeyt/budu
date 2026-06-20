@@ -54,7 +54,9 @@ export function verifyTelegramInitData(
   }
 
   const dataCheckString = buildDataCheckString(params);
-  const secretKey = createHmac("sha256", "WebAppData").update(botToken).digest();
+  const secretKey = createHmac("sha256", "WebAppData")
+    .update(botToken)
+    .digest();
   const expected = createHmac("sha256", secretKey)
     .update(dataCheckString)
     .digest("hex");

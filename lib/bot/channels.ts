@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { getEffectiveChannelsForEvent } from "@/lib/notifications/effectiveChannels";
 import type { TelegramChannelDto } from "@/lib/bot/types";
 

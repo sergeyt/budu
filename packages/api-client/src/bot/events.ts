@@ -33,9 +33,9 @@ export function createBotEventsApi(client: ApiClient) {
       return dto ? parseEvent(dto) : null;
     },
 
-    async listDueForAnnouncement(now: Date = new Date()): Promise<
-      AnnounceableEvent[]
-    > {
+    async listDueForAnnouncement(
+      now: Date = new Date(),
+    ): Promise<AnnounceableEvent[]> {
       const rows = await client.fetch<
         Array<
           Omit<AnnounceableEvent, "startAt"> & {
@@ -43,9 +43,9 @@ export function createBotEventsApi(client: ApiClient) {
           }
         >
       >(
-        `${PREFIX}/events/due-for-announcement?now=${
-          encodeURIComponent(now.toISOString())
-        }`,
+        `${PREFIX}/events/due-for-announcement?now=${encodeURIComponent(
+          now.toISOString(),
+        )}`,
       );
       return rows.map(parseAnnounceable);
     },

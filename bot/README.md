@@ -116,6 +116,8 @@ deno run --allow-env --allow-net --allow-read --allow-import \
 
 (requires Next app running with matching `BOT_INTERNAL_TOKEN`)
 
+Manual E2E checklist: [`../docs/bot-test-plan.md`](../docs/bot-test-plan.md).
+
 ## Layout
 
 ```

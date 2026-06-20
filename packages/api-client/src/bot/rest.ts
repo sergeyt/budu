@@ -100,10 +100,10 @@ export function createBotAdminApi(client: ApiClient) {
 export function createBotMaterializeApi(client: ApiClient) {
   return {
     upcoming(now: Date = new Date()) {
-      return client.fetch<MaterializeResult>(
-        `${PREFIX}/cron/materialize`,
-        { method: "POST", body: { now: now.toISOString() } },
-      );
+      return client.fetch<MaterializeResult>(`${PREFIX}/cron/materialize`, {
+        method: "POST",
+        body: { now: now.toISOString() },
+      });
     },
   };
 }

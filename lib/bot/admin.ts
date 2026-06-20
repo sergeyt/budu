@@ -18,7 +18,9 @@ function toPlaceDto(p: {
   };
 }
 
-async function userIdForTelegram(telegramUserId: number): Promise<string | null> {
+async function userIdForTelegram(
+  telegramUserId: number,
+): Promise<string | null> {
   const row = await prisma.user.findUnique({
     where: { telegramUserId: BigInt(telegramUserId) },
     select: { id: true },

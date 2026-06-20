@@ -64,8 +64,8 @@ async function main() {
   ]);
 
   const now = new Date();
-  const in36h = startIn(now, 36);
-  const in3h = startIn(now, 3);
+  const _in36h = startIn(now, 36);
+  const _in3h = startIn(now, 3);
   const t7pm = tomorrowAt(now, 19);
   const t10am = tomorrowAt(now, 10);
 

@@ -125,13 +125,7 @@ export default function TgEventPage({ eventId }: { eventId: string }) {
   );
 }
 
-function Section({
-  title,
-  items,
-}: {
-  title: string;
-  items: Participant[];
-}) {
+function Section({ title, items }: { title: string; items: Participant[] }) {
   return (
     <Box>
       <Text fontWeight="semibold" mb={2}>

@@ -62,6 +62,8 @@ deno run --allow-env --allow-net --allow-read --allow-import \
   --env-file=.env --env-file=../.env scripts/smoke_materialize.ts
 ```
 
+Manual E2E checklist: [`bot-test-plan.md`](bot-test-plan.md).
+
 ## CI
 
 Both unit and integration jobs run in

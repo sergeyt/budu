@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { type DateLike, RegistrationStatus } from "@/types/model";
+import type { DateLike } from "@/types/model";
 
 /**
  * @param val - value to check

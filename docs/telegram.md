@@ -88,3 +88,5 @@ Telegram entry point.
   Details: [`bot/README.md`](../bot/README.md#webhook-mode-prod--deno-deploy).
 
 Both apps need the same `BOT_INTERNAL_TOKEN` and `TELEGRAM_LINK_SECRET`.
+
+Manual test plan: [`bot-test-plan.md`](bot-test-plan.md).

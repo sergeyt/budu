@@ -1,10 +1,20 @@
 "use client";
 
 import { Duration } from "luxon";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { HStack, Switch, VStack } from "@chakra-ui/react";
-import { api, type CreateEventTemplateBody, type TemplateChannel } from "@/lib/api";
+import {
+  api,
+  type CreateEventTemplateBody,
+  type TemplateChannel,
+} from "@/lib/api";
 import { Button, Card, Heading, Input, Text, toast } from "@/ui/index";
 import { dateToLocalTime, weekdayName } from "@/lib/templates";
 import type { EventTemplate, Place } from "@/types/model";
@@ -330,21 +340,24 @@ function TemplateChannels({ templateId }: { templateId: string }) {
   const [label, setLabel] = useState("");
   const [pending, startTransition] = useTransition();
 
-  const load = () =>
-    startTransition(async () => {
-      try {
-        const rows = await api.templates.channels.list(templateId);
-        setChannels(rows);
-      } catch (e) {
-        toast.error({
-          title: e instanceof Error ? e.message : "Failed to load channels",
-        });
-      }
-    });
+  const load = useCallback(
+    () =>
+      startTransition(async () => {
+        try {
+          const rows = await api.templates.channels.list(templateId);
+          setChannels(rows);
+        } catch (e) {
+          toast.error({
+            title: e instanceof Error ? e.message : "Failed to load channels",
+          });
+        }
+      }),
+    [templateId],
+  );
 
   useEffect(() => {
     load();
-  }, [templateId]);
+  }, [load]);
 
   const add = () =>
     startTransition(async () => {
