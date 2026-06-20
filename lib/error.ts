@@ -149,6 +149,17 @@ export const errors = {
     new NotFoundError("No event in the given place", {
       code: "NO_EVENT_IN_PLACE",
     }),
+  invalidTimezone: (zone: string) =>
+    new BadRequestError(`Invalid IANA timezone: ${zone}`, {
+      code: "INVALID_TIMEZONE",
+      details: { zone },
+    }),
+
+  // ===== Templates =====
+  templateNotFound: () =>
+    new NotFoundError("Event template not found", {
+      code: "TEMPLATE_NOT_FOUND",
+    }),
 
   // ===== Users =====
   userNotFound: () =>

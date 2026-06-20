@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/api-auth";
 import { UpdatePlace } from "@/lib/validation";
 import { errorMiddleware, errors } from "@/lib/error";
+import { isValidIanaZone } from "@/lib/templates";
 
 type Params = { id?: string };
 
@@ -31,6 +32,9 @@ export const PATCH = errorMiddleware<Params>(async (req, ctx) => {
   const parsed = UpdatePlace.safeParse(body);
   if (!parsed.success) {
     throw errors.invalidPayload("place", parsed.error.flatten());
+  }
+  if (parsed.data.timezone && !isValidIanaZone(parsed.data.timezone)) {
+    throw errors.invalidTimezone(parsed.data.timezone);
   }
   const place = await prisma.place.update({
     where: { id: placeId },

@@ -11,6 +11,12 @@ const Schema = z.object({
   WEBHOOK_URL: z.string().url().optional(),
   WEBHOOK_SECRET: z.string().optional(),
   PORT: z.coerce.number().int().min(1).max(65535).default(8080),
+  // How often the materializer tick fires in **non**-Deno-Deploy runs
+  // (local dev, plain `deno run`, etc.). In Deno Deploy we let `Deno.cron`
+  // schedule it at every minute. Useful to bump while smoke-testing.
+  MATERIALIZE_INTERVAL_SEC: z.coerce.number().int().min(5).max(3600).default(
+    60,
+  ),
 });
 
 export type Config = z.infer<typeof Schema>;

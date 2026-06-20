@@ -2,10 +2,13 @@ import type { z } from "zod";
 import type {
   AddPlaceAdmin,
   CreateEvent,
+  CreateEventTemplate,
   CreatePlace,
+  UpdateEventTemplate,
   UpdatePlace,
 } from "@/lib/validation";
 import type {
+  EventTemplate,
   Place,
   Registration,
   RegistrationStatus,
@@ -17,6 +20,8 @@ export type CreateEventBody = z.infer<typeof CreateEvent>;
 export type CreatePlaceBody = z.infer<typeof CreatePlace>;
 export type UpdatePlaceBody = z.infer<typeof UpdatePlace>;
 export type AddPlaceAdminBody = z.infer<typeof AddPlaceAdmin>;
+export type CreateEventTemplateBody = z.infer<typeof CreateEventTemplate>;
+export type UpdateEventTemplateBody = z.infer<typeof UpdateEventTemplate>;
 
 export type RegisterResponse = {
   ok: true;
@@ -100,6 +105,21 @@ export const api = {
       http<RegisterResponse>(`/api/events/${id}/register`, { method: "POST" }),
     unregister: (id: string) =>
       http<UnregisterResponse>(`/api/events/${id}/register`, {
+        method: "DELETE",
+      }),
+  },
+  templates: {
+    list: (placeId: string) =>
+      http<EventTemplate[]>(`/api/places/${placeId}/templates`),
+    create: (placeId: string, body: CreateEventTemplateBody) =>
+      http<EventTemplate>(`/api/places/${placeId}/templates`, {
+        method: "POST",
+        body,
+      }),
+    update: (id: string, body: UpdateEventTemplateBody) =>
+      http<EventTemplate>(`/api/templates/${id}`, { method: "PATCH", body }),
+    remove: (id: string) =>
+      http<{ ok: true; deleted: string }>(`/api/templates/${id}`, {
         method: "DELETE",
       }),
   },

@@ -21,6 +21,30 @@ export type Place = {
   description?: Opt<string>;
   location?: Opt<string>;
   infoUrl?: Opt<string>;
+  timezone: string;
+  createdAt: DateLike;
+  updatedAt: DateLike;
+};
+
+export type EventTemplate = {
+  id: string;
+  placeId: string;
+  title: string;
+  description: Opt<string>;
+  infoUrl: Opt<string>;
+  /** ISO 1 = Mon … 7 = Sun. */
+  dayOfWeek: number;
+  /**
+   * Postgres TIME(0) surfaced by Prisma as a Date pinned to 1970-01-01
+   * with the time-of-day populated. Use `dateToLocalTime` from
+   * `lib/templates` to render.
+   */
+  localTime: DateLike;
+  durationMinutes: Opt<number>;
+  capacity: Opt<number>;
+  reserveCapacity: Opt<number>;
+  announceOffsetMinutes: number;
+  enabled: boolean;
   createdAt: DateLike;
   updatedAt: DateLike;
 };

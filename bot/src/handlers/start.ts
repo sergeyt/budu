@@ -16,6 +16,7 @@ export async function handleStart(ctx: Context): Promise<void> {
       `• <code>/link &lt;код&gt;</code> — привязать этот чат к месту\n` +
       `• <code>/unlink &lt;код&gt;</code> — отвязать\n` +
       `• <code>/announce_next</code> — опубликовать анонс ближайшего события\n` +
+      `• <code>/templates</code> — шаблоны привязанного места\n` +
       `• <code>/help</code> — помощь`,
     { parse_mode: "HTML", link_preview_options: { is_disabled: true } },
   );
@@ -27,6 +28,7 @@ export async function handleHelp(ctx: Context): Promise<void> {
       "/start — приветствие и id чата\n" +
       "/link <код> — привязать чат к месту\n" +
       "/unlink <код> — отвязать\n" +
-      "/announce_next — анонс ближайшего события привязанного места",
+      "/announce_next — анонс ближайшего события привязанного места\n" +
+      "/templates — шаблоны привязанного места",
   );
 }
