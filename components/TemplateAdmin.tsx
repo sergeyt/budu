@@ -1,10 +1,10 @@
 "use client";
 
 import { Duration } from "luxon";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { HStack, Switch, VStack } from "@chakra-ui/react";
-import { api, type CreateEventTemplateBody } from "@/lib/api";
+import { api, type CreateEventTemplateBody, type TemplateChannel } from "@/lib/api";
 import { Button, Card, Heading, Input, Text, toast } from "@/ui/index";
 import { dateToLocalTime, weekdayName } from "@/lib/templates";
 import type { EventTemplate, Place } from "@/types/model";
@@ -319,7 +319,115 @@ function TemplateRow({
           </Button>
         </HStack>
       </HStack>
+      <TemplateChannels templateId={template.id} />
     </Card.Root>
+  );
+}
+
+function TemplateChannels({ templateId }: { templateId: string }) {
+  const [channels, setChannels] = useState<TemplateChannel[]>([]);
+  const [target, setTarget] = useState("");
+  const [label, setLabel] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const load = () =>
+    startTransition(async () => {
+      try {
+        const rows = await api.templates.channels.list(templateId);
+        setChannels(rows);
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Failed to load channels",
+        });
+      }
+    });
+
+  useEffect(() => {
+    load();
+  }, [templateId]);
+
+  const add = () =>
+    startTransition(async () => {
+      const trimmed = target.trim();
+      if (!trimmed) {
+        toast.error({ title: "Chat id is required" });
+        return;
+      }
+      try {
+        await api.templates.channels.upsert(templateId, {
+          type: "TELEGRAM",
+          target: trimmed,
+          label: label.trim() || null,
+        });
+        setTarget("");
+        setLabel("");
+        load();
+        toast.success({ title: "Channel saved" });
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Save failed",
+        });
+      }
+    });
+
+  const removeChannel = (channelId: string) =>
+    startTransition(async () => {
+      try {
+        await api.templates.channels.remove(templateId, channelId);
+        load();
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Delete failed",
+        });
+      }
+    });
+
+  return (
+    <VStack align="stretch" gap={2} pt={2} borderTopWidth="1px">
+      <Text fontSize="xs" muted>
+        Telegram channels (override place defaults for this template)
+      </Text>
+      {channels.length === 0 ? (
+        <Text fontSize="xs" muted>
+          No overrides — uses place channels.
+        </Text>
+      ) : (
+        channels.map((ch) => (
+          <HStack key={ch.id} justify="space-between" fontSize="sm">
+            <Text>
+              {ch.label ? `${ch.label} · ` : ""}
+              <code>{ch.target}</code>
+            </Text>
+            <Button
+              size="xs"
+              variant="ghost"
+              colorPalette="red"
+              onClick={() => removeChannel(ch.id)}
+              disabled={pending}
+            >
+              Remove
+            </Button>
+          </HStack>
+        ))
+      )}
+      <HStack gap={2}>
+        <Input
+          size="sm"
+          placeholder="Chat id"
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+        />
+        <Input
+          size="sm"
+          placeholder="Label (optional)"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+        <Button size="sm" onClick={add} loading={pending} disabled={pending}>
+          Add
+        </Button>
+      </HStack>
+    </VStack>
   );
 }
 

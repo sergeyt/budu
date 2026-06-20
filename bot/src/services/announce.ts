@@ -1,6 +1,9 @@
 import type { Bot } from "grammy";
+import type { BotContext } from "@/context.ts";
 import type { InlineKeyboardMarkup } from "grammy/types";
 import { encodeCallbackData } from "@/services/callbackData.ts";
+import { webAppBaseUrl } from "@/config.ts";
+import { t, type Locale } from "@/i18n.ts";
 import {
   type EventRow,
   findEventById,
@@ -118,22 +121,25 @@ function renderText(event: EventRow, participants: ParticipantRow[]): string {
   return lines.join("\n");
 }
 
-async function buildKeyboard(eventId: string): Promise<InlineKeyboardMarkup> {
-  const [reg, wai, can, list] = await Promise.all([
+async function buildKeyboard(
+  eventId: string,
+  locale: Locale = "ru",
+): Promise<InlineKeyboardMarkup> {
+  const [reg, wai, can] = await Promise.all([
     encodeCallbackData("reg", eventId),
     encodeCallbackData("wai", eventId),
     encodeCallbackData("can", eventId),
-    encodeCallbackData("list", eventId),
   ]);
+  const listUrl = `${webAppBaseUrl()}/tg/events/${eventId}`;
   return {
     inline_keyboard: [
       [
-        { text: "✅ Я иду", callback_data: reg },
-        { text: "⏳ Резерв", callback_data: wai },
+        { text: t(locale, "keyboard.register"), callback_data: reg },
+        { text: t(locale, "keyboard.waitlist"), callback_data: wai },
       ],
       [
-        { text: "❌ Отмена", callback_data: can },
-        { text: "📋 Список", callback_data: list },
+        { text: t(locale, "keyboard.cancel"), callback_data: can },
+        { text: t(locale, "keyboard.list"), web_app: { url: listUrl } },
       ],
     ],
   };
@@ -157,7 +163,7 @@ export async function buildAnnouncement(
 }
 
 export async function postAnnouncement(
-  bot: Bot,
+  bot: Bot<BotContext>,
   event: EventRow,
   chatId: number | string,
 ): Promise<AnnouncementRef> {
@@ -182,7 +188,7 @@ export async function postAnnouncement(
  * last change. Signature comparison still skips no-op edits.
  */
 export function scheduleAnnouncementRefresh(
-  bot: Bot,
+  bot: Bot<BotContext>,
   eventId: string,
 ): void {
   const existing = pendingRefreshes.get(eventId);
@@ -201,7 +207,7 @@ export function scheduleAnnouncementRefresh(
 }
 
 export async function refreshAnnouncements(
-  bot: Bot,
+  bot: Bot<BotContext>,
   eventId: string,
 ): Promise<void> {
   const event = await findEventById(eventId);

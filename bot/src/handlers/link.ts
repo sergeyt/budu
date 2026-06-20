@@ -5,6 +5,7 @@ import {
   linkTelegramChatToPlace,
   unlinkTelegramChatFromPlace,
 } from "@/api/places.ts";
+import { tr } from "@/i18n.ts";
 
 function extractCode(text: string | undefined): string | null {
   if (!text) return null;
@@ -18,21 +19,21 @@ export async function handleLink(ctx: Context): Promise<void> {
   if (!chatId) return;
   const code = extractCode(ctx.message?.text ?? ctx.channelPost?.text);
   if (!code) {
-    await ctx.reply("Использование: <code>/link &lt;код&gt;</code>", {
-      parse_mode: "HTML",
-    });
+    await ctx.reply(tr(ctx, "link.usage"), { parse_mode: "HTML" });
     return;
   }
 
   const verified = await verifyLinkCode(code);
   if (!verified.ok) {
-    await ctx.reply(`❌ Не удалось привязать: ${verified.error}`);
+    await ctx.reply(tr(ctx, "link.failed", { error: verified.error }));
     return;
   }
 
   const place = await findPlaceById(verified.placeId);
   if (!place) {
-    await ctx.reply(`❌ Место не найдено: ${verified.placeId}`);
+    await ctx.reply(
+      tr(ctx, "link.place_not_found", { placeId: verified.placeId }),
+    );
     return;
   }
 
@@ -41,8 +42,7 @@ export async function handleLink(ctx: Context): Promise<void> {
   await linkTelegramChatToPlace(place.id, chatId, label);
 
   await ctx.reply(
-    `✅ Чат привязан к месту: <b>${place.name}</b>\n` +
-      `<code>${place.id}</code>`,
+    tr(ctx, "link.success", { name: place.name, placeId: place.id }),
     { parse_mode: "HTML" },
   );
 }
@@ -52,28 +52,28 @@ export async function handleUnlink(ctx: Context): Promise<void> {
   if (!chatId) return;
   const code = extractCode(ctx.message?.text ?? ctx.channelPost?.text);
   if (!code) {
-    await ctx.reply("Использование: <code>/unlink &lt;код&gt;</code>", {
-      parse_mode: "HTML",
-    });
+    await ctx.reply(tr(ctx, "unlink.usage"), { parse_mode: "HTML" });
     return;
   }
 
   const verified = await verifyLinkCode(code);
   if (!verified.ok) {
-    await ctx.reply(`❌ Не удалось отвязать: ${verified.error}`);
+    await ctx.reply(tr(ctx, "unlink.failed", { error: verified.error }));
     return;
   }
 
   const place = await findPlaceById(verified.placeId);
   if (!place) {
-    await ctx.reply(`❌ Место не найдено: ${verified.placeId}`);
+    await ctx.reply(
+      tr(ctx, "unlink.place_not_found", { placeId: verified.placeId }),
+    );
     return;
   }
 
   const removed = await unlinkTelegramChatFromPlace(place.id, chatId);
   await ctx.reply(
     removed
-      ? `🗑 Чат отвязан от места: ${place.name}`
-      : `ℹ️ Привязки к месту ${place.name} не было`,
+      ? tr(ctx, "unlink.success", { name: place.name })
+      : tr(ctx, "unlink.not_linked", { name: place.name }),
   );
 }

@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { dateToLocalTime } from "@/lib/templates";
+import { dateToLocalTime, localTimeToDate } from "@/lib/templates";
+import { isTelegramUserPlaceAdmin } from "@/lib/bot/admin";
 import type { TemplateDto } from "@/lib/bot/types";
 
-function toTemplateDto(row: {
+export function toTemplateDto(row: {
   id: string;
   placeId: string;
   title: string;
@@ -64,4 +65,51 @@ export async function listTemplatesForChat(
     orderBy: [{ place: { name: "asc" } }, { title: "asc" }],
   });
   return rows.map(toTemplateDto);
+}
+
+export async function createTemplateForTelegramAdmin(input: {
+  telegramUserId: number;
+  placeId: string;
+  body: {
+    title: string;
+    description?: string | null;
+    infoUrl?: string | null;
+    dayOfWeek: number;
+    localTime: string;
+    durationMinutes?: number | null;
+    capacity?: number | null;
+    reserveCapacity?: number | null;
+    announceOffsetMinutes?: number;
+    enabled?: boolean;
+  };
+}): Promise<TemplateDto | null> {
+  const allowed = await isTelegramUserPlaceAdmin(
+    input.telegramUserId,
+    input.placeId,
+  );
+  if (!allowed) {
+    return null;
+  }
+  const place = await prisma.place.findUnique({ where: { id: input.placeId } });
+  if (!place) {
+    return null;
+  }
+  const data = input.body;
+  const row = await prisma.eventTemplate.create({
+    data: {
+      placeId: input.placeId,
+      title: data.title,
+      description: data.description ?? null,
+      infoUrl: data.infoUrl ?? null,
+      dayOfWeek: data.dayOfWeek,
+      localTime: localTimeToDate(data.localTime),
+      durationMinutes: data.durationMinutes ?? null,
+      capacity: data.capacity ?? null,
+      reserveCapacity: data.reserveCapacity ?? null,
+      announceOffsetMinutes: data.announceOffsetMinutes ?? 1440,
+      enabled: data.enabled ?? true,
+    },
+    include: templateInclude,
+  });
+  return toTemplateDto(row);
 }

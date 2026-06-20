@@ -1,4 +1,5 @@
 import type { Bot } from "grammy";
+import type { BotContext } from "@/context.ts";
 import { listTelegramChannelsForEvent } from "@/api/channels.ts";
 import {
   type AnnounceableEvent,
@@ -24,7 +25,7 @@ function announcedChatIds(event: AnnounceableEvent): Set<string> {
  * `Event.announcements` so the cron tick is idempotent.
  */
 export async function postDueAnnouncements(
-  bot: Bot,
+  bot: Bot<BotContext>,
   now: Date = new Date(),
 ): Promise<AnnounceSchedulerResult> {
   const due = await listEventsDueForAnnouncement(now);

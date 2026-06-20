@@ -122,5 +122,30 @@ export const api = {
       http<{ ok: true; deleted: string }>(`/api/templates/${id}`, {
         method: "DELETE",
       }),
+    channels: {
+      list: (templateId: string) =>
+        http<TemplateChannel[]>(`/api/templates/${templateId}/channels`),
+      upsert: (
+        templateId: string,
+        body: { type: string; target: string; label?: string | null },
+      ) =>
+        http<TemplateChannel>(`/api/templates/${templateId}/channels`, {
+          method: "POST",
+          body,
+        }),
+      remove: (templateId: string, channelId: string) =>
+        http<{ ok: true; deleted: string }>(
+          `/api/templates/${templateId}/channels?channelId=${encodeURIComponent(channelId)}`,
+          { method: "DELETE" },
+        ),
+    },
   },
+};
+
+export type TemplateChannel = {
+  id: string;
+  templateId: string;
+  type: string;
+  target: string;
+  label: string | null;
 };

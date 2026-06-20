@@ -1,4 +1,5 @@
 import type { Bot, Context } from "grammy";
+import type { BotContext } from "@/context.ts";
 import { type Action, decodeCallbackData } from "@/services/callbackData.ts";
 import { findOrCreateTelegramUser } from "@/api/users.ts";
 import {
@@ -9,8 +10,9 @@ import {
   buildFullListMessage,
   scheduleAnnouncementRefresh,
 } from "@/services/announce.ts";
+import { tr } from "@/i18n.ts";
 
-export function handleCallbackQuery(bot: Bot) {
+export function handleCallbackQuery(bot: Bot<BotContext>) {
   return async (ctx: Context): Promise<void> => {
     const cb = ctx.callbackQuery;
     if (!cb?.data) {
@@ -19,7 +21,7 @@ export function handleCallbackQuery(bot: Bot) {
     const decoded = await decodeCallbackData(cb.data);
     if (!decoded.ok) {
       await ctx.answerCallbackQuery({
-        text: `Кнопка устарела (${decoded.error})`,
+        text: tr(ctx, "registration.stale_button", { error: decoded.error }),
         show_alert: false,
       });
       return;
@@ -36,7 +38,7 @@ export function handleCallbackQuery(bot: Bot) {
       } catch (err) {
         console.error("[registration] full list DM failed", err);
         await ctx.answerCallbackQuery({
-          text: "Не удалось отправить список в личку. Напишите боту /start.",
+          text: tr(ctx, "registration.list_dm_failed"),
           show_alert: true,
         });
       }
@@ -49,13 +51,14 @@ export function handleCallbackQuery(bot: Bot) {
       firstName: from.first_name,
     });
 
-    const reply = await runAction(decoded.action, decoded.eventId, user.id);
+    const reply = await runAction(ctx, decoded.action, decoded.eventId, user.id);
     await ctx.answerCallbackQuery({ text: reply.toast });
     scheduleAnnouncementRefresh(bot, decoded.eventId);
   };
 }
 
 async function runAction(
+  ctx: Context,
   action: Exclude<Action, "list">,
   eventId: string,
   userId: string,
@@ -66,35 +69,35 @@ async function runAction(
       const out = await registerUserForEvent(eventId, userId);
       if (!out.ok) {
         if (out.reason === "WINDOW_CLOSED") {
-          return {
-            toast: "Запись открывается за 24ч до начала и закрывается в старт",
-          };
+          return { toast: tr(ctx, "registration.window_closed") };
         }
         return {
           toast: out.reason === "FULL"
-            ? "Все места и резерв заняты"
-            : "Событие не найдено",
+            ? tr(ctx, "registration.full")
+            : tr(ctx, "registration.event_not_found"),
         };
       }
       if (out.alreadyRegistered) {
         return {
           toast: out.status === "CONFIRMED"
-            ? "Вы уже записаны ✅"
-            : "Вы уже в резерве ⏳",
+            ? tr(ctx, "registration.already_confirmed")
+            : tr(ctx, "registration.already_waitlist"),
         };
       }
       return {
         toast: out.status === "CONFIRMED"
-          ? "Записал ✅"
-          : "Свободных мест нет — добавил в резерв ⏳",
+          ? tr(ctx, "registration.registered")
+          : tr(ctx, "registration.waitlisted"),
       };
     }
     case "can": {
       const out = await cancelRegistration(eventId, userId);
       return {
         toast: out.unregistered
-          ? out.promotedUserId ? "Снял запись · резерв двинулся" : "Снял запись"
-          : "Записи не было",
+          ? out.promotedUserId
+            ? tr(ctx, "registration.cancelled_promoted")
+            : tr(ctx, "registration.cancelled")
+          : tr(ctx, "registration.not_registered"),
       };
     }
   }

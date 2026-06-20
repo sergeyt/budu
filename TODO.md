@@ -9,6 +9,9 @@ with `BOT_INTERNAL_TOKEN`), Deno Deploy (`Deno.cron` + webhook). Supports
 both Telegram channels and groups via a per-binding flag. Mini App deferred
 to M4.
 
+Stack note (M4+): Mini App at `/tg/events/[id]`, bot uses `WEB_APP_BASE_URL`
+for inline WebApp buttons; optional `SENTRY_DSN` on the Deno side.
+
 ### M0 — Prisma migrations (no behavior change) ✅
 - [x] `EventTemplate`: weekly recurrence (`dayOfWeek`, `localTime`),
       `durationMinutes`, `capacity`, `reserveCapacity`,
@@ -63,11 +66,11 @@ to M4.
       Full list DMs the tapper; Mini App deferred to M4.
 
 ### M4 — Polish
-- [ ] Telegram Mini App for "Full list" (Next.js page, `initData` auth).
-- [ ] Bot DM template wizard (`grammy-conversations`).
-- [ ] Per-template channel overrides (`EventTemplateNotificationChannel`).
-- [ ] ru/en i18n in bot text (mirror `messages/`).
-- [ ] Sentry-Deno integration.
+- [x] Telegram Mini App for "Full list" (Next.js page, `initData` auth).
+- [x] Bot DM template wizard (`grammy-conversations`).
+- [x] Per-template channel overrides (`EventTemplateNotificationChannel`).
+- [x] ru/en i18n in bot text (mirror `messages/`).
+- [x] Sentry-Deno integration.
 
 ### Open notes
 - Channel posting requires bot to be added as channel admin with

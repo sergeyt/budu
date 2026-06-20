@@ -1,23 +1,23 @@
 import type { Bot, Context } from "grammy";
+import type { BotContext } from "@/context.ts";
 import { findNextEventForPlace } from "@/api/events.ts";
 import { placesLinkedToChat } from "@/api/places.ts";
 import { postAnnouncement } from "@/services/announce.ts";
+import { tr } from "@/i18n.ts";
 
 /**
  * Manual nudge: post the next upcoming event for whichever place(s) this
  * chat is linked to. Useful for sanity-checking templates + capacities
  * before the scheduler hits.
  */
-export function handleAnnounceNext(bot: Bot) {
+export function handleAnnounceNext(bot: Bot<BotContext>) {
   return async (ctx: Context): Promise<void> => {
     const chatId = ctx.chat?.id;
     if (!chatId) return;
 
     const places = await placesLinkedToChat(chatId);
     if (places.length === 0) {
-      await ctx.reply(
-        "Этот чат не привязан ни к одному месту. Используйте /link.",
-      );
+      await ctx.reply(tr(ctx, "announce.not_linked"));
       return;
     }
 
@@ -29,10 +29,7 @@ export function handleAnnounceNext(bot: Bot) {
       posted++;
     }
     if (posted === 0) {
-      await ctx.reply(
-        "Не нашёл ближайших событий для привязанных мест. " +
-          "Создайте событие в админке (или дождитесь материализации шаблона).",
-      );
+      await ctx.reply(tr(ctx, "announce.no_events"));
     }
   };
 }

@@ -65,3 +65,9 @@ const EventTemplateBase = z.object({
 
 export const CreateEventTemplate = EventTemplateBase;
 export const UpdateEventTemplate = EventTemplateBase.partial();
+
+export const UpsertTemplateChannel = z.object({
+  type: z.enum(["TELEGRAM", "WHATSAPP", "SLACK", "MAX"]),
+  target: z.string().min(1),
+  label: z.string().nullish(),
+});

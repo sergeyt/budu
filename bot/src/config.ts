@@ -17,6 +17,10 @@ const Schema = z.object({
   MATERIALIZE_INTERVAL_SEC: z.coerce.number().int().min(5).max(3600).default(
     60,
   ),
+  /** Public URL for Telegram Mini App pages (defaults to API_BASE_URL). */
+  WEB_APP_BASE_URL: z.string().url().optional(),
+  /** Optional Sentry DSN for error reporting. */
+  SENTRY_DSN: z.string().url().optional(),
 });
 
 export type Config = z.infer<typeof Schema>;
@@ -44,4 +48,10 @@ export function loadConfig(): Config {
   }
   cached = cfg;
   return cfg;
+}
+
+/** Base URL for Mini App links embedded in inline keyboards. */
+export function webAppBaseUrl(): string {
+  const cfg = loadConfig();
+  return cfg.WEB_APP_BASE_URL ?? cfg.API_BASE_URL;
 }

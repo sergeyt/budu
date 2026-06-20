@@ -1,13 +1,14 @@
 import type { Bot } from "grammy";
+import type { BotContext } from "@/context.ts";
 import { materializeUpcoming } from "@/api/materialize.ts";
 import { postDueAnnouncements } from "@/services/announceScheduler.ts";
 import { loadConfig } from "@/config.ts";
 
 let started = false;
-let botRef: Bot | undefined;
+let botRef: Bot<BotContext> | undefined;
 
 /** Called from main.ts after bot.init() so the cron tick can post messages. */
-export function attachBotToCron(bot: Bot): void {
+export function attachBotToCron(bot: Bot<BotContext>): void {
   botRef = bot;
 }
 

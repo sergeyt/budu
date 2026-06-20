@@ -9,9 +9,8 @@ export type Channel = {
 };
 
 /**
- * Resolve the notification channels that apply to an event:
- * - event-level channels override place-level channels of the same type
- * - place-level channels of types not configured at the event level apply unchanged
+ * Resolve notification channels for an event. Precedence per `type`:
+ *   event-level overrides template-level overrides place-level.
  */
 export async function getEffectiveChannelsForEvent(
   eventId: string,
@@ -29,6 +28,13 @@ export async function getEffectiveChannelsForEvent(
           label: true,
         },
       },
+      template: {
+        select: {
+          channels: {
+            select: { type: true, target: true, meta: true, label: true },
+          },
+        },
+      },
       place: {
         select: {
           channels: {
@@ -43,11 +49,15 @@ export async function getEffectiveChannelsForEvent(
   }
 
   const eventChannels = event.channels as Channel[];
+  const templateChannels = (event.template?.channels ?? []) as Channel[];
   const placeChannels = event.place.channels as Channel[];
-  const eventTypes = new Set(eventChannels.map((c) => c.type));
 
-  return [
-    ...eventChannels,
-    ...placeChannels.filter((c) => !eventTypes.has(c.type)),
-  ];
+  const covered = new Set(eventChannels.map((c) => c.type));
+  const fromTemplate = templateChannels.filter((c) => !covered.has(c.type));
+  for (const c of fromTemplate) {
+    covered.add(c.type);
+  }
+  const fromPlace = placeChannels.filter((c) => !covered.has(c.type));
+
+  return [...eventChannels, ...fromTemplate, ...fromPlace];
 }

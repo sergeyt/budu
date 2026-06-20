@@ -1,10 +1,17 @@
 import { webhookCallback } from "grammy";
+import * as Sentry from "@sentry/deno";
 import { loadConfig } from "@/config.ts";
 import { createBot, publishCommands } from "@/bot.ts";
 import { attachBotToCron, startCron } from "@/cron.ts";
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
+  if (cfg.SENTRY_DSN) {
+    Sentry.init({ dsn: cfg.SENTRY_DSN, tracesSampleRate: 0.1 });
+    (globalThis as { Sentry?: typeof Sentry }).Sentry = Sentry;
+    console.log("[bot] Sentry enabled");
+  }
+
   const bot = createBot();
   await bot.init();
   await publishCommands(bot);
@@ -47,6 +54,12 @@ async function main(): Promise<void> {
 if (import.meta.main) {
   main().catch((err) => {
     console.error("[bot] fatal", err);
+    try {
+      Sentry.captureException(err);
+      void Sentry.flush(2000);
+    } catch {
+      // Sentry optional
+    }
     Deno.exit(1);
   });
 }

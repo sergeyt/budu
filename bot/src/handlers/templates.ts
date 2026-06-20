@@ -5,6 +5,7 @@ import {
   nextOccurrencesUtc,
   weekdayName,
 } from "@/services/time.ts";
+import { localeFrom, tr } from "@/i18n.ts";
 
 const WEEKDAY_RU: Record<number, string> = {
   1: "Пн",
@@ -23,12 +24,8 @@ function escapeHtml(s: string): string {
     .replaceAll(">", "&gt;");
 }
 
-function formatNext(occUtc: Date, zone: string): string {
-  // Server-rendered string, intentionally short. Telegram clients render
-  // their own timezone for tg-native datetimes only — for plain text we
-  // show local-to-place time so the audience reading the chat sees what
-  // they expect.
-  const fmt = new Intl.DateTimeFormat("ru-RU", {
+function formatNext(occUtc: Date, zone: string, locale: string): string {
+  const fmt = new Intl.DateTimeFormat(locale, {
     timeZone: zone,
     weekday: "short",
     day: "2-digit",
@@ -52,15 +49,13 @@ export async function handleTemplates(ctx: Context): Promise<void> {
 
   const rows = await listTemplatesForChat(chatId);
   if (rows.length === 0) {
-    await ctx.reply(
-      "В этом чате нет шаблонов. Свяжите чат с местом командой " +
-        "<code>/link &lt;код&gt;</code> и создайте шаблон в админке.",
-      { parse_mode: "HTML" },
-    );
+    await ctx.reply(tr(ctx, "templates.empty"), { parse_mode: "HTML" });
     return;
   }
 
   const now = new Date();
+  const locale = localeFrom(ctx);
+  const fmtLocale = locale === "ru" ? "ru-RU" : "en-US";
   const lines: string[] = [];
   // Group by place so a chat linked to multiple places stays readable.
   let currentPlace = "";
@@ -75,8 +70,18 @@ export async function handleTemplates(ctx: Context): Promise<void> {
     const head = `• ${WEEKDAY_RU[t.dayOfWeek] ?? weekdayName(t.dayOfWeek)} ` +
       `${hhmm} — <b>${escapeHtml(t.title)}</b>`;
     const caps: string[] = [];
-    if (t.capacity != null) caps.push(`мест ${t.capacity}`);
-    if (t.reserveCapacity != null) caps.push(`резерв ${t.reserveCapacity}`);
+    if (t.capacity != null) {
+      caps.push(
+        locale === "ru" ? `мест ${t.capacity}` : `cap ${t.capacity}`,
+      );
+    }
+    if (t.reserveCapacity != null) {
+      caps.push(
+        locale === "ru"
+          ? `резерв ${t.reserveCapacity}`
+          : `waitlist ${t.reserveCapacity}`,
+      );
+    }
     if (caps.length > 0) lines.push(`${head} <i>(${caps.join(", ")})</i>`);
     else lines.push(head);
 
@@ -89,7 +94,7 @@ export async function handleTemplates(ctx: Context): Promise<void> {
     }).slice(0, 3);
     if (occs.length > 0) {
       lines.push(
-        `   ↳ ${occs.map((o) => formatNext(o, t.placeTimezone)).join(" · ")}`,
+        `   ↳ ${occs.map((o) => formatNext(o, t.placeTimezone, fmtLocale)).join(" · ")}`,
       );
     }
   }
