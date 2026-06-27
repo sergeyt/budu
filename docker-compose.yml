@@ -1,0 +1,35 @@
+# budu Telegram bot on a VPS (Hetzner, Oracle, etc.)
+#
+# Setup:
+#   cp bot/.env.example bot/.env   # fill TELEGRAM_BOT_TOKEN, API_BASE_URL, …
+#   docker compose up -d --build
+#
+# Optional vifu bot (clone vifu repo as ../vifu, configure ../vifu/bot/.env):
+#   docker compose --profile vifu up -d --build
+
+services:
+  budu-bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    image: budu-bot:local
+    container_name: budu-bot
+    restart: unless-stopped
+    env_file: bot/.env
+    # Polling needs no inbound ports. Uncomment for local health checks:
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+
+  vifu-bot:
+    profiles: [vifu]
+    build:
+      context: ../vifu
+      dockerfile: Dockerfile
+    image: vifu-bot:local
+    container_name: vifu-bot
+    restart: unless-stopped
+    env_file: ../vifu/bot/.env
+    environment:
+      VIFU_ROOT: /app
+    # ports:
+    #   - "127.0.0.1:8787:8787"
