@@ -88,33 +88,20 @@ Public Mini App API (Telegram `initData`, not bot token):
 
 Business logic lives in `lib/bot/*` on the Next side (Prisma + advisory locks).
 
-## Production (Fly.io)
+## Production
 
-Recommended: Docker on [Fly.io](./DEPLOY.md). Polling by default — no public
-URL until you opt into webhooks.
-
-```bash
-# once: fly apps create budu-bot && fly secrets set …
-fly deploy --config bot/fly.toml
-```
-
-Secrets (`TELEGRAM_BOT_TOKEN`, `BOT_INTERNAL_TOKEN`, `TELEGRAM_LINK_SECRET`,
-`API_BASE_URL`, `WEB_APP_BASE_URL`) must match the Next app on Vercel. See
-[`DEPLOY.md`](./DEPLOY.md) for the full checklist and GitHub Actions setup.
-
-### Webhook on Fly (optional)
+Recommended: Docker Compose on a VPS — see [`DEPLOY.md`](./DEPLOY.md). Polling
+by default (no public URL). Secrets (`TELEGRAM_BOT_TOKEN`, `BOT_INTERNAL_TOKEN`,
+`TELEGRAM_LINK_SECRET`, `API_BASE_URL`, `WEB_APP_BASE_URL`) must match the Next
+app on Vercel.
 
 ```bash
-fly secrets set BOT_PUBLIC_URL=https://budu.fly.dev -a budu
+# from repo root, after bot/.env is configured
+docker compose up -d --build
 ```
 
-Same `[http_service]` and `/health` as polling; Telegram POSTs to `/webhook`
-instead of the bot using long-polling.
-
-### Deno Deploy (alternative)
-
-Same env vars; set `BOT_PUBLIC_URL` to your Deno Deploy URL and use
-`deno task start`.
+Optional webhook: set `BOT_PUBLIC_URL` to the public HTTPS origin and expose
+`PORT` (reverse proxy).
 
 ## Tests
 

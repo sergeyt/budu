@@ -25,7 +25,6 @@ async function main(): Promise<void> {
     // Long-polling can't coexist with an active webhook. Drop any leftover
     // one (e.g. set by the Next app) so getUpdates doesn't 409.
     await bot.api.deleteWebhook({ drop_pending_updates: false });
-    // Fly needs something on internal_port for health checks + always-on.
     startHealthServer(cfg.PORT);
     console.log("[bot] starting long-polling…");
     await bot.start({

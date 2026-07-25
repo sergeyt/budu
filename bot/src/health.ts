@@ -1,4 +1,4 @@
-/** Minimal HTTP server so Fly health checks pass while Telegram polling runs. */
+/** Minimal HTTP server for container health checks while Telegram polling runs. */
 export function startHealthServer(port: number): void {
   Deno.serve({
     port,

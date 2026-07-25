@@ -54,7 +54,7 @@ disposable. Override with `ALLOW_NON_TEST_DB=1` if you know what you're doing.
 cd bot && deno task check && deno task test
 ```
 
-Same checks run in CI (`.github/workflows/ci.yml` → `bot` job) before Fly deploy.
+Same checks run in CI (`.github/workflows/ci.yml` → `bot` job).
 
 Integration smoke (Next app must be running with matching `BOT_INTERNAL_TOKEN`):
 

@@ -82,10 +82,11 @@ Telegram entry point.
 
 ## Production
 
-- **Next app** — any Node host (Vercel, …); needs `BOT_INTERNAL_TOKEN`,
+- **Next app** — Vercel (or any Node host); needs `BOT_INTERNAL_TOKEN`,
   `TELEGRAM_BOT_TOKEN`, `SENTRY_DSN` (optional).
-- **Bot** — [Deno Deploy](https://deno.com/deploy) or similar; set
-  `BOT_PUBLIC_URL` (webhook registers on startup). Details: [`bot/README.md`](../bot/README.md#production-deno-deploy).
+- **Bot** — long-running process on a VPS (Docker Compose). Polling by
+  default; set `BOT_PUBLIC_URL` only for webhook mode. Details:
+  [`bot/DEPLOY.md`](../bot/DEPLOY.md).
 
 Both apps need the same `BOT_INTERNAL_TOKEN` and `TELEGRAM_LINK_SECRET`.
 
