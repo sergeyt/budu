@@ -6,7 +6,9 @@ import { loadConfig } from "@/config.ts";
  * secret signs inline-keyboard callback_data (see callbackData.ts).
  *
  * Format: `<base64url(payload)>.<base64url(HMAC-SHA256(payload))>` where
- * payload is `{"placeId":"...","exp":<unix-seconds>}`.
+ * payload is either:
+ *   - place: `{"placeId":"...","exp":<unix-seconds>}`
+ *   - user:  `{"kind":"user","userId":"...","exp":<unix-seconds>}`
  */
 
 const encoder = new TextEncoder();
@@ -65,23 +67,17 @@ function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return diff === 0;
 }
 
-export async function createLinkCode(
-  placeId: string,
-  ttlSeconds: number = 15 * 60,
-): Promise<string> {
-  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
-  const payload = copyBytes(encoder.encode(JSON.stringify({ placeId, exp })));
+async function signPayload(obj: object): Promise<string> {
+  const payload = copyBytes(encoder.encode(JSON.stringify(obj)));
   const sig = copyBytes(
     await crypto.subtle.sign("HMAC", await getKey(), payload),
   );
   return `${b64url(payload)}.${b64url(sig)}`;
 }
 
-export type LinkVerifyResult =
-  | { ok: true; placeId: string }
-  | { ok: false; error: string };
-
-export async function verifyLinkCode(code: string): Promise<LinkVerifyResult> {
+async function verifySignedPayload(
+  code: string,
+): Promise<{ ok: true; payload: unknown } | { ok: false; error: string }> {
   const [p64, s64] = code.split(".");
   if (!p64 || !s64) return { ok: false, error: "Malformed code" };
 
@@ -101,10 +97,50 @@ export async function verifyLinkCode(code: string): Promise<LinkVerifyResult> {
     return { ok: false, error: "Bad signature" };
   }
 
-  let parsed: { placeId?: unknown; exp?: unknown };
   try {
-    parsed = JSON.parse(decoder.decode(payload));
+    return { ok: true, payload: JSON.parse(decoder.decode(payload)) };
   } catch {
+    return { ok: false, error: "Invalid payload" };
+  }
+}
+
+export async function createLinkCode(
+  placeId: string,
+  ttlSeconds: number = 15 * 60,
+): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  return signPayload({ placeId, exp });
+}
+
+export async function createUserLinkCode(
+  userId: string,
+  ttlSeconds: number = 15 * 60,
+): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  return signPayload({ kind: "user", userId, exp });
+}
+
+export type LinkVerifyResult =
+  | { ok: true; placeId: string }
+  | { ok: false; error: string };
+
+export type UserLinkVerifyResult =
+  | { ok: true; userId: string }
+  | { ok: false; error: string };
+
+export async function verifyLinkCode(code: string): Promise<LinkVerifyResult> {
+  const verified = await verifySignedPayload(code);
+  if (!verified.ok) return verified;
+
+  if (typeof verified.payload !== "object" || verified.payload === null) {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const parsed = verified.payload as {
+    kind?: unknown;
+    placeId?: unknown;
+    exp?: unknown;
+  };
+  if (parsed.kind === "user") {
     return { ok: false, error: "Invalid payload" };
   }
   const placeId = typeof parsed.placeId === "string" ? parsed.placeId : null;
@@ -114,4 +150,30 @@ export async function verifyLinkCode(code: string): Promise<LinkVerifyResult> {
     return { ok: false, error: "Code expired" };
   }
   return { ok: true, placeId };
+}
+
+export async function verifyUserLinkCode(
+  code: string,
+): Promise<UserLinkVerifyResult> {
+  const verified = await verifySignedPayload(code);
+  if (!verified.ok) return verified;
+
+  if (typeof verified.payload !== "object" || verified.payload === null) {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const parsed = verified.payload as {
+    kind?: unknown;
+    userId?: unknown;
+    exp?: unknown;
+  };
+  if (parsed.kind !== "user") {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const userId = typeof parsed.userId === "string" ? parsed.userId : null;
+  const exp = typeof parsed.exp === "number" ? parsed.exp : null;
+  if (!userId || !exp) return { ok: false, error: "Invalid payload" };
+  if (exp < Math.floor(Date.now() / 1000)) {
+    return { ok: false, error: "Code expired" };
+  }
+  return { ok: true, userId };
 }

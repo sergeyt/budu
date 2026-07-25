@@ -172,6 +172,21 @@ export const errors = {
   // ===== Users =====
   userNotFound: () =>
     new NotFoundError("User not found", { code: "USER_NOT_FOUND" }),
+  invalidUserLinkCode: (reason: string) =>
+    new BadRequestError(`Invalid account link code: ${reason}`, {
+      code: "INVALID_USER_LINK_CODE",
+      details: { reason },
+    }),
+  telegramAlreadyLinked: () =>
+    new ConflictError(
+      "This account is already linked to a different Telegram user",
+      { code: "TELEGRAM_ALREADY_LINKED" },
+    ),
+  telegramOwnedByOtherUser: () =>
+    new ConflictError(
+      "This Telegram account is already linked to another web user",
+      { code: "TELEGRAM_OWNED_BY_OTHER_USER" },
+    ),
 } as const;
 
 export type ErrorKey = keyof typeof errors;

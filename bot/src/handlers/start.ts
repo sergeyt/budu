@@ -82,6 +82,7 @@ export function handleStart(bot: Bot<BotContext>) {
         tr(ctx, "start.commands_header"),
         tr(ctx, "start.cmd_link"),
         tr(ctx, "start.cmd_unlink"),
+        tr(ctx, "start.cmd_link_account"),
         tr(ctx, "start.cmd_announce"),
         tr(ctx, "start.cmd_templates"),
         tr(ctx, "start.cmd_new_template"),

@@ -28,6 +28,22 @@ export function createBotUsersApi(client: ApiClient) {
         },
       });
     },
+
+    linkAccount(
+      telegramUserId: number,
+      code: string,
+      attrs: { username?: string; firstName?: string } = {},
+    ) {
+      return client.fetch<BotUser>(`${PREFIX}/users/link`, {
+        method: "POST",
+        body: {
+          telegramUserId,
+          code,
+          username: attrs.username,
+          firstName: attrs.firstName,
+        },
+      });
+    },
   };
 }
 

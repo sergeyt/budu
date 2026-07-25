@@ -3,6 +3,7 @@ import { loadConfig } from "@/config.ts";
 import type { BotContext } from "@/context.ts";
 import { handleHelp, handleStart } from "@/handlers/start.ts";
 import { handleLink, handleUnlink } from "@/handlers/link.ts";
+import { handleLinkAccount } from "@/handlers/linkAccount.ts";
 import { handleAnnounceNext } from "@/handlers/announce.ts";
 import { handleCallbackQuery } from "@/handlers/registration.ts";
 import { handleTemplates } from "@/handlers/templates.ts";
@@ -34,6 +35,7 @@ export function createBot(): Bot<BotContext> {
   bot.command("help", handleHelp);
   bot.command("link", handleLink);
   bot.command("unlink", handleUnlink);
+  bot.command("link_account", handleLinkAccount);
   bot.command("announce_next", handleAnnounceNext(bot));
   bot.command("templates", handleTemplates);
 
@@ -55,6 +57,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
       { command: "help", description: c.help },
       { command: "link", description: c.link },
       { command: "unlink", description: c.unlink },
+      { command: "link_account", description: c.link_account },
       { command: "announce_next", description: c.announce_next },
       { command: "templates", description: c.templates },
       { command: "new_template", description: c.new_template },
@@ -66,6 +69,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
     { command: "help", description: c.help },
     { command: "link", description: c.link },
     { command: "unlink", description: c.unlink },
+    { command: "link_account", description: c.link_account },
     { command: "announce_next", description: c.announce_next },
     { command: "templates", description: c.templates },
     { command: "new_template", description: c.new_template },

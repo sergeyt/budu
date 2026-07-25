@@ -43,6 +43,7 @@ database access goes through the Next internal API — see
 
 | Flow | Entry |
 | --- | --- |
+| Link Telegram to web account | `POST /api/me/telegram-link` → DM `/link_account <code>` |
 | Register from announcement | Tap ✅ / ⏳ under the live message |
 | Register from DM | `t.me/<bot>?start=ev_<eventId>` |
 | Full participant list | Tap **📋 List** (Telegram Mini App) |
@@ -90,4 +91,6 @@ Telegram entry point.
 
 Both apps need the same `BOT_INTERNAL_TOKEN` and `TELEGRAM_LINK_SECRET`.
 
-Manual test plan: [`bot-test-plan.md`](bot-test-plan.md).
+Manual test plan: [`bot-test-plan.md`](bot-test-plan.md). Super-admin
+place/templates smoke: [`superadmin-bot-guide.md`](superadmin-bot-guide.md).
+Account linking: [`telegram-user-linking-plan.md`](telegram-user-linking-plan.md).

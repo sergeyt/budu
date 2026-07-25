@@ -8,7 +8,12 @@ Deno.env.set("TELEGRAM_BOT_TOKEN", "test-token-0000000000");
 Deno.env.set("API_BASE_URL", "http://localhost:3000");
 Deno.env.set("BOT_INTERNAL_TOKEN", "test-internal-token-00000000");
 
-const { createLinkCode, verifyLinkCode } = await import(
+const {
+  createLinkCode,
+  createUserLinkCode,
+  verifyLinkCode,
+  verifyUserLinkCode,
+} = await import(
   "../src/services/linkCode.ts"
 );
 
@@ -93,6 +98,28 @@ Deno.test("linkCode: accepts code one second before expiry", async () => {
     assertEquals(await verifyLinkCode(code), {
       ok: true,
       placeId: "place_abc123",
+    });
+  } finally {
+    time.restore();
+  }
+});
+
+Deno.test("linkCode: user link codes round-trip and stay distinct from place", async () => {
+  const time = new FakeTime("2025-06-01T12:00:00.000Z");
+  try {
+    const userCode = await createUserLinkCode("user_abc123");
+    assertEquals(await verifyUserLinkCode(userCode), {
+      ok: true,
+      userId: "user_abc123",
+    });
+    const placeCode = await createLinkCode("place_abc123");
+    assertEquals(await verifyUserLinkCode(placeCode), {
+      ok: false,
+      error: "Invalid payload",
+    });
+    assertEquals(await verifyLinkCode(userCode), {
+      ok: false,
+      error: "Invalid payload",
     });
   } finally {
     time.restore();

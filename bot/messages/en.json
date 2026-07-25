@@ -4,6 +4,7 @@
     "help": "Help",
     "link": "Link chat to a place",
     "unlink": "Unlink",
+    "link_account": "Link Telegram to web account",
     "announce_next": "Post next event announcement",
     "templates": "Templates for linked place",
     "new_template": "Create a weekly template (DM)"
@@ -14,6 +15,7 @@
     "commands_header": "Commands:",
     "cmd_link": "• <code>/link &lt;code&gt;</code> — link this chat to a place",
     "cmd_unlink": "• <code>/unlink &lt;code&gt;</code> — unlink",
+    "cmd_link_account": "• <code>/link_account &lt;code&gt;</code> — link Telegram to your web account (DM)",
     "cmd_announce": "• <code>/announce_next</code> — post the next event announcement",
     "cmd_templates": "• <code>/templates</code> — templates for the linked place",
     "cmd_new_template": "• <code>/new_template</code> — create a template (DM, admins only)",
@@ -24,13 +26,19 @@
     "register_closed": "Registration opens 24 hours before start."
   },
   "help": {
-    "body": "Available commands:\n/start — greeting and chat id\n/start ev_<id> — open an event and register\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
+    "body": "Available commands:\n/start — greeting and chat id\n/start ev_<id> — open an event and register\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/link_account <code> — link Telegram to your web account (DM)\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
   },
   "link": {
     "usage": "Usage: <code>/link &lt;code&gt;</code>",
     "failed": "❌ Link failed: {error}",
     "place_not_found": "❌ Place not found: {placeId}",
     "success": "✅ Chat linked to place: <b>{name}</b>\n<code>{placeId}</code>"
+  },
+  "link_account": {
+    "dm_only": "Run /link_account in a private chat with the bot.",
+    "usage": "Usage: <code>/link_account &lt;code&gt;</code>\nGet a code while signed in: <code>POST /api/me/telegram-link</code>",
+    "failed": "❌ Account link failed: {error}",
+    "success": "✅ Telegram linked to web account <b>{name}</b>\n<code>{userId}</code>"
   },
   "unlink": {
     "usage": "Usage: <code>/unlink &lt;code&gt;</code>",

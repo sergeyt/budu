@@ -482,11 +482,12 @@ Use before a release:
 
 - [ ] `deno task check && deno task test` green
 - [ ] `/link` + `/templates` in linked chat
+- [ ] `POST /api/me/telegram-link` + DM `/link_account` (web role available in bot)
 - [ ] `/announce_next` posts with keyboard
 - [ ] Register + cancel via inline button; message edits
 - [ ] Deep link `?start=ev_<id>` works in DM
 - [ ] **📋 List** Mini App on phone (ngrok Mode B)
-- [ ] `/new_template` in DM (place admin) creates template
+- [ ] `/new_template` in DM (place admin / linked SUPERADMIN) creates template
 - [ ] Cron materialize + announce (or smoke script)
 - [ ] Web registration syncs to bot message
 - [ ] ru + en command menu visible

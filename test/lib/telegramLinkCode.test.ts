@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLinkCode, verifyLinkCode } from "@/lib/telegramLinkCode";
+import {
+  createLinkCode,
+  createUserLinkCode,
+  verifyLinkCode,
+  verifyUserLinkCode,
+} from "@/lib/telegramLinkCode";
 
 describe("telegramLinkCode", () => {
   beforeEach(() => {
@@ -75,6 +80,36 @@ describe("telegramLinkCode", () => {
     expect(verifyLinkCode(code)).toEqual({
       ok: true,
       placeId: "place_abc123",
+    });
+  });
+
+  it("round-trips userId for account link codes", () => {
+    const code = createUserLinkCode("user_abc123");
+    expect(verifyUserLinkCode(code)).toEqual({
+      ok: true,
+      userId: "user_abc123",
+    });
+  });
+
+  it("rejects place codes as user link codes and vice versa", () => {
+    const placeCode = createLinkCode("place_abc123");
+    const userCode = createUserLinkCode("user_abc123");
+    expect(verifyUserLinkCode(placeCode)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+    expect(verifyLinkCode(userCode)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+  });
+
+  it("rejects an expired user link code", () => {
+    const code = createUserLinkCode("user_abc123", 60);
+    vi.setSystemTime(new Date("2025-06-01T12:01:01.000Z"));
+    expect(verifyUserLinkCode(code)).toEqual({
+      ok: false,
+      error: "Code expired",
     });
   });
 });

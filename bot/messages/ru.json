@@ -4,6 +4,7 @@
     "help": "Помощь",
     "link": "Привязать чат к месту",
     "unlink": "Отвязать",
+    "link_account": "Привязать Telegram к веб-аккаунту",
     "announce_next": "Анонс ближайшего события",
     "templates": "Шаблоны привязанного места",
     "new_template": "Создать шаблон (личка)"
@@ -14,6 +15,7 @@
     "commands_header": "Команды:",
     "cmd_link": "• <code>/link &lt;код&gt;</code> — привязать этот чат к месту",
     "cmd_unlink": "• <code>/unlink &lt;код&gt;</code> — отвязать",
+    "cmd_link_account": "• <code>/link_account &lt;код&gt;</code> — привязать Telegram к веб-аккаунту (личка)",
     "cmd_announce": "• <code>/announce_next</code> — опубликовать анонс ближайшего события",
     "cmd_templates": "• <code>/templates</code> — шаблоны привязанного места",
     "cmd_new_template": "• <code>/new_template</code> — создать шаблон (личка, для админов)",
@@ -24,13 +26,19 @@
     "register_closed": "Запись открывается за 24 часа до начала."
   },
   "help": {
-    "body": "Доступные команды:\n/start — приветствие и id чата\n/start ev_<id> — открыть событие и записаться\n/link <код> — привязать чат к месту\n/unlink <код> — отвязать\n/announce_next — анонс ближайшего события привязанного места\n/templates — шаблоны привязанного места\n/new_template — создать еженедельный шаблон (личка, для админов)"
+    "body": "Доступные команды:\n/start — приветствие и id чата\n/start ev_<id> — открыть событие и записаться\n/link <код> — привязать чат к месту\n/unlink <код> — отвязать\n/link_account <код> — привязать Telegram к веб-аккаунту (личка)\n/announce_next — анонс ближайшего события привязанного места\n/templates — шаблоны привязанного места\n/new_template — создать еженедельный шаблон (личка, для админов)"
   },
   "link": {
     "usage": "Использование: <code>/link &lt;код&gt;</code>",
     "failed": "❌ Не удалось привязать: {error}",
     "place_not_found": "❌ Место не найдено: {placeId}",
     "success": "✅ Чат привязан к месту: <b>{name}</b>\n<code>{placeId}</code>"
+  },
+  "link_account": {
+    "dm_only": "Команду /link_account нужно вызывать в личке с ботом.",
+    "usage": "Использование: <code>/link_account &lt;код&gt;</code>\nПолучить код, будучи залогиненным: <code>POST /api/me/telegram-link</code>",
+    "failed": "❌ Не удалось привязать аккаунт: {error}",
+    "success": "✅ Telegram привязан к веб-аккаунту <b>{name}</b>\n<code>{userId}</code>"
   },
   "unlink": {
     "usage": "Использование: <code>/unlink &lt;код&gt;</code>",
