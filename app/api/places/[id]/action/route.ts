@@ -32,7 +32,11 @@ async function generateTelegramLink(placeId: string) {
   const code = createLinkCode(placeId, 15 * 60); // 15 min TTL
   return {
     code,
-    instructions: `Open Telegram → DM your bot and send:\n/link ${code}`,
+    instructions:
+      "In the Telegram group/channel that should receive announcements, send:\n" +
+      `/link ${code}\n\n` +
+      "(Code expires in 15 minutes. Bot must be able to read commands there; " +
+      "for channels, make it an admin with Post + Edit.)",
   };
 }
 
