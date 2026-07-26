@@ -11,8 +11,13 @@ import { SuperAdminGate } from "./Gate";
 
 enum ActionType {
   REUSE_EVENT = "reuse_event",
-  TELEGRAM_LINK = "telegram_link",
+  TELEGRAM_CHAT = "telegram_chat",
+  TELEGRAM_ACCOUNT = "telegram_account",
 }
+
+type LinkResult = TelegramLinkResponse & {
+  command: "/link" | "/link_account";
+};
 
 export function SuperAdminConsole({
   user,
@@ -22,9 +27,7 @@ export function SuperAdminConsole({
   place: Place;
 }) {
   const router = useRouter();
-  const [linkResult, setLinkResult] = useState<TelegramLinkResponse | null>(
-    null,
-  );
+  const [linkResult, setLinkResult] = useState<LinkResult | null>(null);
   const [busy, setBusy] = useState<ActionType | null>(null);
 
   const onReuseEvent = async () => {
@@ -43,8 +46,8 @@ export function SuperAdminConsole({
     }
   };
 
-  const onTelegramLink = async () => {
-    setBusy(ActionType.TELEGRAM_LINK);
+  const onTelegramChatLink = async () => {
+    setBusy(ActionType.TELEGRAM_CHAT);
     try {
       const resp = await api.places.action<TelegramLinkResponse>(place.id, {
         type: "telegram_link",
@@ -52,10 +55,10 @@ export function SuperAdminConsole({
       if (!resp?.code) {
         throw new Error("Server did not return a link code");
       }
-      setLinkResult(resp);
+      setLinkResult({ ...resp, command: "/link" });
     } catch (err) {
       toast.error({
-        title: "Telegram link failed",
+        title: "Telegram chat link failed",
         description: err instanceof ApiError ? err.message : String(err),
       });
     } finally {
@@ -63,13 +66,32 @@ export function SuperAdminConsole({
     }
   };
 
-  const copyCode = async () => {
+  const onTelegramAccountLink = async () => {
+    setBusy(ActionType.TELEGRAM_ACCOUNT);
+    try {
+      const resp = await api.me.telegramLink();
+      if (!resp?.code) {
+        throw new Error("Server did not return a link code");
+      }
+      setLinkResult({ ...resp, command: "/link_account" });
+    } catch (err) {
+      toast.error({
+        title: "Telegram account link failed",
+        description: err instanceof ApiError ? err.message : String(err),
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const copyCommand = async () => {
     if (!linkResult) {
       return;
     }
+    const text = `${linkResult.command} ${linkResult.code}`;
     try {
-      await navigator.clipboard.writeText(`/link ${linkResult.code}`);
-      toast.success({ title: "Copied /link command" });
+      await navigator.clipboard.writeText(text);
+      toast.success({ title: `Copied ${linkResult.command} command` });
     } catch {
       toast.error({ title: "Could not copy to clipboard" });
     }
@@ -92,10 +114,10 @@ export function SuperAdminConsole({
             borderRadius="md"
             color="text"
           >
-            {linkResult.code}
+            {`${linkResult.command} ${linkResult.code}`}
           </Text>
-          <Button w="full" variant="gradient" onClick={copyCode}>
-            Copy /link command
+          <Button w="full" variant="gradient" onClick={copyCommand}>
+            {`Copy ${linkResult.command} command`}
           </Button>
           <Button w="full" variant="outline" onClick={() => setLinkResult(null)}>
             Close
@@ -118,11 +140,20 @@ export function SuperAdminConsole({
         <Button
           w="full"
           variant="gradient"
-          loading={busy === ActionType.TELEGRAM_LINK}
+          loading={busy === ActionType.TELEGRAM_CHAT}
           disabled={busy !== null}
-          onClick={onTelegramLink}
+          onClick={onTelegramChatLink}
         >
-          Telegram Link
+          Link Telegram Chat
+        </Button>
+        <Button
+          w="full"
+          variant="gradient"
+          loading={busy === ActionType.TELEGRAM_ACCOUNT}
+          disabled={busy !== null}
+          onClick={onTelegramAccountLink}
+        >
+          Link Telegram Account
         </Button>
       </VStack>
     );

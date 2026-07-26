@@ -33,17 +33,11 @@ Sign out and back in so the session picks up the role.
 ## 2. Link your Telegram to the web account
 
 Needed so bot admin commands (`/new_template`, etc.) see your SUPERADMIN /
-PlaceAdmin role. No web UI — API + bot only.
+PlaceAdmin role.
 
-1. While signed in on the site, in the browser console:
-
-```js
-await fetch("/api/me/telegram-link", { method: "POST" }).then((r) => r.json());
-// → { code, instructions }
-```
-
+1. Open a place page → **Super Admin Console** → **Link Telegram Account**
+   (or `POST /api/me/telegram-link` while signed in).
 2. DM the bot: `/link_account <code>` (15 min TTL).
-
 3. Expect success with your user id. Re-run is idempotent if already linked to
    the same Telegram account.
 
@@ -90,7 +84,7 @@ Alternative: DM the bot as SUPERADMIN and run `/new_template` (wizard; DM only).
 ## 5. Link Telegram chat to the place
 
 1. Open `/?place=<placeId>`
-2. **Super Admin Console** → **Telegram Link** → copy the code (15 min TTL)
+2. **Super Admin Console** → **Link Telegram Chat** → copy the code (15 min TTL)
 3. In the group/channel (or a DM): `/link <code>`
 4. Check: `/templates` lists the place’s templates
 
@@ -124,9 +118,9 @@ reached (instead of `/announce_next`).
 | Goal | Where |
 | --- | --- |
 | Create place | `POST /api/places` |
-| Link Telegram **user** | `POST /api/me/telegram-link` → DM `/link_account <code>` |
+| Link Telegram **user** | `/?place=<id>` → **Link Telegram Account** → DM `/link_account` |
 | Templates | `/admin/places/<id>/templates` |
-| Link **chat** code | `/?place=<id>` → Telegram Link |
+| Link **chat** code | `/?place=<id>` → **Link Telegram Chat** |
 | Link chat | `/link <code>` in Telegram |
 | List templates | `/templates` in linked chat |
 | Post next event | `/announce_next` |

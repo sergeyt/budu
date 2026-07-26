@@ -18,6 +18,7 @@ const webApi = createWebApi(client);
 
 /** Wire JSON matches app model shapes; assert at the boundary. */
 export const api = {
+  me: webApi.me,
   places: webApi.places,
   templates: webApi.templates,
   events: {

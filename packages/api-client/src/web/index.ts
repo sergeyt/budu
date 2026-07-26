@@ -6,6 +6,7 @@ import type {
   CreatePlaceBody,
   RegisterResponse,
   SuperAdminAction,
+  TelegramLinkResponse,
   TemplateChannel,
   UnregisterResponse,
   UpdateEventTemplateBody,
@@ -16,6 +17,16 @@ import type {
   WebPlace,
   WebRegistration,
 } from "../types/web";
+
+export function createWebMeApi(client: ApiClient) {
+  return {
+    /** Mint a short-lived code for bot `/link_account`. */
+    telegramLink: () =>
+      client.fetch<TelegramLinkResponse>("/api/me/telegram-link", {
+        method: "POST",
+      }),
+  };
+}
 
 export function createWebPlacesApi(client: ApiClient) {
   return {
@@ -98,6 +109,7 @@ export function createWebTemplatesApi(client: ApiClient) {
 
 export function createWebApi(client: ApiClient) {
   return {
+    me: createWebMeApi(client),
     places: createWebPlacesApi(client),
     events: createWebEventsApi(client),
     templates: createWebTemplatesApi(client),
