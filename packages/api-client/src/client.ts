@@ -36,7 +36,10 @@ export class ApiClient {
     this.baseUrl = options.baseUrl ?? "";
     this.auth = options.auth;
     this.credentials = options.credentials;
-    this.fetchFn = options.fetch ?? fetch;
+    // Must not store unbound `window.fetch` — calling it later throws
+    // "Illegal invocation" in browsers (Safari/WebKit especially).
+    this.fetchFn =
+      options.fetch ?? ((input, init) => globalThis.fetch(input, init));
   }
 
   async fetch<T>(path: string, init: HttpInit = {}): Promise<T> {
