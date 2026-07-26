@@ -69,6 +69,17 @@ export function handleStart(bot: Bot<BotContext>) {
       return;
     }
 
+    // Ensure a bot-only User row exists for this Telegram identity.
+    // A later Yandex/OAuth login may create a separate web user; /link_account
+    // can merge the orphan, or they can coexist until Gmail replaces Yandex.
+    const from = ctx.from;
+    if (from) {
+      await api.users.findOrCreateTelegram(from.id, {
+        username: from.username,
+        firstName: from.first_name,
+      });
+    }
+
     const chat = ctx.chat;
     const chatId = chat?.id;
     const name = displayName(ctx);
