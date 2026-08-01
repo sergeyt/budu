@@ -15,7 +15,7 @@
     "grammy": "https://deno.land/x/grammy@v1.44.0/mod.ts",
     "grammy/types": "https://deno.land/x/grammy@v1.44.0/types.ts",
     "@grammyjs/conversations": "https://deno.land/x/grammy_conversations@v1.2.0/mod.ts",
-    "@sentry/deno": "npm:@sentry/deno@10.59.0",
+    "@sentry/deno": "npm:@sentry/deno@10.69.0",
     "luxon": "npm:luxon@^3.7.2",
     "@types/luxon": "npm:@types/luxon@^3.7.2",
     "zod": "npm:zod@^4.4.3",

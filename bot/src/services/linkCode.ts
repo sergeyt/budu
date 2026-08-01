@@ -109,7 +109,7 @@ export async function createLinkCode(
   ttlSeconds: number = 15 * 60,
 ): Promise<string> {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
-  return signPayload({ placeId, exp });
+  return await signPayload({ placeId, exp });
 }
 
 export async function createUserLinkCode(
@@ -117,7 +117,7 @@ export async function createUserLinkCode(
   ttlSeconds: number = 15 * 60,
 ): Promise<string> {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
-  return signPayload({ kind: "user", userId, exp });
+  return await signPayload({ kind: "user", userId, exp });
 }
 
 export type LinkVerifyResult =

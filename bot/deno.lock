@@ -8,7 +8,7 @@
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/path@1.1.2": "1.1.2",
     "jsr:@std/testing@1": "1.0.19",
-    "npm:@sentry/deno@10.59.0": "10.59.0",
+    "npm:@sentry/deno@10.69.0": "10.69.0",
     "npm:@types/luxon@^3.7.2": "3.7.2",
     "npm:luxon@^3.7.2": "3.7.2",
     "npm:zod@^4.4.3": "4.4.3"
@@ -44,8 +44,8 @@
     }
   },
   "npm": {
-    "@apm-js-collab/code-transformer-bundler-plugins@0.5.0": {
-      "integrity": "sha512-YxLBY5nGlurL7QeJLq6e5g0ouBpAp0pwgyA/5rHXEXwhiPLn9ZHbT+Y2LlP90GT872cSocfjWRYu/fnpuBudNQ==",
+    "@apm-js-collab/code-transformer-bundler-plugins@0.7.3": {
+      "integrity": "sha512-qNbPwuMZ8f5ZuGj/ttPeB7a6C/S1bB6tNYaEL5vNiRKydSAxa4AU0gxCWgaP4fVju+AuwhcumSFjrEcGF9Dv7Q==",
       "dependencies": [
         "@apm-js-collab/code-transformer",
         "es-module-lexer",
@@ -53,8 +53,8 @@
         "module-details-from-path"
       ]
     },
-    "@apm-js-collab/code-transformer@0.15.0": {
-      "integrity": "sha512-XmXYVs8CzJ1Aj79noVbn2weUO/XWtRyURpGqx7aU7DOXlUQhR0WKOQNF0okh7PCeY37vxf7kU3v57OAkEPm3ww==",
+    "@apm-js-collab/code-transformer@0.18.1": {
+      "integrity": "sha512-u1Hb6bHjWtkSpiprwVP6YaHC1DTN4RAU3zYkUDUe7WMnJwdyU1pwTL9dFKiSJB9IiLue/EQovmyx6xhU7FFtAQ==",
       "dependencies": [
         "@types/estree",
         "astring",
@@ -65,8 +65,8 @@
       ],
       "bin": true
     },
-    "@apm-js-collab/tracing-hooks@0.10.0": {
-      "integrity": "sha512-2/Z3NTewJTruUkmsSnBC5bJlLNUd9keuD1OLlTEpim4FyLhm6m2Rnfv+wrFdUvFfhmH8CRdiDZBqBrn+wyaGuA==",
+    "@apm-js-collab/tracing-hooks@0.13.0": {
+      "integrity": "sha512-mTvWz9rnQwx1U3h0XPTHaX7bgfkpipLLTQyjlC2cdhQpQEuoLT0AGzoydeoq2NxfEVv6fWOOETcSbb2nptleyw==",
       "dependencies": [
         "@apm-js-collab/code-transformer",
         "debug",
@@ -79,29 +79,31 @@
     "@opentelemetry/api@1.9.1": {
       "integrity": "sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q=="
     },
-    "@sentry/conventions@0.12.0": {
-      "integrity": "sha512-z1JQrl/1SLY+8wpzvork6vl+fpsg/oCCxM7HWWhUnI/R+OGNyoIzieQuggX3uUMY7NBtp8UWCQx6FeFazzOF9g=="
+    "@sentry/conventions@0.16.0": {
+      "integrity": "sha512-fO9PLmHdVURcSPUpWCItWAtgKiMwGdJHbovoSEyLplX5sxs2ugvI4CBPTrkkgqhObnZOD0CnWBKDzSVQYBKEyQ=="
     },
-    "@sentry/core@10.59.0": {
-      "integrity": "sha512-QeG7XZL5j6CkToYCE7OwCerb/r742Tjj9p1BBohBKcypYTPRuqfD+A3FeUj7pk5CGO6Vj1/gOAmdbuuNbR51dQ=="
+    "@sentry/core@10.69.0": {
+      "integrity": "sha512-+uuqVEeiDzYuAKjZLqsROKXvRTbl/QeH0gfGRtpYib1cud4rAFWRIkFmcR7Jb7JGFYwmReyQotiTj/hcDszTZg==",
+      "dependencies": [
+        "@sentry/conventions"
+      ]
     },
-    "@sentry/deno@10.59.0": {
-      "integrity": "sha512-+cGof16N3I5/cvtZ3oBOc+cFayz9Kaxpwkzesaqm5Pf7Vj8T/AW6EQA+yHytRBKfXBApsnu9zt3Pwlr9Zr9MxA==",
+    "@sentry/deno@10.69.0": {
+      "integrity": "sha512-OmsSBuurSsdFMaFurR1yKXDwiMcr8ciPAPNCCoytg0QxzKvHd1DtotN8qxiPdX0VG58EPTlb0xGl8i3/ky5tZw==",
       "dependencies": [
         "@opentelemetry/api",
         "@sentry/core",
         "@sentry/server-utils"
       ]
     },
-    "@sentry/server-utils@10.59.0": {
-      "integrity": "sha512-mR3fWaU7uGxIstRba6YO+/6V3qIa7432F7/U8EWHry+dY4C9DWAVG90E2GCzeD2MwLSP0tB25i8p1TWTGiQgVg==",
+    "@sentry/server-utils@10.69.0": {
+      "integrity": "sha512-0MwHrA8+nNvMIsqf8m3cXwCBlUjr6AS7N6CZvHJtY1DkqEvQqEbD5VIrhzEyHN/KMZIgQ8XeDCQRhjnXFQGRhg==",
       "dependencies": [
-        "@apm-js-collab/code-transformer",
         "@apm-js-collab/code-transformer-bundler-plugins",
         "@apm-js-collab/tracing-hooks",
         "@sentry/conventions",
         "@sentry/core",
-        "magic-string"
+        "meriyah"
       ]
     },
     "@types/estree@1.0.9": {
@@ -120,8 +122,8 @@
         "ms"
       ]
     },
-    "es-module-lexer@2.1.0": {
-      "integrity": "sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ=="
+    "es-module-lexer@2.3.1": {
+      "integrity": "sha512-shc1dbU90Yl/xq1QrC7QRtfcwURZuVRfPhZbDoldJ1cn1gzDvBaBWlv0eFolj5+0znnPJz5TXLxsN77X/12KTA=="
     },
     "esquery@1.7.0": {
       "integrity": "sha512-Ap6G0WQwcU/LHsvLwON1fAQX9Zp0A2Y6Y/cJBl9r/JbW90Zyg4/zbG6zzKa2OTALELarYHmKu0GhpM5EO+7T0g==",
@@ -187,6 +189,25 @@
     "https://deno.land/x/grammy@v1.44.0/platform.deno.ts": "bff65a7efb99b4645ad20d7c4041a61b7faf55b14261ee75363d9bd0c6d7ee8a",
     "https://deno.land/x/grammy@v1.44.0/types.deno.ts": "2a19e5a4f745c74fe1c89055d666f958ceec78c9bd429062167c2ac78530fcb4",
     "https://deno.land/x/grammy@v1.44.0/types.ts": "729415590dfa188dbe924dea614dff4e976babdbabb28a307b869fc25777cdf0",
+    "https://deno.land/x/grammy@v1.45.1/bot.ts": "5c1d0360fe3543eaa78a1400794b491d497c647cd34e68fb81282782fb0370b5",
+    "https://deno.land/x/grammy@v1.45.1/composer.ts": "4fcfc5c5b68107c0e0f24a9b00a5f3cf8d4ed0adee964be17005d96782e09562",
+    "https://deno.land/x/grammy@v1.45.1/context.ts": "cb07082658fbe93eeca6b8fe31bcabd3a6d94ea8d5dd232b45dce8191db19f71",
+    "https://deno.land/x/grammy@v1.45.1/convenience/constants.ts": "fc972813cc017f707958631d7959e95b83968615a941da55d83176dff37519e3",
+    "https://deno.land/x/grammy@v1.45.1/convenience/frameworks.ts": "21732d143f24828b93082265f201d40f1af64903ad784cece86e4da1b1e61390",
+    "https://deno.land/x/grammy@v1.45.1/convenience/inline_query.ts": "e21ffb02c966e63ac7c3526920ad64a298c618eb587e7bd8b762564fe85b2bdc",
+    "https://deno.land/x/grammy@v1.45.1/convenience/input_media.ts": "7af72a5fdb1af0417e31b1327003f536ddfdf64e06ab8bc7f5da6b574de38658",
+    "https://deno.land/x/grammy@v1.45.1/convenience/keyboard.ts": "deb8403a6f3d106080651ef6f738490b6bc50713ae3fa5ac0fd50020873c70d0",
+    "https://deno.land/x/grammy@v1.45.1/convenience/session.ts": "5e4b976528a0b3d7893645ac23e2e35e78671af578a3aed5efb4b621e7e9b6da",
+    "https://deno.land/x/grammy@v1.45.1/convenience/webhook.ts": "ff89a9472a87e47adb343dbb29ead04f668b1f4ca0d9ae47a6bdf29575ace824",
+    "https://deno.land/x/grammy@v1.45.1/core/api.ts": "d954034a8d1632051a5019e6297c4f127713a93b4980bbedada95701bfca8404",
+    "https://deno.land/x/grammy@v1.45.1/core/client.ts": "1bc84185f47e3a5e3116d0e840e545533822c8231267ec2f80aef8bb90903cc8",
+    "https://deno.land/x/grammy@v1.45.1/core/error.ts": "9fd6695e201dc04a30e1688f65ab08729a1e821236a2322514f1e8763a03ad6e",
+    "https://deno.land/x/grammy@v1.45.1/core/payload.ts": "5e27679acca66cbca981e2b77b206da3efe262f69d4638290b3567f514f50a0e",
+    "https://deno.land/x/grammy@v1.45.1/filter.ts": "d4dd98f163c3113a22f977efca5647f059af768388e5f5f3158c5d4e3105913c",
+    "https://deno.land/x/grammy@v1.45.1/mod.ts": "a973e356760eed1b58bc89280e6eb41bbdf74035f6348c08d6cebf50da1dac34",
+    "https://deno.land/x/grammy@v1.45.1/platform.deno.ts": "d849577c4958bbf7c5c4ef009024cf12ce1d1da2feab144d7dca0dd42b6038f4",
+    "https://deno.land/x/grammy@v1.45.1/types.deno.ts": "6e8b05417f4e5792d3f9050f5491dc04e36ccec3bc8570ab8712d35403e68427",
+    "https://deno.land/x/grammy@v1.45.1/types.ts": "729415590dfa188dbe924dea614dff4e976babdbabb28a307b869fc25777cdf0",
     "https://deno.land/x/grammy_conversations@v1.2.0/conversation.ts": "4bcad06e2ac562969a7a6661bb1cf1477a3fe9e537c18419de65c456feb69499",
     "https://deno.land/x/grammy_conversations@v1.2.0/deps.deno.ts": "c982798d7ca4cd3ebcd5a24319d03c5980dc47827b5a172a77022859abdb404e",
     "https://deno.land/x/grammy_conversations@v1.2.0/form.ts": "d2d527fdcb26eb489b4aa1a183ae3aa14bf185a375ebf7d5c6ab8360e8b0e170",
@@ -207,13 +228,28 @@
     "https://deno.land/x/grammy_types@v3.28.0/settings.ts": "43879f885b8d76877640810246a5e4a0e495c6d364fd06e99ad1cb8920b4b5cf",
     "https://deno.land/x/grammy_types@v3.28.0/story.ts": "f558c6e6054a43fa1403c2376f7c0b51e2138f4e0d13f0f6e870ffd1cd085ae2",
     "https://deno.land/x/grammy_types@v3.28.0/update.ts": "d03351337e40465708a53c4ccbd56ba6cf1dc889e7312b3eab8bc50cb0edc5b7",
+    "https://deno.land/x/grammy_types@v4.0.0/api.ts": "040ba3beae8798622387b5d55acdeb9e925a1b234afdafa8a5257d0248115581",
+    "https://deno.land/x/grammy_types@v4.0.0/checklist.ts": "c8f5f0128ca96d8cc4c33b45040ea9436ecf92997d6f5a5e2fa6a85798f465d6",
+    "https://deno.land/x/grammy_types@v4.0.0/inline.ts": "8e15680c6e8ff09046a2cd9b7553f1b73daa9981945071678db45b291165ae15",
+    "https://deno.land/x/grammy_types@v4.0.0/langs.ts": "5f5fd09c58ba3ae942dd7cea2696f95587d2032c1829bba4bca81762b7ef73b6",
+    "https://deno.land/x/grammy_types@v4.0.0/manage.ts": "099a6a50d22a63890e3e9432ee0ac19cd7d1584054c2bcd16bbe51ade492abed",
+    "https://deno.land/x/grammy_types@v4.0.0/markup.ts": "8b6e5e3ffa18eca240f3ca6f023c5c1131439fc88ece1d83bd7ba28e9697e4f0",
+    "https://deno.land/x/grammy_types@v4.0.0/message.ts": "2d8dae2efdde136a959093eb82e0879c562604209eeabe7077f330e5bf40bf95",
+    "https://deno.land/x/grammy_types@v4.0.0/methods.ts": "07876b6713398e9d86db3ab55416f8b06ccc5122fc79e4880a038eb9d8b15581",
+    "https://deno.land/x/grammy_types@v4.0.0/mod.ts": "dc2efbffd0800e84439085bf2ccb8ea0b749140dd4d9061d475f76525efa788f",
+    "https://deno.land/x/grammy_types@v4.0.0/passport.ts": "19820e7d6c279521f8bc8912d6a378239f73d4ab525453808994b5f44ef95215",
+    "https://deno.land/x/grammy_types@v4.0.0/payment.ts": "90b6809ff22a80c0f4430dc684d26a92315e13238d1a5e7c80152acec3db7615",
+    "https://deno.land/x/grammy_types@v4.0.0/rich.ts": "371c0764e1321e6a6eeae374bac9c372819ba73fcceb2738bdbe0222743fcf82",
+    "https://deno.land/x/grammy_types@v4.0.0/settings.ts": "43879f885b8d76877640810246a5e4a0e495c6d364fd06e99ad1cb8920b4b5cf",
+    "https://deno.land/x/grammy_types@v4.0.0/story.ts": "f558c6e6054a43fa1403c2376f7c0b51e2138f4e0d13f0f6e870ffd1cd085ae2",
+    "https://deno.land/x/grammy_types@v4.0.0/update.ts": "401ff4e083ab750635a6aae0a364cbb6ecaa90d793df148d022bf13788c74674",
     "https://deno.land/x/oson@1.0.1/constructors.ts": "2b77dcdc8d8db5ece2860d1657f4dcef37dd761684f1d4b9535c7e56a0fbfcf6",
     "https://deno.land/x/oson@1.0.1/mod.ts": "54e494dc517ce0de6c727c25d9731ccc748e8646c883e922dc5d656f523a4e5b",
     "https://deno.land/x/oson@1.0.1/oson.ts": "ec3908ae5c9ceff7bfd869d95a2183b929b9d96fbff44b57d28d3b742d06a4a1"
   },
   "workspace": {
     "dependencies": [
-      "npm:@sentry/deno@10.59.0",
+      "npm:@sentry/deno@10.69.0",
       "npm:@types/luxon@^3.7.2",
       "npm:luxon@^3.7.2",
       "npm:zod@^4.4.3"

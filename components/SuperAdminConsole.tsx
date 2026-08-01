@@ -119,7 +119,11 @@ export function SuperAdminConsole({
           <Button w="full" variant="gradient" onClick={copyCommand}>
             {`Copy ${linkResult.command} command`}
           </Button>
-          <Button w="full" variant="outline" onClick={() => setLinkResult(null)}>
+          <Button
+            w="full"
+            variant="outline"
+            onClick={() => setLinkResult(null)}
+          >
             Close
           </Button>
         </VStack>
