@@ -4,6 +4,8 @@ import type {
   CreateEventBody,
   CreateEventTemplateBody,
   CreatePlaceBody,
+  ImportTemplatesMarkdownBody,
+  ImportTemplatesMarkdownResult,
   RegisterResponse,
   SuperAdminAction,
   TelegramLinkResponse,
@@ -77,6 +79,11 @@ export function createWebTemplatesApi(client: ApiClient) {
         method: "POST",
         body,
       }),
+    importMarkdown: (placeId: string, body: ImportTemplatesMarkdownBody) =>
+      client.fetch<ImportTemplatesMarkdownResult>(
+        `/api/places/${placeId}/templates/import`,
+        { method: "POST", body },
+      ),
     update: (id: string, body: UpdateEventTemplateBody) =>
       client.fetch<WebEventTemplate>(`/api/templates/${id}`, {
         method: "PATCH",
@@ -123,6 +130,8 @@ export type {
   CreateEventBody,
   CreateEventTemplateBody,
   CreatePlaceBody,
+  ImportTemplatesMarkdownBody,
+  ImportTemplatesMarkdownResult,
   RegisterResponse,
   SuperAdminAction,
   TelegramLinkResponse,

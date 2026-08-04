@@ -114,6 +114,19 @@ export type CreateEventTemplateBody = {
 
 export type UpdateEventTemplateBody = Partial<CreateEventTemplateBody>;
 
+export type ImportTemplatesMarkdownBody = {
+  markdown: string;
+  /** When true (default), templates absent from the document are deleted. */
+  prune?: boolean;
+};
+
+export type ImportTemplatesMarkdownResult = {
+  created: number;
+  updated: number;
+  deleted: number;
+  templates: WebEventTemplate[];
+};
+
 export type AddPlaceAdminBody = {
   userEmail: string;
 };

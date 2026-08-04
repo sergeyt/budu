@@ -5,11 +5,12 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
 import { useRouter } from "next/navigation";
-import { HStack, Switch, VStack } from "@chakra-ui/react";
+import { HStack, Switch, Textarea, VStack } from "@chakra-ui/react";
 import {
   api,
   type CreateEventTemplateBody,
@@ -17,6 +18,10 @@ import {
 } from "@/lib/api";
 import { Button, Card, Heading, Input, Text, toast } from "@/ui/index";
 import { dateToLocalTime, weekdayName } from "@/lib/templates";
+import {
+  parseTemplatesMarkdown,
+  serializeTemplatesMarkdown,
+} from "@/lib/templateMarkdown";
 import type { EventTemplate, Place } from "@/types/model";
 
 type Draft = {
@@ -109,6 +114,12 @@ export function TemplateAdmin({
 
   return (
     <VStack align="stretch" gap={3}>
+      <TemplateMarkdownPanel
+        place={place}
+        templates={templates}
+        onApplied={() => router.refresh()}
+      />
+
       {templates.map((tpl) => (
         <TemplateRow
           key={tpl.id}
@@ -149,6 +160,211 @@ export function TemplateAdmin({
         </Button>
       )}
     </VStack>
+  );
+}
+
+function templatesToMarkdown(templates: EventTemplate[]): string {
+  return serializeTemplatesMarkdown(
+    templates.map((t) => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      infoUrl: t.infoUrl,
+      dayOfWeek: t.dayOfWeek,
+      localTime: dateToLocalTime(new Date(t.localTime)),
+      durationMinutes: t.durationMinutes,
+      capacity: t.capacity,
+      reserveCapacity: t.reserveCapacity,
+      announceOffsetMinutes: t.announceOffsetMinutes,
+      enabled: t.enabled,
+    })),
+  );
+}
+
+function downloadText(filename: string, text: string) {
+  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function TemplateMarkdownPanel({
+  place,
+  templates,
+  onApplied,
+}: {
+  place: Place;
+  templates: EventTemplate[];
+  onApplied: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [markdown, setMarkdown] = useState("");
+  const [pending, startTransition] = useTransition();
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const openEditor = () => {
+    setMarkdown(templatesToMarkdown(templates));
+    setOpen(true);
+  };
+
+  const download = () => {
+    const slug = place.name
+      .toLowerCase()
+      .replace(/[^a-z0-9а-яё]+/gi, "-")
+      .replace(/^-|-$/g, "");
+    downloadText(
+      `${slug || "place"}-templates.md`,
+      templatesToMarkdown(templates),
+    );
+  };
+
+  const apply = () =>
+    startTransition(async () => {
+      const parsed = parseTemplatesMarkdown(markdown);
+      if (!parsed.ok) {
+        const first = parsed.errors[0];
+        toast.error({
+          title: first.line
+            ? `Line ${first.line}: ${first.message}`
+            : first.message,
+          description:
+            parsed.errors.length > 1
+              ? `+${parsed.errors.length - 1} more error(s)`
+              : undefined,
+        });
+        return;
+      }
+
+      const existingIds = new Set(templates.map((t) => t.id));
+      let willUpdate = 0;
+      let willCreate = 0;
+      const kept = new Set<string>();
+      for (const t of parsed.templates) {
+        if (t.id && existingIds.has(t.id)) {
+          willUpdate += 1;
+          kept.add(t.id);
+        } else {
+          willCreate += 1;
+        }
+      }
+      const willDelete = templates.filter((t) => !kept.has(t.id)).length;
+      const summary = [
+        willCreate ? `create ${willCreate}` : null,
+        willUpdate ? `update ${willUpdate}` : null,
+        willDelete ? `delete ${willDelete}` : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      if (
+        !confirm(
+          summary
+            ? `Apply schedule? This will ${summary}.`
+            : "Apply schedule? No changes detected.",
+        )
+      ) {
+        return;
+      }
+
+      try {
+        const result = await api.templates.importMarkdown(place.id, {
+          markdown,
+          prune: true,
+        });
+        toast.success({
+          title: "Schedule applied",
+          description: `created ${result.created}, updated ${result.updated}, deleted ${result.deleted}`,
+        });
+        setOpen(false);
+        onApplied();
+      } catch (e) {
+        toast.error({
+          title: e instanceof Error ? e.message : "Import failed",
+        });
+      }
+    });
+
+  const onFile = (file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      setMarkdown(text);
+      setOpen(true);
+    };
+    reader.onerror = () => {
+      toast.error({ title: "Could not read file" });
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <Card.Root p={3}>
+      <HStack justify="space-between" align="center" gap={2} wrap="wrap">
+        <VStack align="start" gap={0}>
+          <Heading size="sm">Markdown schedule</Heading>
+          <Text fontSize="xs" muted>
+            Download, edit as text, then upload or apply. File is source of
+            truth (missing templates are deleted).
+          </Text>
+        </VStack>
+        <HStack gap={2}>
+          <Button size="sm" variant="outline" onClick={download}>
+            Download
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => fileRef.current?.click()}
+          >
+            Upload
+          </Button>
+          <Button size="sm" variant="outline" onClick={openEditor}>
+            {open ? "Reload editor" : "Edit as Markdown"}
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".md,text/markdown,text/plain"
+            hidden
+            onChange={(e) => {
+              onFile(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+        </HStack>
+      </HStack>
+
+      {open && (
+        <VStack align="stretch" gap={2} pt={3}>
+          <Textarea
+            value={markdown}
+            onChange={(e) => setMarkdown(e.target.value)}
+            fontFamily="mono"
+            fontSize="sm"
+            minH="280px"
+            spellCheck={false}
+          />
+          <HStack justify="end" gap={2}>
+            <Button
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              disabled={pending}
+            >
+              Cancel
+            </Button>
+            <Button onClick={apply} loading={pending} disabled={pending}>
+              Apply
+            </Button>
+          </HStack>
+        </VStack>
+      )}
+    </Card.Root>
   );
 }
 
