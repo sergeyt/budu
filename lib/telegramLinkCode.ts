@@ -78,7 +78,7 @@ export function verifyLinkCode(
     return { ok: false, error: "Invalid payload" };
   }
   const payload = verified.payload as Record<string, unknown>;
-  if (payload.kind === "user") {
+  if (payload.kind === "user" || payload.kind === "web_login") {
     return { ok: false, error: "Invalid payload" };
   }
   const placeId = typeof payload.placeId === "string" ? payload.placeId : null;
@@ -113,6 +113,40 @@ export function verifyUserLinkCode(
   }
   const payload = verified.payload as Record<string, unknown>;
   if (payload.kind !== "user") {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const userId = typeof payload.userId === "string" ? payload.userId : null;
+  const exp = readExp(payload);
+  if (!userId || !exp) {
+    return { ok: false, error: "Invalid payload" };
+  }
+  if (exp < Math.floor(Date.now() / 1000)) {
+    return { ok: false, error: "Code expired" };
+  }
+  return { ok: true, userId };
+}
+
+/** Short-lived magic-link token for web sign-in via the Telegram bot. */
+export function createWebLoginToken(
+  userId: string,
+  ttlSeconds: number = 5 * 60,
+) {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  return signPayload({ kind: "web_login", userId, exp });
+}
+
+export function verifyWebLoginToken(
+  token: string,
+): { ok: true; userId: string } | { ok: false; error: string } {
+  const verified = verifySignedPayload(token);
+  if (!verified.ok) {
+    return verified;
+  }
+  if (typeof verified.payload !== "object" || verified.payload === null) {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const payload = verified.payload as Record<string, unknown>;
+  if (payload.kind !== "web_login") {
     return { ok: false, error: "Invalid payload" };
   }
   const userId = typeof payload.userId === "string" ? payload.userId : null;

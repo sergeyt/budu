@@ -27,6 +27,8 @@ database access goes through the Next internal API — see
    BOT_INTERNAL_TOKEN=...        # ≥16 chars, shared with bot
    TELEGRAM_BOT_TOKEN=...        # @BotFather; also used for Mini App auth
    TELEGRAM_LINK_SECRET=...      # signs one-time link codes
+   NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=YourBot  # web sign-in deep link
+   AUTH_URL=http://localhost:3000
    ```
 
 2. **Bot** — `cd bot && cp .env.example .env`, match the secrets above, then
@@ -43,7 +45,8 @@ database access goes through the Next internal API — see
 
 | Flow | Entry |
 | --- | --- |
-| Link Telegram to web account | `POST /api/me/telegram-link` → DM `/link_account <code>` |
+| Web sign-in (magic link) | Site → `t.me/<bot>?start=login` → bot DM URL → `/api/auth/telegram-login` |
+| Link Telegram to an existing OAuth web account | `POST /api/me/telegram-link` → DM `/link_account <code>` (for when OAuth providers are re-enabled) |
 | Register from announcement | Tap ✅ / ⏳ under the live message |
 | Register from DM | `t.me/<bot>?start=ev_<eventId>` |
 | Full participant list | Tap **📋 List** (Telegram Mini App) |

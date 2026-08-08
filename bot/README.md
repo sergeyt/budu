@@ -7,7 +7,7 @@ with a shared `BOT_INTERNAL_TOKEN`.
 
 ## What works today (through M4)
 
-- `/start`, `/help`, `/start ev_<eventId>` deep links
+- `/start`, `/help`, `/login`, `/start login`, `/start ev_<eventId>` deep links
 - `/link` / `/unlink`, `/templates`, `/announce_next`
 - `/new_template` — DM wizard for place admins (grammy-conversations)
 - Scheduled cron: materialize templates + post due announcements
@@ -64,6 +64,8 @@ Authorization: Bearer <BOT_INTERNAL_TOKEN>
 | Route | Purpose |
 |-------|---------|
 | `POST /users/telegram` | find-or-create bot user |
+| `POST /users/web-login` | mint short-lived web magic-login URL |
+| `POST /users/link` | claim `/link_account` code onto Telegram user |
 | `GET /users/:telegramUserId/admin-places` | places a linked TG user administers |
 | `GET /places/:id` | place lookup |
 | `POST/DELETE /places/:id/telegram` | link/unlink chat |

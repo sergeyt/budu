@@ -1,6 +1,7 @@
 import type { Bot, Context } from "grammy";
 import type { BotContext } from "@/context.ts";
 import { api } from "@/api/client.ts";
+import { handleLogin } from "@/handlers/login.ts";
 import { buildAnnouncement } from "@/services/announce.ts";
 import { canRegisterNow } from "@/services/registrationWindow.ts";
 import { tr } from "@/i18n.ts";
@@ -20,7 +21,10 @@ function parseStartPayload(text: string | undefined): string | null {
   if (!text) {
     return null;
   }
-  const payload = text.split(/\s+/)[1]?.trim();
+  return text.split(/\s+/)[1]?.trim() || null;
+}
+
+function parseEventDeepLink(payload: string | null): string | null {
   if (!payload?.startsWith("ev_")) {
     return null;
   }
@@ -64,14 +68,20 @@ async function handleEventDeepLink(
 
 export function handleStart(bot: Bot<BotContext>) {
   return async (ctx: Context): Promise<void> => {
-    const eventId = parseStartPayload(ctx.message?.text);
+    const payload = parseStartPayload(ctx.message?.text);
+    if (payload === "login") {
+      await handleLogin(ctx);
+      return;
+    }
+
+    const eventId = parseEventDeepLink(payload);
     if (eventId && await handleEventDeepLink(ctx, eventId)) {
       return;
     }
 
     // Ensure a bot-only User row exists for this Telegram identity.
-    // A later Yandex/OAuth login may create a separate web user; /link_account
-    // can merge the orphan, or they can coexist until Gmail replaces Yandex.
+    // Web magic-link login uses the same row; /link_account can still merge
+    // when additional OAuth providers are re-enabled later.
     const from = ctx.from;
     if (from) {
       await api.users.findOrCreateTelegram(from.id, {
@@ -91,6 +101,7 @@ export function handleStart(bot: Bot<BotContext>) {
         tr(ctx, "start.chat_id", { chatId: String(chatId) }),
         "",
         tr(ctx, "start.commands_header"),
+        tr(ctx, "start.cmd_login"),
         tr(ctx, "start.cmd_link"),
         tr(ctx, "start.cmd_unlink"),
         tr(ctx, "start.cmd_link_account"),

@@ -4,6 +4,7 @@ import type { BotContext } from "@/context.ts";
 import { handleHelp, handleStart } from "@/handlers/start.ts";
 import { handleLink, handleUnlink } from "@/handlers/link.ts";
 import { handleLinkAccount } from "@/handlers/linkAccount.ts";
+import { handleLogin } from "@/handlers/login.ts";
 import { handleAnnounceNext } from "@/handlers/announce.ts";
 import { handleCallbackQuery } from "@/handlers/registration.ts";
 import { handleTemplates } from "@/handlers/templates.ts";
@@ -33,6 +34,7 @@ export function createBot(): Bot<BotContext> {
 
   bot.command("start", handleStart(bot));
   bot.command("help", handleHelp);
+  bot.command("login", handleLogin);
   bot.command("link", handleLink);
   bot.command("unlink", handleUnlink);
   bot.command("link_account", handleLinkAccount);
@@ -55,6 +57,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
     await bot.api.setMyCommands([
       { command: "start", description: c.start },
       { command: "help", description: c.help },
+      { command: "login", description: c.login },
       { command: "link", description: c.link },
       { command: "unlink", description: c.unlink },
       { command: "link_account", description: c.link_account },
@@ -67,6 +70,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
   await bot.api.setMyCommands([
     { command: "start", description: c.start },
     { command: "help", description: c.help },
+    { command: "login", description: c.login },
     { command: "link", description: c.link },
     { command: "unlink", description: c.unlink },
     { command: "link_account", description: c.link_account },

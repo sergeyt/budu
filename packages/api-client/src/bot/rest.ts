@@ -44,6 +44,21 @@ export function createBotUsersApi(client: ApiClient) {
         },
       });
     },
+
+    /** Mint a short-lived web magic-login URL for this Telegram user. */
+    mintWebLogin(
+      telegramUserId: number,
+      attrs: { username?: string; firstName?: string } = {},
+    ) {
+      return client.fetch<{ url: string }>(`${PREFIX}/users/web-login`, {
+        method: "POST",
+        body: {
+          telegramUserId,
+          username: attrs.username,
+          firstName: attrs.firstName,
+        },
+      });
+    },
   };
 }
 

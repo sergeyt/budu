@@ -2,6 +2,7 @@
   "commands": {
     "start": "Start",
     "help": "Help",
+    "login": "Sign in to the website",
     "link": "Link chat to a place",
     "unlink": "Unlink",
     "link_account": "Link Telegram to web account",
@@ -13,6 +14,7 @@
     "greeting": "👋 Hi, {name}!",
     "chat_id": "This chat: <code>{chatId}</code>",
     "commands_header": "Commands:",
+    "cmd_login": "• <code>/login</code> — get a link to sign in on the website (DM)",
     "cmd_link": "• <code>/link &lt;code&gt;</code> — link this chat to a place",
     "cmd_unlink": "• <code>/unlink &lt;code&gt;</code> — unlink",
     "cmd_link_account": "• <code>/link_account &lt;code&gt;</code> — link Telegram to your web account (DM)",
@@ -26,7 +28,13 @@
     "register_closed": "Registration opens 24 hours before start."
   },
   "help": {
-    "body": "Available commands:\n/start — greeting and chat id\n/start ev_<id> — open an event and register\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/link_account <code> — link Telegram to your web account (DM)\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
+    "body": "Available commands:\n/start — greeting and chat id\n/start login — sign in to the website (DM)\n/start ev_<id> — open an event and register\n/login — sign in to the website (DM)\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/link_account <code> — link Telegram to your web account (DM)\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
+  },
+  "login": {
+    "dm_only": "Run /login in a private chat with the bot.",
+    "body": "Tap the button below to sign in on the website. The link expires in a few minutes.",
+    "button": "Open website",
+    "failed": "❌ Could not create a login link: {error}"
   },
   "link": {
     "usage": "Usage: <code>/link &lt;code&gt;</code>",

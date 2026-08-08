@@ -3,6 +3,10 @@
     "title": "I'LL BE"
   },
   "sign_in": {
+    "telegram": "Sign in with Telegram",
+    "telegram_hint": "Opens the bot — tap the login link it sends you.",
+    "telegram_unconfigured": "Telegram sign-in is not configured.",
+    "error": "Sign-in link expired or invalid. Try again from Telegram.",
     "yandex": "Sign in with Yandex",
     "vk": "Sign in with VK",
     "sber": "Sign in with Sber ID",

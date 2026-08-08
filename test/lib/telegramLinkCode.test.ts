@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createLinkCode,
   createUserLinkCode,
+  createWebLoginToken,
   verifyLinkCode,
   verifyUserLinkCode,
+  verifyWebLoginToken,
 } from "@/lib/telegramLinkCode";
 
 describe("telegramLinkCode", () => {
@@ -108,6 +110,45 @@ describe("telegramLinkCode", () => {
     const code = createUserLinkCode("user_abc123", 60);
     vi.setSystemTime(new Date("2025-06-01T12:01:01.000Z"));
     expect(verifyUserLinkCode(code)).toEqual({
+      ok: false,
+      error: "Code expired",
+    });
+  });
+
+  it("round-trips userId for web login tokens", () => {
+    const token = createWebLoginToken("user_abc123");
+    expect(verifyWebLoginToken(token)).toEqual({
+      ok: true,
+      userId: "user_abc123",
+    });
+  });
+
+  it("rejects place and user-link codes as web login tokens", () => {
+    const placeCode = createLinkCode("place_abc123");
+    const userCode = createUserLinkCode("user_abc123");
+    const loginToken = createWebLoginToken("user_abc123");
+    expect(verifyWebLoginToken(placeCode)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+    expect(verifyWebLoginToken(userCode)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+    expect(verifyLinkCode(loginToken)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+    expect(verifyUserLinkCode(loginToken)).toEqual({
+      ok: false,
+      error: "Invalid payload",
+    });
+  });
+
+  it("rejects an expired web login token", () => {
+    const token = createWebLoginToken("user_abc123", 60);
+    vi.setSystemTime(new Date("2025-06-01T12:01:01.000Z"));
+    expect(verifyWebLoginToken(token)).toEqual({
       ok: false,
       error: "Code expired",
     });

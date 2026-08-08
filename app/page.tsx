@@ -9,6 +9,7 @@ import type { User, WorldEvent } from "@/types/model";
 
 type SearchParams = {
   place?: string;
+  loginError?: string;
 };
 
 export default async function Home({
@@ -36,7 +37,7 @@ export default async function Home({
     if (!user?.id) {
       return (
         <Box p={4}>
-          <SignIn />
+          <SignIn loginError={params.loginError} />
         </Box>
       );
     }
