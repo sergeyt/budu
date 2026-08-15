@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Box, HStack } from "@chakra-ui/react";
 import { Heading, Link, Text } from "@/ui/index";
@@ -22,8 +23,11 @@ export default function AdminCalendarClient({
   timezone: string;
 }) {
   const t = useTranslations("calendar");
+  const searchParams = useSearchParams();
   const [events, setEvents] = useState<CalendarEventItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    searchParams.get("event"),
+  );
   const [detail, setDetail] = useState<EventDetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
