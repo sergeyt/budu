@@ -48,7 +48,12 @@ export default async function AdminHome() {
             {places.map((p) => (
               <Card.Root key={p.id} p={3}>
                 <VStack align="stretch" gap={1}>
-                  <Link href={`/admin/places/${p.id}/templates`}>{p.name}</Link>
+                  <Link href={`/admin/places/${p.id}/calendar`}>
+                    {p.name} — calendar
+                  </Link>
+                  <Link href={`/admin/places/${p.id}/templates`}>
+                    Templates
+                  </Link>
                   <Text muted fontSize="xs">
                     {p.timezone}
                   </Text>

@@ -5,6 +5,7 @@ import PlacePicker from "@/components/PlacePicker";
 import RegisterPanel from "@/components/RegisterPanel";
 import SignIn from "@/components/SignIn";
 import HomePromo from "@/components/HomePromo";
+import NarrowShell from "@/components/NarrowShell";
 import type { User, WorldEvent } from "@/types/model";
 
 type SearchParams = {
@@ -27,7 +28,11 @@ export default async function Home({
     : null;
   const upcomingEvent = place
     ? await prisma.event.findFirst({
-        where: { placeId: place.id, startAt: { gt: new Date() } },
+        where: {
+          placeId: place.id,
+          startAt: { gt: new Date() },
+          status: "SCHEDULED",
+        },
         orderBy: { startAt: "asc" },
         include: { regs: true },
       })
@@ -56,14 +61,16 @@ export default async function Home({
   };
 
   return (
-    <Box w="full" as="main" display="grid" gap={4} bg="bg.page">
-      <HomePromo />
-      {user?.id && (
-        <Box px={3}>
-          <PlacePicker places={places} currentId={place?.id ?? ""} />
-        </Box>
-      )}
-      {renderContent()}
-    </Box>
+    <NarrowShell>
+      <Box w="full" as="main" display="grid" gap={4} bg="bg.page">
+        <HomePromo />
+        {user?.id && (
+          <Box px={3}>
+            <PlacePicker places={places} currentId={place?.id ?? ""} />
+          </Box>
+        )}
+        {renderContent()}
+      </Box>
+    </NarrowShell>
   );
 }

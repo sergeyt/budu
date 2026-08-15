@@ -23,6 +23,15 @@
     "today": "Today at",
     "tomorrow": "Tomorrow at",
 
+    "register": "Register",
+    "join_waitlist": "Join waitlist",
+    "leave": "Leave",
+    "leave_waitlist": "Leave waitlist",
+    "full_label": "Full",
+    "sign_in_to_register": "Sign in to register",
+    "status_confirmed": "You're in",
+    "status_waitlist": "On waitlist",
+
     "register_label1": "Register",
     "register_label2": "Let's go!",
     "register_label3": "I'm with you!",
@@ -71,13 +80,42 @@
   "participants": {
     "participants_label": "Participants",
     "confirmed_label": "Confirmed",
-    "reserved_label": "Reserved"
+    "reserved_label": "Waitlist",
+    "you": "you"
   },
 
   "errors": {
     "too_early": "Registration will open 24 hours before the event starts and close at the start time.",
+    "opens_at": "Registration opens at {when}.",
     "cap_reached": "The main capacity is full. You can join the waitlist.",
     "full": "The event is fully booked, including the waitlist."
+  },
+
+  "calendar": {
+    "title": "Calendar",
+    "admin_title": "Calendar",
+    "admin_home": "Admin",
+    "templates_link": "Templates",
+    "expired_title": "Not found",
+    "expired": "This place calendar could not be opened.",
+    "load_failed": "Could not load events.",
+    "loading": "Loading…",
+    "event": "Event",
+    "participants": "Participants",
+    "edit": "Edit",
+    "save": "Save",
+    "saved": "Saved",
+    "save_failed": "Could not save",
+    "discard": "Cancel",
+    "field_title": "Title",
+    "description": "Description",
+    "cancel_event": "Cancel event",
+    "cancel_reason_title": "Why is this event cancelled?",
+    "cancel_reason_placeholder": "Reason (shown to players)",
+    "confirm_cancel": "Confirm cancel",
+    "cancelled": "Event cancelled",
+    "cancel_failed": "Could not cancel",
+    "cancelled_banner": "This event is cancelled"
   },
 
   "notifications": {
@@ -89,6 +127,8 @@
     "registered": "✅ {actor} just registered",
     "waitlisted": "⏳ {actor} joined the waitlist",
     "unregistered": "❎ {actor} unregistered",
-    "promoted": "⬆️ {actor} was promoted from waitlist to confirmed"
+    "promoted": "⬆️ {actor} was promoted from waitlist to confirmed",
+    "cancelled_header": "❌ Cancelled: 📍 {place}, *{event}* 🗓 {when}",
+    "cancelled_reason": "Reason: {reason}"
   }
 }

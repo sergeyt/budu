@@ -98,6 +98,11 @@ model PlaceAdmin {
   @@unique([userId, placeId])
 }
 
+enum EventStatus {
+  SCHEDULED
+  CANCELLED
+}
+
 model Event {
   id              String                     @id @default(cuid())
   title           String
@@ -107,6 +112,9 @@ model Event {
   startAt         DateTime
   // event length in minutes; nullable so callers can opt out
   durationMinutes Int?                       @default(60)
+  status          EventStatus                @default(SCHEDULED)
+  cancelReason    String?
+  cancelledAt     DateTime?
   placeId         String
   place           Place                      @relation(fields: [placeId], references: [id], onDelete: Cascade)
   // Set when an event was materialized from a recurring template.
@@ -128,6 +136,7 @@ model Event {
 
   @@unique([templateId, startAt])
   @@index([placeId, startAt])
+  @@index([placeId, status, startAt])
 }
 
 /// Weekly recurring "show" run by a place. A scheduler materializes one

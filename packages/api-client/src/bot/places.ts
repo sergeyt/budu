@@ -34,6 +34,13 @@ export function createBotPlacesApi(client: ApiClient) {
     listByChat(chatId: number) {
       return client.fetch<BotPlace[]>(`${PREFIX}/places/by-chat/${chatId}`);
     },
+
+    mintCalendarLink(placeId: string, baseUrl?: string) {
+      return client.fetch<{ url: string }>(
+        `${PREFIX}/places/${placeId}/calendar-link`,
+        { method: "POST", body: baseUrl ? { baseUrl } : {} },
+      );
+    },
   };
 }
 

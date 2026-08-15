@@ -51,6 +51,7 @@ database access goes through the Next internal API — see
 | Register from DM | `t.me/<bot>?start=ev_<eventId>` |
 | Full participant list | Tap **📋 List** (Telegram Mini App) |
 | Read templates | `/templates` in a linked chat |
+| Place calendar (public web page) | `/calendar` in a linked chat → `/places/<id>/calendar` |
 | Unlink chat | `/unlink <code>` |
 
 Registration opens **24 hours before** event start and closes at start time

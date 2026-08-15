@@ -33,6 +33,9 @@ export const POST = errorMiddleware<Params>(async (req, ctx) => {
       if (!event) {
         throw errors.eventNotFound();
       }
+      if (event.status === "CANCELLED") {
+        throw errors.eventCancelled();
+      }
       if (!canRegisterNow(event.startAt)) {
         throw errors.registrationWindowClosed();
       }

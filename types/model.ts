@@ -54,6 +54,11 @@ export enum RegistrationStatus {
   RESERVED = "RESERVED",
 }
 
+export enum EventStatus {
+  SCHEDULED = "SCHEDULED",
+  CANCELLED = "CANCELLED",
+}
+
 export type Registration = {
   id: string;
   userId: string;
@@ -70,6 +75,9 @@ export type WorldEvent = {
   durationMinutes: Opt<number>;
   capacity: Opt<number>;
   reserveCapacity: Opt<number>;
+  status?: EventStatus;
+  cancelReason?: Opt<string>;
+  cancelledAt?: Opt<DateLike>;
   regs?: Registration[];
 };
 

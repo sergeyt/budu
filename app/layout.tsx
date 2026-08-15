@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
-import { Center } from "@chakra-ui/react";
 import { Inter } from "next/font/google";
 import { Provider as UIProvider } from "../ui/provider";
 import { NextAuthProvider } from "./providers";
@@ -20,10 +19,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <NextIntlClientProvider>
           <UIProvider>
             <NextAuthProvider>
-              <Center maxW="md" minH="100vh" bg="bg.page">
-                <Toaster />
-                {children}
-              </Center>
+              <Toaster />
+              {children}
             </NextAuthProvider>
           </UIProvider>
         </NextIntlClientProvider>

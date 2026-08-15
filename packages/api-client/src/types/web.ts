@@ -19,7 +19,43 @@ export type WebEvent = {
   durationMinutes?: number | null;
   capacity?: number | null;
   reserveCapacity?: number | null;
+  status?: "SCHEDULED" | "CANCELLED";
+  cancelReason?: string | null;
   regs?: WebRegistration[];
+};
+
+export type WebEventDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  startAt: string;
+  durationMinutes: number | null;
+  capacity: number | null;
+  reserveCapacity: number | null;
+  status: string;
+  cancelReason: string | null;
+  placeName: string;
+  placeTimezone: string;
+  participants: Array<{
+    userId: string;
+    status: "CONFIRMED" | "RESERVED";
+    displayName: string;
+    createdAt: string;
+  }>;
+};
+
+export type UpdateEventBody = {
+  title?: string;
+  description?: string | null;
+  infoUrl?: string | null;
+  startAt?: string;
+  durationMinutes?: number | null;
+  capacity?: number | null;
+  reserveCapacity?: number | null;
+};
+
+export type CancelEventBody = {
+  reason: string;
 };
 
 export type WebRegistration = {

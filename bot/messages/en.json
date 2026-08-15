@@ -8,6 +8,7 @@
     "link_account": "Link Telegram to web account",
     "announce_next": "Post next event announcement",
     "templates": "Templates for linked place",
+    "calendar": "Place calendar link",
     "new_template": "Create a weekly template (DM)"
   },
   "start": {
@@ -20,6 +21,7 @@
     "cmd_link_account": "• <code>/link_account &lt;code&gt;</code> — link Telegram to your web account (DM)",
     "cmd_announce": "• <code>/announce_next</code> — post the next event announcement",
     "cmd_templates": "• <code>/templates</code> — templates for the linked place",
+    "cmd_calendar": "• <code>/calendar</code> — public calendar link for the linked place",
     "cmd_new_template": "• <code>/new_template</code> — create a template (DM, admins only)",
     "cmd_help": "• <code>/help</code> — help",
     "deep_link_hint": "Event link: <code>t.me/{bot}?start=ev_&lt;id&gt;</code>",
@@ -28,7 +30,7 @@
     "register_closed": "Registration opens 24 hours before start."
   },
   "help": {
-    "body": "Available commands:\n/start — greeting and chat id\n/start login — sign in to the website (DM)\n/start ev_<id> — open an event and register\n/login — sign in to the website (DM)\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/link_account <code> — link Telegram to your web account (DM)\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/new_template — create a weekly template (DM, admins only)"
+    "body": "Available commands:\n/start — greeting and chat id\n/start login — sign in to the website (DM)\n/start ev_<id> — open an event and register\n/login — sign in to the website (DM)\n/link <code> — link chat to a place\n/unlink <code> — unlink\n/link_account <code> — link Telegram to your web account (DM)\n/announce_next — announce next event for linked place\n/templates — templates for linked place\n/calendar — public calendar link\n/new_template — create a weekly template (DM, admins only)"
   },
   "login": {
     "dm_only": "Run /login in a private chat with the bot.",
@@ -58,6 +60,10 @@
   "templates": {
     "empty": "No templates in this chat. Link the chat with <code>/link &lt;code&gt;</code> and create templates in the admin UI.",
     "caps": "seats {capacity}, reserve {reserve}"
+  },
+  "calendar": {
+    "not_linked": "This chat is not linked to any place. Use /link.",
+    "header": "📅 Public calendar:"
   },
   "announce": {
     "not_linked": "This chat is not linked to any place. Use /link.",

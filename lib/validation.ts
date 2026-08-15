@@ -72,3 +72,17 @@ export const UpsertTemplateChannel = z.object({
   target: z.string().min(1),
   label: z.string().nullish(),
 });
+
+export const UpdateEvent = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().nullish(),
+  infoUrl: z.url().nullish(),
+  startAt: z.string().min(1).optional(),
+  durationMinutes: z.number().int().min(1).nullish(),
+  capacity: z.number().int().nonnegative().nullish(),
+  reserveCapacity: z.number().int().nonnegative().nullish(),
+});
+
+export const CancelEvent = z.object({
+  reason: z.string().trim().min(3).max(2000),
+});

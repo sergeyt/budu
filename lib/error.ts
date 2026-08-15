@@ -149,6 +149,12 @@ export const errors = {
     new ConflictError("Already registered for this event", {
       code: "ALREADY_REGISTERED",
     }),
+  eventCancelled: () =>
+    new BadRequestError("Event is cancelled", { code: "EVENT_CANCELLED" }),
+  eventAlreadyCancelled: () =>
+    new ConflictError("Event is already cancelled", {
+      code: "EVENT_ALREADY_CANCELLED",
+    }),
 
   // ===== Places =====
   placeNotFound: () =>

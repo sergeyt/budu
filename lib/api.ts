@@ -23,6 +23,10 @@ export const api = {
   templates: webApi.templates,
   events: {
     create: webApi.events.create,
+    get: webApi.events.get,
+    detail: webApi.events.get,
+    update: webApi.events.update,
+    cancel: webApi.events.cancel,
     participants: (id: string): Promise<Registration[]> =>
       webApi.events.participants(id) as Promise<Registration[]>,
     register: (id: string): Promise<RegisterResponse> =>

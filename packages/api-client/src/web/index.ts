@@ -1,6 +1,7 @@
 import type { ApiClient } from "../client";
 import type {
   AddPlaceAdminBody,
+  CancelEventBody,
   CreateEventBody,
   CreateEventTemplateBody,
   CreatePlaceBody,
@@ -11,10 +12,12 @@ import type {
   TelegramLinkResponse,
   TemplateChannel,
   UnregisterResponse,
+  UpdateEventBody,
   UpdateEventTemplateBody,
   UpdatePlaceBody,
   UpsertTemplateChannelBody,
   WebEvent,
+  WebEventDetail,
   WebEventTemplate,
   WebPlace,
   WebRegistration,
@@ -43,8 +46,13 @@ export function createWebPlacesApi(client: ApiClient) {
         `/api/places/${placeId}/admins`,
         { method: "POST", body },
       ),
-    events: (placeId: string) =>
-      client.fetch<WebEvent[]>(`/api/places/${placeId}/events`),
+    events: (placeId: string, range?: { from: string; to: string }) => {
+      const q =
+        range != null
+          ? `?from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`
+          : "";
+      return client.fetch<WebEvent[]>(`/api/places/${placeId}/events${q}`);
+    },
     action: <T = unknown>(placeId: string, body: SuperAdminAction) =>
       client.fetch<T>(`/api/places/${placeId}/action`, {
         method: "POST",
@@ -57,6 +65,14 @@ export function createWebEventsApi(client: ApiClient) {
   return {
     create: (body: CreateEventBody) =>
       client.fetch<WebEvent>("/api/events", { method: "POST", body }),
+    get: (id: string) => client.fetch<WebEventDetail>(`/api/events/${id}`),
+    update: (id: string, body: UpdateEventBody) =>
+      client.fetch<WebEvent>(`/api/events/${id}`, { method: "PATCH", body }),
+    cancel: (id: string, body: CancelEventBody) =>
+      client.fetch<WebEvent>(`/api/events/${id}/cancel`, {
+        method: "POST",
+        body,
+      }),
     participants: (id: string) =>
       client.fetch<WebRegistration[]>(`/api/events/${id}/participants`),
     register: (id: string) =>
@@ -127,6 +143,7 @@ export type WebApi = ReturnType<typeof createWebApi>;
 
 export type {
   AddPlaceAdminBody,
+  CancelEventBody,
   CreateEventBody,
   CreateEventTemplateBody,
   CreatePlaceBody,
@@ -137,10 +154,12 @@ export type {
   TelegramLinkResponse,
   TemplateChannel,
   UnregisterResponse,
+  UpdateEventBody,
   UpdateEventTemplateBody,
   UpdatePlaceBody,
   UpsertTemplateChannelBody,
   WebEvent,
+  WebEventDetail,
   WebEventTemplate,
   WebPlace,
   WebRegistration,

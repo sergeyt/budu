@@ -8,6 +8,7 @@ import { handleLogin } from "@/handlers/login.ts";
 import { handleAnnounceNext } from "@/handlers/announce.ts";
 import { handleCallbackQuery } from "@/handlers/registration.ts";
 import { handleTemplates } from "@/handlers/templates.ts";
+import { handleCalendar } from "@/handlers/calendar.ts";
 import { registerTemplateWizard } from "@/handlers/templateWizard.ts";
 import { commandDescriptions, type Locale } from "@/i18n.ts";
 
@@ -40,6 +41,7 @@ export function createBot(): Bot<BotContext> {
   bot.command("link_account", handleLinkAccount);
   bot.command("announce_next", handleAnnounceNext(bot));
   bot.command("templates", handleTemplates);
+  bot.command("calendar", handleCalendar);
 
   bot.on("callback_query:data", handleCallbackQuery(bot));
 
@@ -63,6 +65,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
       { command: "link_account", description: c.link_account },
       { command: "announce_next", description: c.announce_next },
       { command: "templates", description: c.templates },
+      { command: "calendar", description: c.calendar },
       { command: "new_template", description: c.new_template },
     ], { language_code: locale });
   }
@@ -76,6 +79,7 @@ export async function publishCommands(bot: Bot<BotContext>): Promise<void> {
     { command: "link_account", description: c.link_account },
     { command: "announce_next", description: c.announce_next },
     { command: "templates", description: c.templates },
+    { command: "calendar", description: c.calendar },
     { command: "new_template", description: c.new_template },
   ]);
 }

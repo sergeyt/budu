@@ -23,6 +23,15 @@
     "today": "Сегодня в",
     "tomorrow": "Завтра в",
 
+    "register": "Записаться",
+    "join_waitlist": "В лист ожидания",
+    "leave": "Отменить запись",
+    "leave_waitlist": "Покинуть лист ожидания",
+    "full_label": "Мест нет",
+    "sign_in_to_register": "Войти, чтобы записаться",
+    "status_confirmed": "Вы в списке",
+    "status_waitlist": "В листе ожидания",
+
     "register_label1": "Зарегистрироваться",
     "register_label2": "Поехали!",
     "register_label3": "Я с вами!",
@@ -70,14 +79,41 @@
   "participants": {
     "participants_label": "Участники",
     "confirmed_label": "Зареганные",
-    "reserved_label": "В ожидании"
+    "reserved_label": "В ожидании",
+    "you": "вы"
   },
   "errors": {
     "too_early": "Регистрация откроется за 24 часа до начала события и закроется в момент начала.",
+    "opens_at": "Регистрация откроется {when}.",
     "cap_reached": "Основные места заняты. Вы можете присоединиться к списку ожидания.",
     "full": "Все места, включая список ожидания, уже заняты."
   },
-
+  "calendar": {
+    "title": "Календарь",
+    "admin_title": "Календарь",
+    "admin_home": "Админ",
+    "templates_link": "Шаблоны",
+    "expired_title": "Не найдено",
+    "expired": "Не удалось открыть календарь этого места.",
+    "load_failed": "Не удалось загрузить события.",
+    "loading": "Загрузка…",
+    "event": "Событие",
+    "participants": "Участники",
+    "edit": "Изменить",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "save_failed": "Не удалось сохранить",
+    "discard": "Отмена",
+    "field_title": "Название",
+    "description": "Описание",
+    "cancel_event": "Отменить событие",
+    "cancel_reason_title": "Почему событие отменяется?",
+    "cancel_reason_placeholder": "Причина (увидят игроки)",
+    "confirm_cancel": "Подтвердить отмену",
+    "cancelled": "Событие отменено",
+    "cancel_failed": "Не удалось отменить",
+    "cancelled_banner": "Событие отменено"
+  },
   "notifications": {
     "event": "📍 {place}, *{event}* 🗓 {when}:",
     "participants_header": "Участники:",
@@ -87,6 +123,8 @@
     "registered": "✅ {actor} только что зарегистрировался",
     "waitlisted": "⏳ {actor} добавлен в лист ожидания",
     "unregistered": "❎ {actor} отписался от мероприятия",
-    "promoted": "⬆️ {actor} переведён из листа ожидания в подтверждённые участники"
+    "promoted": "⬆️ {actor} переведён из листа ожидания в подтверждённые участники",
+    "cancelled_header": "❌ Отменено: 📍 {place}, *{event}* 🗓 {when}",
+    "cancelled_reason": "Причина: {reason}"
   }
 }

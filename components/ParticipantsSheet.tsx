@@ -1,82 +1,37 @@
 "use client";
 
-import React, { type ReactElement, useMemo, useState } from "react";
-import {
-  Avatar,
-  Box,
-  Separator,
-  Drawer,
-  HStack,
-  VStack,
-  CloseButton,
-  Stack,
-} from "@chakra-ui/react";
-import { Text } from "../ui";
+import React, { type ReactElement, useState } from "react";
+import { Drawer, CloseButton, Separator } from "@chakra-ui/react";
 import { api } from "@/lib/api";
-import {
-  type Registration,
-  RegistrationStatus,
-  type WorldEvent,
-} from "@/types/model";
+import type { Registration, WorldEvent } from "@/types/model";
 import { useTranslations } from "next-intl";
+import ParticipantLists from "./ParticipantLists";
 
 export default function ParticipantsSheet({
   event,
   trigger,
+  regs: controlledRegs,
+  onRegsChange,
 }: {
   event: WorldEvent;
   trigger: ReactElement<{ onClick?: (e: unknown) => void }>;
+  regs?: Registration[];
+  onRegsChange?: (regs: Registration[]) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [regs, setRegs] = useState(event.regs || []);
+  const [localRegs, setLocalRegs] = useState(event.regs || []);
   const t = useTranslations("participants");
-
-  const { confirmed, reserved } = useMemo(() => {
-    const confirmed = regs.filter(
-      (p) => p.status === RegistrationStatus.CONFIRMED,
-    );
-    const reserved = regs.filter(
-      (p) => p.status === RegistrationStatus.RESERVED,
-    );
-    return { confirmed, reserved };
-  }, [regs]);
+  const regs = controlledRegs ?? localRegs;
 
   const show = async () => {
-    const regs = await api.events.participants(event.id);
-    setRegs(regs);
+    const next = await api.events.participants(event.id);
+    if (onRegsChange) {
+      onRegsChange(next);
+    } else {
+      setLocalRegs(next);
+    }
     setIsOpen(true);
   };
-
-  const renderList = (regs: Registration[], label: string) => (
-    <Stack gap={2}>
-      <Text fontSize="sm">
-        {label} ({regs.length})
-      </Text>
-      <VStack align="stretch" gap={3} maxH="30dvh" overflowY="auto" mb={4}>
-        {regs.map((it) => (
-          <HStack key={it.id} borderWidth="1px" rounded="xl" p={3}>
-            <Avatar.Root size="sm">
-              <Avatar.Fallback name={it.user?.name ?? "Anonymous"} />
-              <Avatar.Image src={it.user?.image ?? undefined} />
-            </Avatar.Root>
-            <Box flex="1">
-              <Text fontSize="sm" fontWeight="medium" color="text">
-                {it.user?.name ?? "Anonymous"}
-              </Text>
-              {it.user?.email && (
-                <Text fontSize="xs" color="gray.500">
-                  {it.user.email}
-                </Text>
-              )}
-            </Box>
-            <Text fontSize="xs" color="gray.500">
-              {new Date(it.createdAt).toLocaleTimeString()}
-            </Text>
-          </HStack>
-        ))}
-      </VStack>
-    </Stack>
-  );
 
   return (
     <Drawer.Root
@@ -103,13 +58,8 @@ export default function ParticipantsSheet({
             </Drawer.Title>
           </Drawer.Header>
           <Drawer.Body>
-            {renderList(confirmed, t("confirmed_label"))}
-            {!!reserved.length && (
-              <>
-                <Separator />
-                {renderList(reserved, t("reserved_label"))}
-              </>
-            )}
+            <ParticipantLists participants={regs} />
+            <Separator display="none" />
           </Drawer.Body>
         </Drawer.Content>
       </Drawer.Positioner>
