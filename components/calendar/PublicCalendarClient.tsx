@@ -98,7 +98,7 @@ export default function PublicCalendarClient({
         <Heading size="lg" as="h1" data-testid="place-calendar-name">
           {place.name}
         </Heading>
-        <Text fontSize="sm" color="gray.500">
+        <Text fontSize="sm" muted>
           {place.timezone}
         </Text>
       </HStack>

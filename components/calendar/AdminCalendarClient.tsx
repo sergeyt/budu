@@ -85,7 +85,7 @@ export default function AdminCalendarClient({
           <Link href="/admin">{t("admin_home")}</Link>
         </HStack>
       </HStack>
-      <Text fontSize="sm" color="gray.500" mb={2}>
+      <Text fontSize="sm" muted mb={2}>
         {timezone}
       </Text>
       <PlaceCalendar

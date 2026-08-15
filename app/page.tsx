@@ -50,7 +50,7 @@ export default async function Home({
       return <>Select place</>;
     }
     return (
-      <Box p={3}>
+      <Box p={4}>
         <RegisterPanel
           event={upcomingEvent as WorldEvent}
           user={user as User}
@@ -65,7 +65,7 @@ export default async function Home({
       <Box w="full" as="main" display="grid" gap={4} bg="bg.page">
         <HomePromo />
         {user?.id && (
-          <Box px={3}>
+          <Box px={4}>
             <PlacePicker places={places} currentId={place?.id ?? ""} />
           </Box>
         )}

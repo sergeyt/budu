@@ -3,15 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import {
-  Box,
-  Drawer,
-  CloseButton,
-  HStack,
-  Textarea,
-  VStack,
-} from "@chakra-ui/react";
-import { Button, Heading, Input, Text, toast } from "@/ui/index";
+import { Box, Drawer, CloseButton, HStack, VStack } from "@chakra-ui/react";
+import { Button, Heading, Input, Text, Textarea, toast } from "@/ui/index";
 import { formatEventDate } from "@/lib/format";
 import { api } from "@/lib/api";
 import type { EventStatus, Registration, WorldEvent } from "@/types/model";
@@ -195,7 +188,7 @@ export default function EventDetailDrawer({
               <Text>{t("loading")}</Text>
             ) : (
               <VStack align="stretch" gap={4}>
-                <Text color="gray.500">{when}</Text>
+                <Text muted>{when}</Text>
                 {cancelled && (
                   <Box
                     borderWidth="1px"

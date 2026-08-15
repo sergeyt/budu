@@ -6,6 +6,16 @@ const font =
 
 // 2) System config with brand tokens + recipes
 const config = defineConfig({
+  globalCss: {
+    "html, body": {
+      bg: "bg.page",
+      color: "text.body",
+    },
+    "*::placeholder, *[data-placeholder]": {
+      color: "text.muted",
+      opacity: 1,
+    },
+  },
   theme: {
     tokens: {
       colors: {

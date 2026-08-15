@@ -19,7 +19,6 @@ const Root = React.forwardRef<HTMLDivElement, CardRootProps>(function CardRoot(
     borderWidth = "1px",
     borderColor = "border.subtle",
     boxShadow = "shadow.card",
-    p = 6,
     ...rest
   },
   ref,
@@ -32,7 +31,6 @@ const Root = React.forwardRef<HTMLDivElement, CardRootProps>(function CardRoot(
       borderWidth={borderWidth}
       borderColor={borderColor}
       boxShadow={boxShadow}
-      p={p}
       {...rest}
     />
   );
@@ -40,8 +38,8 @@ const Root = React.forwardRef<HTMLDivElement, CardRootProps>(function CardRoot(
 
 // ----------- HEADER -----------
 const Header = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  function CardHeader({ py = 0, ...rest }, ref) {
-    return <ChakraCard.Header ref={ref} py={py} {...rest} />;
+  function CardHeader({ px = 4, pt = 4, pb = 0, ...rest }, ref) {
+    return <ChakraCard.Header ref={ref} px={px} pt={pt} pb={pb} {...rest} />;
   },
 );
 
@@ -55,8 +53,8 @@ const Body = React.forwardRef<HTMLDivElement, CardBodyProps>(function CardBody(
 
 // ----------- FOOTER -----------
 const Footer = React.forwardRef<HTMLDivElement, CardFooterProps>(
-  function CardFooter({ pt = 4, ...rest }, ref) {
-    return <ChakraCard.Footer ref={ref} pt={pt} {...rest} />;
+  function CardFooter({ px = 4, pt = 4, pb = 4, ...rest }, ref) {
+    return <ChakraCard.Footer ref={ref} px={px} pt={pt} pb={pb} {...rest} />;
   },
 );
 

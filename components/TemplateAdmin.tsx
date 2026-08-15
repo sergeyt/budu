@@ -10,13 +10,21 @@ import {
   useTransition,
 } from "react";
 import { useRouter } from "next/navigation";
-import { HStack, Switch, Textarea, VStack } from "@chakra-ui/react";
+import { HStack, Switch, VStack } from "@chakra-ui/react";
 import {
   api,
   type CreateEventTemplateBody,
   type TemplateChannel,
 } from "@/lib/api";
-import { Button, Card, Heading, Input, Text, toast } from "@/ui/index";
+import {
+  Button,
+  Card,
+  Heading,
+  Input,
+  Text,
+  Textarea,
+  toast,
+} from "@/ui/index";
 import { dateToLocalTime, weekdayName } from "@/lib/templates";
 import {
   parseTemplatesMarkdown,
@@ -129,7 +137,7 @@ export function TemplateAdmin({
       ))}
 
       {showForm ? (
-        <Card.Root p={4}>
+        <Card.Root>
           <Card.Header pb={2}>
             <Heading size="sm">New template</Heading>
           </Card.Header>

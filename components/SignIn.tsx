@@ -45,7 +45,7 @@ export default function SignIn({ loginError }: Props) {
         >
           {t("telegram")}
         </ChakraLink>
-        <Text color="fg.muted" textAlign="center" fontSize="sm">
+        <Text muted textAlign="center" fontSize="sm">
           {t("telegram_hint")}
         </Text>
       </Stack>

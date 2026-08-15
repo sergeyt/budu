@@ -44,7 +44,7 @@ export default function RegisterPanel({
 
   const trigger = (
     <HStack cursor="pointer">
-      <Badge colorScheme={reg.confirmedFull ? "red" : "green"} px={1}>
+      <Badge colorPalette={reg.confirmedFull ? "red" : "green"} px={1}>
         {reg.confirmedCount}
         {reg.reservedCount > 0 && (
           <>
@@ -73,10 +73,8 @@ export default function RegisterPanel({
         <Card.Header>
           <HStack w="full" justifyContent="space-between">
             <HStack>
-              <Heading size="md" color="text">
-                {event.title}
-              </Heading>
-              <Box color="gray.400">{at}</Box>
+              <Heading size="md">{event.title}</Heading>
+              <Box color="text.muted">{at}</Box>
             </HStack>
             <ParticipantsSheet
               event={event}

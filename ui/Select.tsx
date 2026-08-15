@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { type ListCollection, Select as ChakraSelect } from "@chakra-ui/react";
+import { fieldControlDefaults } from "./fieldControl";
 
 // Derive prop types from Chakra subcomponents
 type SelectRootProps = Omit<
@@ -120,9 +121,12 @@ const Trigger = React.forwardRef<
   SelectTriggerProps
 >(function SelectTrigger(
   {
-    borderRadius = "lg",
+    borderRadius = fieldControlDefaults.borderRadius,
+    borderColor = fieldControlDefaults.borderColor,
+    color = fieldControlDefaults.color,
     fontSize = "sm",
-    _focusVisible = { boxShadow: "shadow.focus" },
+    _focusVisible = fieldControlDefaults._focusVisible,
+    _placeholderShown = { color: "text.muted" },
     ...rest
   },
   ref,
@@ -131,8 +135,11 @@ const Trigger = React.forwardRef<
     <ChakraSelect.Trigger
       ref={ref}
       borderRadius={borderRadius}
+      borderColor={borderColor}
+      color={color}
       fontSize={fontSize}
       _focusVisible={_focusVisible}
+      _placeholderShown={_placeholderShown}
       {...rest}
     />
   );
@@ -142,8 +149,8 @@ const Trigger = React.forwardRef<
 const ValueText = React.forwardRef<
   React.ComponentRef<typeof ChakraSelect.ValueText>,
   SelectValueTextProps
->(function SelectValueText({ color = "text.body", ...rest }, ref) {
-  return <ChakraSelect.ValueText ref={ref} color={color} {...rest} />;
+>(function SelectValueText(props, ref) {
+  return <ChakraSelect.ValueText ref={ref} {...props} />;
 });
 
 // ---------- INDICATOR GROUP ----------

@@ -4,6 +4,7 @@ export * from "./Button";
 export * from "./Card";
 export * from "./Heading";
 export * from "./Input";
+export * from "./Textarea";
 export * from "./Link";
 export * from "./Text";
 export * from "./tooltip";

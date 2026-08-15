@@ -60,10 +60,10 @@ export default function PlacePicker({ places, currentId }: Props) {
             <Text>{t("label")}:&nbsp;</Text>
           </Select.Label>
           <Select.Control w="full">
-            <Select.Trigger pl={2}>
+            <Select.Trigger>
               <Select.ValueText placeholder="Select place" />
             </Select.Trigger>
-            <Select.IndicatorGroup pr={2}>
+            <Select.IndicatorGroup>
               <Select.Indicator />
             </Select.IndicatorGroup>
           </Select.Control>
@@ -109,12 +109,7 @@ export default function PlacePicker({ places, currentId }: Props) {
           <Select.Positioner>
             <Select.Content>
               {collection.items.map((framework) => (
-                <Select.Item
-                  item={framework}
-                  key={framework.value}
-                  p={2}
-                  cursor="pointer"
-                >
+                <Select.Item item={framework} key={framework.value}>
                   <Text>{framework.label}</Text>
                   <Select.ItemIndicator />
                 </Select.Item>
@@ -162,7 +157,7 @@ function PlaceInfo({ t, place }: { t: TranslateFn; place: Place }) {
           )}
         </Box>
       ) : (
-        <Text color="gray.500">Select a place to see details.</Text>
+        <Text muted>Select a place to see details.</Text>
       )}
     </>
   );

@@ -60,7 +60,7 @@ export default function ParticipantLists({
       </Text>
       <VStack align="stretch" gap={2} maxH={maxH} overflowY="auto" mb={2}>
         {rows.length === 0 ? (
-          <Text fontSize="xs" color="gray.500">
+          <Text fontSize="xs" muted>
             —
           </Text>
         ) : (
@@ -79,13 +79,13 @@ export default function ParticipantLists({
                   <Avatar.Image src={it.user?.image ?? undefined} />
                 </Avatar.Root>
                 <Box flex="1">
-                  <Text fontSize="sm" fontWeight="medium" color="text">
+                  <Text fontSize="sm" fontWeight="medium">
                     {nameOf(it)}
                     {isYou ? ` (${t("you")})` : ""}
                   </Text>
                 </Box>
                 {it.createdAt && (
-                  <Text fontSize="xs" color="gray.500">
+                  <Text fontSize="xs" muted>
                     {new Date(it.createdAt).toLocaleTimeString()}
                   </Text>
                 )}

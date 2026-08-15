@@ -101,9 +101,7 @@ export function SuperAdminConsole({
     if (linkResult) {
       return (
         <VStack gap={3} align="stretch">
-          <Text fontSize="sm" color="text">
-            {linkResult.instructions}
-          </Text>
+          <Text fontSize="sm">{linkResult.instructions}</Text>
           <Text
             as="pre"
             fontSize="xs"
@@ -112,7 +110,6 @@ export function SuperAdminConsole({
             p={3}
             borderWidth="1px"
             borderRadius="md"
-            color="text"
           >
             {`${linkResult.command} ${linkResult.code}`}
           </Text>
@@ -165,10 +162,8 @@ export function SuperAdminConsole({
 
   return (
     <SuperAdminGate user={user}>
-      <Card.Root w="full" p={3}>
-        <Card.Header color="text" mb={2}>
-          SUPER-ADMIN ACTIONS
-        </Card.Header>
+      <Card.Root w="full">
+        <Card.Header mb={2}>SUPER-ADMIN ACTIONS</Card.Header>
         <Card.Body>{renderContent()}</Card.Body>
       </Card.Root>
     </SuperAdminGate>
