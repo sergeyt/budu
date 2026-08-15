@@ -30,6 +30,10 @@ model User {
   telegramUserId    BigInt?        @unique
   telegramUsername  String?
   telegramFirstName String?
+  // Optional username/password for test/dev login (AUTH_PASSWORD_LOGIN).
+  // Telegram and OAuth users leave both null.
+  username          String?        @unique
+  passwordHash      String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @default(now()) @updatedAt
   accounts          Account[]
