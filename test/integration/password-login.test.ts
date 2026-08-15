@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as passwordLoginPOST } from "@/app/api/auth/password-login/route";
 import { hashPassword } from "@/lib/password";
-import { prisma } from "./helpers/db";
-import { makeUser } from "./helpers/factories";
+import { prisma } from "../helpers/db";
+import { makeUser } from "../helpers/factories";
 
 function postJson(body: unknown) {
   const req = new NextRequest("http://localhost/api/auth/password-login", {

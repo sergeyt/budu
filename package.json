@@ -16,6 +16,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:watch": "vitest --config vitest.integration.config.ts",
     "test:integration:local": "bash scripts/test-integration.sh",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "bash scripts/test-e2e.sh",
     "postinstall": "prisma generate",
     "db:deploy": "prisma migrate deploy",
     "db:migrate": "prisma migrate dev",
@@ -48,6 +50,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.8",
+    "@playwright/test": "^1.62.1",
     "@types/luxon": "^3.7.4",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
