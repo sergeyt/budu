@@ -69,7 +69,7 @@ export default function RegisterPanel({
 
   return (
     <>
-      <Card.Root w="full">
+      <Card.Root w="full" data-testid="event-card">
         <Card.Header>
           <HStack w="full" justifyContent="space-between">
             <HStack>

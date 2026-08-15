@@ -84,6 +84,7 @@ export default function RegistrationCta({
         <Button
           w="full"
           cta
+          data-testid="sign-in-to-register"
           onClick={() => {
             window.location.href = signInHref ?? "/";
           }}
@@ -128,7 +129,7 @@ export default function RegistrationCta({
     <VStack align="stretch" gap={2} w="full">
       {statusChip && (
         <HStack>
-          <Badge colorPalette="green" px={2}>
+          <Badge colorPalette="green" px={2} data-testid="registration-status">
             {statusChip}
           </Badge>
         </HStack>
@@ -144,6 +145,7 @@ export default function RegistrationCta({
         loading={isPending}
         variant={variant}
         cta
+        data-testid="registration-cta"
       >
         {primaryCta}
       </Button>

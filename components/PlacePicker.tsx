@@ -43,7 +43,7 @@ export default function PlacePicker({ places, currentId }: Props) {
   }, [currentId, places]);
 
   return (
-    <HStack>
+    <HStack data-testid="place-picker">
       <Select.Root
         collection={collection}
         size="sm"
