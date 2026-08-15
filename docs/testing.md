@@ -1,6 +1,7 @@
 # Testing
 
-Two layers, run independently.
+Three layers, run independently. Unit and integration need no browser.
+Playwright e2e covers the Web UI.
 
 ## Unit tests
 
@@ -66,7 +67,36 @@ deno run --allow-env --allow-net --allow-read --allow-import \
 
 Manual E2E checklist: [`bot-test-plan.md`](bot-test-plan.md).
 
+## Playwright (Web UI)
+
+Chromium specs in `e2e/`. They sign in through the test/dev password form
+(`testuser` / `testuser`, `testadmin` / `testadmin`) against a disposable
+Postgres. Production stays Telegram-only: leave `AUTH_PASSWORD_LOGIN` and
+`NEXT_PUBLIC_PASSWORD_LOGIN` unset.
+
+`NEXT_PUBLIC_PASSWORD_LOGIN=1` is inlined at **build** time — set it before
+`next build` (the e2e runner and CI job do this).
+
+```bash
+pnpm exec playwright install chromium   # once
+pnpm test:e2e:local                     # Docker PG 17 + Next on :3100
+KEEP=1 pnpm test:e2e:local              # keep the container for iteration
+```
+
+Wrapper: [`scripts/test-e2e.sh`](../scripts/test-e2e.sh). Same disposable-URL
+guard as integration tests; it will not truncate a production database.
+
+Against an existing test Postgres:
+
+```bash
+DATABASE_URL='postgresql://budu:budu@localhost:54330/budu_test?schema=public' \
+  AUTH_PASSWORD_LOGIN=1 NEXT_PUBLIC_PASSWORD_LOGIN=1 \
+  AUTH_SECRET=e2e-secret AUTH_URL=http://127.0.0.1:3100 \
+  pnpm test:e2e
+```
+
 ## CI
 
-Both unit and integration jobs run in
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+Unit, integration, bot, and Playwright jobs run in
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml). `pnpm ci` is still
+lint + unit tests + build only.
