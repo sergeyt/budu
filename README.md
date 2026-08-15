@@ -51,6 +51,8 @@ Env vars: [`.env.example`](./.env.example).
 | `pnpm build` / `pnpm start` | Production build / serve |
 | `pnpm test` / `pnpm test:watch` | Vitest unit tests (DB-free) |
 | `pnpm test:integration:local` | Postgres 17 in Docker + integration tests |
+| `pnpm test:e2e:local` | Compose up + Playwright + report + down |
+| `pnpm test:e2e:headed` | Same, with a visible browser |
 | `pnpm lint` / `pnpm fmt` | Biome check / format |
 | `pnpm db:migrate` / `pnpm db:deploy` | Migrations (dev / production) |
 | `pnpm db:seed` | Seed fixtures from `prisma/seed.ts` |

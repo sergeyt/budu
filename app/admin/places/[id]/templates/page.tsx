@@ -1,11 +1,12 @@
 import { notFound, redirect } from "next/navigation";
-import { Box, HStack, VStack } from "@chakra-ui/react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isPlaceAdmin, isSuperAdmin } from "@/lib/api-auth";
-import { Heading, Link, Text } from "@/ui/index";
 import type { EventTemplate, Place } from "@/types/model";
 import { TemplateAdmin } from "@/components/TemplateAdmin";
+import AdminTemplatesHeader from "@/components/AdminTemplatesHeader";
+
+export const dynamic = "force-dynamic";
 
 type Params = { id: string };
 
@@ -43,26 +44,15 @@ export default async function TemplatesPage({
   });
 
   return (
-    <Box w="full" p={4}>
-      <VStack align="stretch" gap={4}>
-        <HStack justify="space-between" align="center">
-          <VStack align="start" gap={0}>
-            <Heading size="lg">{place.name}</Heading>
-            <Text muted fontSize="xs">
-              {place.timezone} · {templates.length} template
-              {templates.length === 1 ? "" : "s"}
-            </Text>
-          </VStack>
-          <Link href="/admin" fontSize="sm">
-            ← back
-          </Link>
-        </HStack>
-
-        <TemplateAdmin
-          place={place as Place}
-          initialTemplates={templates as unknown as EventTemplate[]}
-        />
-      </VStack>
-    </Box>
+    <AdminTemplatesHeader
+      placeName={place.name}
+      timezone={place.timezone}
+      templateCount={templates.length}
+    >
+      <TemplateAdmin
+        place={place as Place}
+        initialTemplates={templates as unknown as EventTemplate[]}
+      />
+    </AdminTemplatesHeader>
   );
 }

@@ -86,3 +86,8 @@ export const UpdateEvent = z.object({
 export const CancelEvent = z.object({
   reason: z.string().trim().min(3).max(2000),
 });
+
+export const PasswordLogin = z.object({
+  username: z.string().trim().min(1).max(64),
+  password: z.string().min(1).max(256),
+});

@@ -118,6 +118,7 @@ export const errors = {
     new ForbiddenError("Bot internal API is not configured", {
       code: "BOT_API_NOT_CONFIGURED",
     }),
+  notFound: () => new NotFoundError("Not found", { code: "NOT_FOUND" }),
 
   // ===== Validation =====
   missingParam: (name: string) =>

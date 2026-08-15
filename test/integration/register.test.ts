@@ -29,8 +29,8 @@ import {
   POST as registerPOST,
 } from "@/app/api/events/[id]/register/route";
 import { withUser } from "./helpers/auth";
-import { prisma } from "./helpers/db";
-import { makeEvent, makeUser, makeUsers } from "./helpers/factories";
+import { prisma } from "../helpers/db";
+import { makeEvent, makeUser, makeUsers } from "../helpers/factories";
 
 function postRegister(eventId: string) {
   const req = new NextRequest(

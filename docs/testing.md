@@ -1,6 +1,7 @@
 # Testing
 
-Two layers, run independently.
+Three layers, run independently. Unit and integration need no browser.
+Playwright e2e covers the Web UI.
 
 ## Unit tests
 
@@ -66,7 +67,53 @@ deno run --allow-env --allow-net --allow-read --allow-import \
 
 Manual E2E checklist: [`bot-test-plan.md`](bot-test-plan.md).
 
+## Playwright (Web UI)
+
+Chromium specs in `e2e/`. They sign in through the test/dev password form
+(`testuser` / `testuser`, `testadmin` / `testadmin`) against Postgres + Next
+in Docker Compose. Production stays Telegram-only: leave
+`AUTH_PASSWORD_LOGIN` and `NEXT_PUBLIC_PASSWORD_LOGIN` unset.
+
+`NEXT_PUBLIC_PASSWORD_LOGIN=1` is inlined at **build** time — the web image
+sets it before `next build`.
+
+```bash
+pnpm exec playwright install chromium   # once
+
+pnpm e2e:up                             # start PG + web
+bash scripts/e2e.sh test --headed e2e/home.spec.ts
+pnpm e2e:report                         # open HTML report (traces, screenshots)
+pnpm e2e:down                           # stop containers
+
+pnpm test:e2e:local                     # one-shot: up + test + down
+KEEP=1 pnpm test:e2e:headed             # one-shot but leave stack running
+```
+
+`--headed` (or `E2E_HEADED=1`) opens Chromium on your machine with slowed
+clicks. `--ui` is Playwright’s interactive runner. Failed tests keep a trace, screenshot, and video. After a run:
+
+- HTML: `pnpm e2e:report` → `playwright-report/index.html`
+- JSON: `playwright-report/results.json` (errors, traces — paste this to debug)
+
+Stack: [`docker-compose.e2e.yml`](../docker-compose.e2e.yml) (web
+`http://127.0.0.1:3100`, Postgres `localhost:55432`). CLI:
+[`scripts/e2e.sh`](../scripts/e2e.sh). Host Postgres port is `E2E_PG_PORT`
+(default **55432**) so it does not clash with Postgres.app on 5432. Same
+disposable-URL guard as integration tests; it will not truncate a production
+database.
+
+Against an already-running stack:
+
+```bash
+docker compose --env-file /dev/null -f docker-compose.e2e.yml up --build -d --wait
+DATABASE_URL='postgresql://budu:budu@localhost:55432/budu_test?schema=public' \
+  E2E_REUSE_SERVER=1 AUTH_PASSWORD_LOGIN=1 NEXT_PUBLIC_PASSWORD_LOGIN=1 \
+  AUTH_SECRET=e2e-secret AUTH_URL=http://127.0.0.1:3100 \
+  pnpm test:e2e
+```
+
 ## CI
 
-Both unit and integration jobs run in
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+Unit, integration, bot, and Playwright jobs run in
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml). `pnpm ci` is still
+lint + unit tests + build only.

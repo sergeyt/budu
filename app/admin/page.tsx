@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
-import { Box, VStack } from "@chakra-ui/react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/types/model";
-import { Card, Heading, Link, Text } from "@/ui/index";
+import AdminHomeClient from "@/components/AdminHomeClient";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Admin landing: lists every place the signed-in user can manage.
@@ -31,38 +32,12 @@ export default async function AdminHome() {
       ).map((row) => row.place);
 
   return (
-    <Box w="full" p={4}>
-      <VStack align="stretch" gap={4}>
-        <Heading size="lg">Admin</Heading>
-        {places.length === 0 ? (
-          <Card.Root>
-            <Card.Body>
-              <Text muted fontSize="sm">
-                You don't manage any places yet. Ask a super-admin to add you as
-                a PlaceAdmin.
-              </Text>
-            </Card.Body>
-          </Card.Root>
-        ) : (
-          <VStack align="stretch" gap={2}>
-            {places.map((p) => (
-              <Card.Root key={p.id} p={3}>
-                <VStack align="stretch" gap={1}>
-                  <Link href={`/admin/places/${p.id}/calendar`}>
-                    {p.name} — calendar
-                  </Link>
-                  <Link href={`/admin/places/${p.id}/templates`}>
-                    Templates
-                  </Link>
-                  <Text muted fontSize="xs">
-                    {p.timezone}
-                  </Text>
-                </VStack>
-              </Card.Root>
-            ))}
-          </VStack>
-        )}
-      </VStack>
-    </Box>
+    <AdminHomeClient
+      places={places.map((p) => ({
+        id: p.id,
+        name: p.name,
+        timezone: p.timezone,
+      }))}
+    />
   );
 }
