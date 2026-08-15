@@ -61,3 +61,9 @@ export async function makeEvent(
     },
   });
 }
+
+export async function makePlaceAdmin(userId: string, placeId: string) {
+  return prisma.placeAdmin.create({
+    data: { userId, placeId },
+  });
+}
