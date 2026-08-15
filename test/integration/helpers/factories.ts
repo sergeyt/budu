@@ -1,17 +1,27 @@
 import { prisma } from "@/lib/prisma";
+import type { UserRole } from "@/types/model";
 
 let userCounter = 0;
 let placeCounter = 0;
 let eventCounter = 0;
 
 export async function makeUser(
-  overrides: { email?: string; name?: string } = {},
+  overrides: {
+    email?: string;
+    name?: string;
+    username?: string;
+    passwordHash?: string;
+    role?: UserRole;
+  } = {},
 ) {
   userCounter += 1;
   return prisma.user.create({
     data: {
       email: overrides.email ?? `user-${userCounter}-${Date.now()}@test.local`,
       name: overrides.name ?? `User ${userCounter}`,
+      username: overrides.username,
+      passwordHash: overrides.passwordHash,
+      role: overrides.role,
     },
   });
 }
