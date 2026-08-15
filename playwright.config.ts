@@ -21,21 +21,36 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
+  reporter: process.env.CI
+    ? [
+        ["github"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "playwright-report/results.json" }],
+      ]
+    : [
+        ["list"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "playwright-report/results.json" }],
+      ],
   globalSetup: "./e2e/global-setup.ts",
   use: {
     baseURL,
-    trace: "on-first-retry",
+    headless: process.env.E2E_HEADED !== "1",
+    launchOptions: process.env.E2E_HEADED === "1" ? { slowMo: 400 } : undefined,
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: {
-    command: process.env.CI
-      ? `pnpm build && pnpm exec next start -p ${PORT}`
-      : `pnpm exec next dev -p ${PORT}`,
-    url: baseURL,
-    reuseExistingServer: false,
-    timeout: 180_000,
-    env: e2eEnv,
-  },
+  webServer: process.env.E2E_REUSE_SERVER
+    ? undefined
+    : {
+        command: process.env.CI
+          ? `pnpm build && pnpm exec next start -p ${PORT}`
+          : `pnpm exec next dev -p ${PORT}`,
+        url: baseURL,
+        reuseExistingServer: false,
+        timeout: 180_000,
+        env: e2eEnv,
+      },
 });

@@ -14,7 +14,6 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
@@ -38,5 +37,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "bot", "packages"]
+  "exclude": ["node_modules", "bot", "packages", "e2e"]
 }

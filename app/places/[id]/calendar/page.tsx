@@ -4,6 +4,8 @@ import { Box, Text } from "@chakra-ui/react";
 import { prisma } from "@/lib/prisma";
 import PublicCalendarClient from "@/components/calendar/PublicCalendarClient";
 
+export const dynamic = "force-dynamic";
+
 type Params = { id: string };
 
 export default async function PublicPlaceCalendarPage({

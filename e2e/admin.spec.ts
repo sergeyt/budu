@@ -13,7 +13,8 @@ test("testuser sees an empty admin place list", async ({
 }) => {
   await loginAs(page, "testuser");
   await page.goto("/admin");
-  await expect(page.getByText("You don't manage any places yet")).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/?$/);
+  await expect(page.getByTestId("admin-empty")).toBeVisible();
 });
 
 test("testadmin sees their place and can create a template", async ({
@@ -22,11 +23,12 @@ test("testadmin sees their place and can create a template", async ({
 }) => {
   await loginAs(page, "testadmin");
   await page.goto("/admin");
-  await expect(
-    page.getByRole("link", { name: `${seed.place.name} — calendar` }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/?$/);
+  await expect(page.getByTestId("admin-calendar-link")).toContainText(
+    seed.place.name,
+  );
 
-  await page.getByRole("link", { name: "Templates" }).click();
+  await page.getByTestId("admin-templates-link").click();
   await expect(
     page.getByRole("heading", { name: "New template" }),
   ).toBeVisible();
@@ -43,7 +45,7 @@ test("testadmin can cancel an event from the calendar drawer", async ({
   await page.goto(
     `/admin/places/${seed.place.id}/calendar?event=${seed.event.id}`,
   );
-  await expect(page.getByText(seed.event.title).first()).toBeVisible();
+  await expect(page.getByTestId("event-drawer")).toBeVisible();
   await page.getByRole("button", { name: "Отменить событие" }).click();
   await page
     .getByPlaceholder("Причина (увидят игроки)")
@@ -53,6 +55,7 @@ test("testadmin can cancel an event from the calendar drawer", async ({
   await page.goto(
     `/admin/places/${seed.place.id}/calendar?event=${seed.event.id}`,
   );
+  await expect(page.getByTestId("event-drawer")).toBeVisible();
   await expect(page.getByText("Событие отменено")).toBeVisible();
   await expect(page.getByText("e2e cancel reason")).toBeVisible();
 });

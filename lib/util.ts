@@ -38,12 +38,13 @@ export function toDateTime(val: DateLike): DateTime {
 }
 
 export function canRegisterNow(start: DateLike) {
-  const now = new Date();
-  // TODO use luxon duration for sake of readability
-  const openAt = new Date(
-    toDateTime(start).toJSDate().getTime() - 24 * 60 * 60 * 1000,
-  );
-  return now >= openAt && now < start;
+  const startMs = toDateTime(start).toMillis();
+  if (!Number.isFinite(startMs)) {
+    return false;
+  }
+  const now = Date.now();
+  const openAt = startMs - 24 * 60 * 60 * 1000;
+  return now >= openAt && now < startMs;
 }
 
 /**

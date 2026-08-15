@@ -95,7 +95,9 @@ export default function PublicCalendarClient({
   return (
     <Box as="main" w="full" px={{ base: 2, md: 4 }} py={3}>
       <HStack justify="space-between" mb={2} px={1}>
-        <Heading size="lg">{place.name}</Heading>
+        <Heading size="lg" as="h1" data-testid="place-calendar-name">
+          {place.name}
+        </Heading>
         <Text fontSize="sm" color="gray.500">
           {place.timezone}
         </Text>

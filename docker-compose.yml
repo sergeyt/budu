@@ -3,6 +3,9 @@
 # Setup:
 #   cp bot/.env.example bot/.env   # fill TELEGRAM_BOT_TOKEN, API_BASE_URL, …
 #   docker compose up -d --build
+#
+# Playwright e2e (Postgres + Next.js) is a separate file:
+#   docker compose --env-file /dev/null -f docker-compose.e2e.yml up --build -d --wait
 
 services:
   budu-bot:

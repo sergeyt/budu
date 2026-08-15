@@ -181,7 +181,7 @@ export default function EventDetailDrawer({
     >
       <Drawer.Backdrop />
       <Drawer.Positioner>
-        <Drawer.Content>
+        <Drawer.Content data-testid="event-drawer">
           <Drawer.CloseTrigger asChild>
             <CloseButton size="sm" />
           </Drawer.CloseTrigger>

@@ -1,4 +1,4 @@
-# Docker build context for bot/ (Fly.io). Web app not included yet.
+# Docker build context is the monorepo root (bot/Dockerfile and Dockerfile).
 .git
 .github
 .next
@@ -7,6 +7,10 @@ out
 build
 coverage
 .pnpm-store
+test-results
+playwright-report
+blob-report
+playwright/.cache
 
 # Env & local secrets
 .env
@@ -15,33 +19,14 @@ coverage
 **/.env.*
 !**/.env.example
 
-# Next.js app (stays on Vercel for now)
-app
-components
-lib
-prisma
-public
-theme
-ui
-types
+# Specs and docs are not needed in either image
+e2e
 test
-scripts
-messages
-i18n
-*.config.ts
-*.config.js
-*.config.mjs
-tsconfig.json
-pnpm-lock.yaml
-pnpm-workspace.yaml
-package.json
-vitest*.ts
-
-# Docs & misc
 docs
 *.md
 !bot/README.md
 !packages/api-client/README.md
+
 .DS_Store
 .idea
 .vercel

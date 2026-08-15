@@ -1,0 +1,54 @@
+# Postgres 17 + Next.js web app for Playwright e2e.
+#
+#   docker compose --env-file /dev/null -f docker-compose.e2e.yml up --build -d --wait
+#   pnpm test:e2e:local
+#
+# Host ports: web http://127.0.0.1:3100  ·  Postgres localhost:${E2E_PG_PORT:-55432}
+# (55432 avoids Postgres.app on 5432 and integration tests on 54329)
+# Pass --env-file /dev/null so a developer .env is not loaded (wrong AUTH_URL,
+# and compose will fail if that file is not valid dotenv).
+# Bot deploy compose is the other file: docker-compose.yml
+
+name: budu-e2e
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: budu
+      POSTGRES_PASSWORD: budu
+      POSTGRES_DB: budu_test
+    ports:
+      - "${E2E_PG_PORT:-55432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budu -d budu_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3000"
+    environment:
+      DATABASE_URL: postgresql://budu:budu@db:5432/budu_test?schema=public
+      AUTH_SECRET: e2e-secret
+      AUTH_URL: http://127.0.0.1:3100
+      AUTH_TRUST_HOST: "true"
+      AUTH_PASSWORD_LOGIN: "1"
+      NEXT_PUBLIC_PASSWORD_LOGIN: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/api/ping').then(async (r)=>{const j=await r.json(); process.exit(j.ok?0:1)}).catch(()=>process.exit(1))\"",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s

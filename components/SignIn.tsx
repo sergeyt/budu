@@ -50,31 +50,30 @@ export default function SignIn({ loginError }: Props) {
         </Text>
       </Stack>
       {passwordLoginEnabled ? (
-        <Stack
-          as="form"
+        <form
           method="POST"
           action="/api/auth/password-login"
-          gap={3}
-          w="full"
-          maxW="xs"
+          style={{ width: "100%", maxWidth: "20rem" }}
         >
-          <Input
-            name="username"
-            autoComplete="username"
-            placeholder={t("username")}
-            data-testid="signin-username"
-          />
-          <Input
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder={t("password")}
-            data-testid="signin-password"
-          />
-          <Button type="submit" w="full" data-testid="signin-submit">
-            {t("password_submit")}
-          </Button>
-        </Stack>
+          <Stack gap={3}>
+            <Input
+              name="username"
+              autoComplete="username"
+              placeholder={t("username")}
+              data-testid="signin-username"
+            />
+            <Input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder={t("password")}
+              data-testid="signin-password"
+            />
+            <Button type="submit" w="full" data-testid="signin-submit">
+              {t("password_submit")}
+            </Button>
+          </Stack>
+        </form>
       ) : null}
     </Stack>
   );

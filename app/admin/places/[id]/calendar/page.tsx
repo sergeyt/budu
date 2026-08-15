@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { isPlaceAdmin, isSuperAdmin } from "@/lib/api-auth";
 import AdminCalendarClient from "@/components/calendar/AdminCalendarClient";
 
+export const dynamic = "force-dynamic";
+
 type Params = { id: string };
 
 export default async function AdminPlaceCalendarPage({

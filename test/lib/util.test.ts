@@ -76,6 +76,11 @@ describe("canRegisterNow", () => {
     vi.setSystemTime(new Date("2025-06-01T18:00:01.000Z"));
     expect(canRegisterNow(start)).toBe(false);
   });
+
+  it("treats an ISO string the same as a Date (client/API payloads)", () => {
+    vi.setSystemTime(new Date("2025-06-01T17:00:00.000Z"));
+    expect(canRegisterNow("2025-06-01T18:00:00.000Z")).toBe(true);
+  });
 });
 
 describe("countBy", () => {

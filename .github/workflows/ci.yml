@@ -130,30 +130,16 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: budu
-          POSTGRES_PASSWORD: budu
-          POSTGRES_DB: budu_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U budu -d budu_test"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 30
 
     env:
-      DATABASE_URL: postgresql://budu:budu@localhost:5432/budu_test?schema=public
+      DATABASE_URL: postgresql://budu:budu@localhost:55432/budu_test?schema=public
       AUTH_SECRET: e2e-secret
       AUTH_URL: http://127.0.0.1:3100
       AUTH_TRUST_HOST: "true"
       AUTH_PASSWORD_LOGIN: "1"
       NEXT_PUBLIC_PASSWORD_LOGIN: "1"
+      E2E_REUSE_SERVER: "1"
 
     steps:
       - name: checkout code
@@ -183,6 +169,9 @@ jobs:
       - name: install chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: start e2e stack
+        run: docker compose --env-file /dev/null -f docker-compose.e2e.yml up --build -d --wait
+
       - name: e2e tests
         run: pnpm test:e2e
 
@@ -193,3 +182,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      - name: stop e2e stack
+        if: always()
+        run: docker compose --env-file /dev/null -f docker-compose.e2e.yml down -v
