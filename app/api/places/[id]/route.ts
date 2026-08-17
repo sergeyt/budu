@@ -42,3 +42,20 @@ export const PATCH = errorMiddleware<Params>(async (req, ctx) => {
   });
   return place;
 });
+
+export const DELETE = errorMiddleware<Params>(async (_req, ctx) => {
+  const { id: placeId } = await ctx.params;
+  if (!placeId) {
+    throw errors.missingParam("placeId");
+  }
+  await requireUser({ isSuperAdmin: true });
+  const existing = await prisma.place.findUnique({
+    where: { id: placeId },
+    select: { id: true },
+  });
+  if (!existing) {
+    throw errors.placeNotFound();
+  }
+  await prisma.place.delete({ where: { id: placeId } });
+  return { ok: true, deleted: placeId };
+});

@@ -6,6 +6,8 @@ export const CreatePlace = z.object({
   location: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   infoUrl: z.url().optional().nullable(),
+  // IANA zone (e.g. "Europe/Moscow"). Validated in the API handler.
+  timezone: z.string().min(1).optional(),
 });
 
 export const UpdatePlace = z.object({

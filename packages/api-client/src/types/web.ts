@@ -119,6 +119,7 @@ export type CreatePlaceBody = {
   location?: string | null;
   description?: string | null;
   infoUrl?: string | null;
+  timezone?: string;
 };
 
 export type UpdatePlaceBody = Partial<CreatePlaceBody> & {

@@ -169,6 +169,10 @@ export const errors = {
       code: "INVALID_TIMEZONE",
       details: { zone },
     }),
+  placeNameTaken: () =>
+    new ConflictError("A place with this name already exists", {
+      code: "PLACE_NAME_TAKEN",
+    }),
 
   // ===== Templates =====
   templateNotFound: () =>
