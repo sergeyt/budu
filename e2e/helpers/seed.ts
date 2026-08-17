@@ -1,5 +1,6 @@
 import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@/types/model";
 import {
   makeEvent,
   makePlace,
@@ -14,6 +15,10 @@ export const E2E_PLAYER = {
 export const E2E_ADMIN = {
   username: "testadmin",
   password: "testadmin",
+} as const;
+export const E2E_SUPERADMIN = {
+  username: "testsuperadmin",
+  password: "testsuperadmin",
 } as const;
 
 export type SeedOptions = {
@@ -32,12 +37,13 @@ export async function seedE2e(opts: SeedOptions = {}) {
     reserveCapacity: opts.reserveCapacity ?? 5,
   });
 
-  const [userHash, adminHash] = await Promise.all([
+  const [userHash, adminHash, superHash] = await Promise.all([
     hashPassword(E2E_PLAYER.password),
     hashPassword(E2E_ADMIN.password),
+    hashPassword(E2E_SUPERADMIN.password),
   ]);
 
-  const [testuser, testadmin] = await Promise.all([
+  const [testuser, testadmin, testsuperadmin] = await Promise.all([
     makeUser({
       username: E2E_PLAYER.username,
       name: "Test User",
@@ -47,6 +53,12 @@ export async function seedE2e(opts: SeedOptions = {}) {
       username: E2E_ADMIN.username,
       name: "Test Admin",
       passwordHash: adminHash,
+    }),
+    makeUser({
+      username: E2E_SUPERADMIN.username,
+      name: "Test Super Admin",
+      passwordHash: superHash,
+      role: UserRole.SUPERADMIN,
     }),
   ]);
   await makePlaceAdmin(testadmin.id, place.id);
@@ -62,5 +74,5 @@ export async function seedE2e(opts: SeedOptions = {}) {
     });
   }
 
-  return { place, event, testuser, testadmin };
+  return { place, event, testuser, testadmin, testsuperadmin };
 }

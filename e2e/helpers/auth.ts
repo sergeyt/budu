@@ -1,11 +1,12 @@
 import type { Page } from "@playwright/test";
-import { E2E_ADMIN, E2E_PLAYER } from "./seed";
+import { E2E_ADMIN, E2E_PLAYER, E2E_SUPERADMIN } from "./seed";
 
-export type E2eAccount = "testuser" | "testadmin";
+export type E2eAccount = "testuser" | "testadmin" | "testsuperadmin";
 
 const credentials = {
   testuser: E2E_PLAYER,
   testadmin: E2E_ADMIN,
+  testsuperadmin: E2E_SUPERADMIN,
 } as const;
 
 /** Sign in through the home password form (AUTH_PASSWORD_LOGIN must be on). */

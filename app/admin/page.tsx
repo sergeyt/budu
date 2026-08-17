@@ -33,6 +33,7 @@ export default async function AdminHome() {
 
   return (
     <AdminHomeClient
+      isSuperAdmin={isSuper}
       places={places.map((p) => ({
         id: p.id,
         name: p.name,

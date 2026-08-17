@@ -16,6 +16,7 @@ import {
 import { FiInfo } from "react-icons/fi";
 import { FaMapMarkerAlt as LocationIcon } from "react-icons/fa";
 import { Text, Tooltip, Select } from "@/ui/index";
+import { MarkdownBody } from "@/components/MarkdownBody";
 import type { Place } from "@/types/model";
 import type { TranslateFn } from "@/types/misc";
 
@@ -128,11 +129,11 @@ function PlaceInfo({ t, place }: { t: TranslateFn; place: Place }) {
     <>
       {place ? (
         <Box p={3}>
-          {place.description && (
-            <Text as="pre" mb={3}>
-              {place.description}
-            </Text>
-          )}
+          {place.description ? (
+            <Box mb={3}>
+              <MarkdownBody source={place.description} />
+            </Box>
+          ) : null}
           <Separator my={3} />
           {/* TODO determine if it is URL then display this way */}
           {!!place.location && (
