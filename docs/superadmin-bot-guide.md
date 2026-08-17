@@ -117,7 +117,8 @@ reached (instead of `/announce_next`).
 
 | Goal | Where |
 | --- | --- |
-| Create place | `POST /api/places` |
+| Create place | `/admin/places/new` |
+| Delete place | `/admin` → **Delete** |
 | Link Telegram **user** | `/?place=<id>` → **Link Telegram Account** → DM `/link_account` |
 | Templates | `/admin/places/<id>/templates` |
 | Link **chat** code | `/?place=<id>` → **Link Telegram Chat** |

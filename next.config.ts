@@ -34,7 +34,7 @@ const securityHeaders: { key: string; value: string }[] = [
 ];
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@budu/api-client"],
+  transpilePackages: ["@budu/api-client", "@uiw/react-md-editor"],
   async headers() {
     return [
       {

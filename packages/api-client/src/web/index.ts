@@ -41,6 +41,10 @@ export function createWebPlacesApi(client: ApiClient) {
       client.fetch<WebPlace>("/api/places", { method: "POST", body }),
     update: (id: string, body: UpdatePlaceBody) =>
       client.fetch<WebPlace>(`/api/places/${id}`, { method: "PATCH", body }),
+    delete: (id: string) =>
+      client.fetch<{ ok: true; deleted: string }>(`/api/places/${id}`, {
+        method: "DELETE",
+      }),
     addAdmin: (placeId: string, body: AddPlaceAdminBody) =>
       client.fetch<{ id: string; userId: string; placeId: string }>(
         `/api/places/${placeId}/admins`,
